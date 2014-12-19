@@ -136,10 +136,10 @@ describe ObjectTable do
     end
   end
 
-  describe '#append!' do
+  describe '#stack!' do
     let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: 5) }
 
-    subject{ table.append! *others }
+    subject{ table.stack! *others }
 
     context 'with different columns' do
       let(:others){ [ObjectTable.new(col3: 10)] }
@@ -166,7 +166,7 @@ describe ObjectTable do
     end
   end
 
-  describe '.concat' do
+  describe '.stack' do
     let(:data) do
       [
         ObjectTable.new(col1: [1, 2, 3], col2: 5),
@@ -176,7 +176,7 @@ describe ObjectTable do
       ]
     end
 
-    subject{ ObjectTable.concat *data }
+    subject{ ObjectTable.stack *data }
 
     it 'should join the tables and grids together' do
       expect(subject).to be_a ObjectTable

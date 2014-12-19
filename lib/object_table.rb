@@ -21,7 +21,7 @@ class ObjectTable
     __setup__
   end
 
-  def append!(*others)
+  def stack!(*others)
     new_values = Hash.new{ [] }
 
     others.each do |x|
@@ -46,12 +46,12 @@ class ObjectTable
     self
   end
 
-  def self.concat(*values)
+  def self.stack(*values)
     return self.new if values.empty?
     base = values.shift
     base = self.new(base) if base.is_a?(BasicGrid)
     raise "Don't know how to join a #{base.class}" unless base.is_a?(ObjectTable)
-    base.append!(*values)
+    base.stack!(*values)
   end
 
 end

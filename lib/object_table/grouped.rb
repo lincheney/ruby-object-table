@@ -19,7 +19,7 @@ class ObjectTable::Grouped
       ObjectTable::BasicGrid[@keys.zip(k) + [[:value, value]]]
     end
 
-    ObjectTable.concat(*values)
+    ObjectTable.stack(*values)
   end
 
   def groups
