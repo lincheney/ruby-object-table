@@ -16,7 +16,16 @@ class ObjectTable::Grouped
   def apply(&block)
     values = groups.map do |k, v|
       value = ObjectTable::View.new(@parent, mask: v).instance_eval &block
-      ObjectTable::BasicGrid[@keys.zip(k) + [[:value, value]]]
+      keys = @keys.zip(k)
+
+      case value
+      when ObjectTable::BasicGrid
+        ObjectTable::BasicGrid[keys + value.to_a]
+      when ObjectTable, ObjectTable::View
+        ObjectTable::BasicGrid[keys + value.columns.to_a]
+      else
+        ObjectTable::BasicGrid[keys + [[:value, value]]]
+      end
     end
 
     ObjectTable.stack(*values)

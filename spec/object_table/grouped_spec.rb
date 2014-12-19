@@ -47,6 +47,22 @@ describe ObjectTable::Grouped do
       expect(subject.where{parity.eq 0}.value.to_a).to eql [even_group.col1.sum]
       expect(subject.where{parity.eq 1}.value.to_a).to eql [odd_group.col1.sum]
     end
+
+    context 'with results that are grids' do
+      subject{ grouped.apply{|g| @R[sum: g.col1.sum, mean: g.col2.mean]} }
+
+      it 'should return a table with the group keys' do
+        expect(subject).to be_a ObjectTable
+        expect(subject.colnames).to include :parity
+      end
+
+      it 'should stack the grids' do
+        expect(subject.where{parity.eq 0}.sum.to_a).to eql [even_group.col1.sum]
+        expect(subject.where{parity.eq 0}.mean.to_a).to eql [even_group.col2.mean]
+        expect(subject.where{parity.eq 1}.sum.to_a).to eql [odd_group.col1.sum]
+        expect(subject.where{parity.eq 1}.mean.to_a).to eql [odd_group.col2.mean]
+      end
+    end
   end
 
 end
