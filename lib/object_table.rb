@@ -1,5 +1,6 @@
 require "object_table/version"
+require "object_table/basic_grid"
+require 'narray'
 
-module ObjectTable
-  # Your code goes here...
+class ObjectTable
 end
