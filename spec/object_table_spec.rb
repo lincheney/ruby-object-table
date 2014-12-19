@@ -56,4 +56,12 @@ describe ObjectTable do
     end
   end
 
+  describe '#view' do
+    let(:table){ ObjectTable.new(a: [1, 2, 3], b: 5) }
+
+    it 'should return a view' do
+      expect(table.where{a > 2}).to be_a ObjectTable::View
+    end
+  end
+
 end

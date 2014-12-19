@@ -20,6 +20,10 @@ module ObjectTable::TableMethods
     result
   end
 
+  def where(&block)
+    ObjectTable::View.new(self, &block)
+  end
+
   def method_missing(meth, *args, &block)
     columns[meth] or super
   end

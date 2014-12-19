@@ -1,7 +1,8 @@
-require "object_table/version"
-require "object_table/basic_grid"
-require "object_table/table_methods"
-require "object_table/column"
+require_relative "object_table/version"
+require_relative "object_table/basic_grid"
+require_relative "object_table/table_methods"
+require_relative "object_table/view"
+require_relative "object_table/column"
 require 'narray'
 
 class ObjectTable
