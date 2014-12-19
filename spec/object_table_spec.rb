@@ -37,6 +37,48 @@ describe ObjectTable do
         expect(subject.send(key)).to be subject.columns[key]
       end
     end
+
+    describe '#[]' do
+      it 'should allow access to columns through []' do
+        columns.keys.each do |key|
+          expect(subject[key]).to be subject.columns[key]
+        end
+      end
+    end
+
+    describe '#[]=' do
+      let(:value){ [4, 5, 6] }
+
+      before do
+        subject[:a] = value
+      end
+
+      it 'should allow assigning columns' do
+        expect(subject.columns[:a].to_a).to eql value
+      end
+
+      it 'should coerce the value to a column' do
+        expect(subject.columns[:a]).to be_a ObjectTable::Column
+      end
+
+      context 'with the wrong length' do
+        it 'should fail' do
+          expect{subject[:a] = [1, 2]}.to raise_error
+        end
+      end
+
+      context 'for a new column' do
+        before do
+          subject[:c] = value
+        end
+
+        it 'should create a new column' do
+          expect(subject.columns).to include :c
+          expect(subject.columns[:c].to_a).to eql value
+        end
+      end
+    end
+
   end
 
   describe '#apply' do
@@ -56,7 +98,7 @@ describe ObjectTable do
     end
   end
 
-  describe '#view' do
+  describe '#where' do
     let(:table){ ObjectTable.new(a: [1, 2, 3], b: 5) }
 
     it 'should return a view' do

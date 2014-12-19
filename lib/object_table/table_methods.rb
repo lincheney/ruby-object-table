@@ -12,6 +12,22 @@ module ObjectTable::TableMethods
     columns.keys.length
   end
 
+  def [](name)
+    columns[name]
+  end
+
+  def []=(name, value)
+    column = columns[name]
+    unless column
+      column = add_column(name)
+    end
+    column[] = value
+  end
+
+  def add_column(name)
+    columns[name] = ObjectTable::Column.object(nrows)
+  end
+
   def apply(&block)
     result = instance_eval &block
     if result.is_a? ObjectTable::BasicGrid
