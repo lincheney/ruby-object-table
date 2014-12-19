@@ -13,6 +13,15 @@ class ObjectTable::Grouped
     @parent
   end
 
+  def apply(&block)
+    values = groups.map do |k, v|
+      value = ObjectTable::View.new(@parent, mask: v).instance_eval &block
+      ObjectTable::BasicGrid[@keys.zip(k) + [[:value, value]]]
+    end
+
+    ObjectTable.concat(*values)
+  end
+
   def groups
     @groups ||= begin
       groups = (0...@parent.nrows).zip(groupers).group_by{|row, value| value}
@@ -24,6 +33,13 @@ class ObjectTable::Grouped
   end
 
   def groupers
-    @groupers ||= @parent.instance_eval(&@grouper)
+    @groupers ||= begin
+      groupers = @parent.instance_eval(&@grouper)
+      raise 'Groups must be a hash' unless groupers.is_a?(Hash)
+      @keys = groupers.keys
+      groupers = groupers.values.map(&:to_a).transpose
+      groupers
+    end
   end
+
 end

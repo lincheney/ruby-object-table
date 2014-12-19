@@ -3,6 +3,11 @@ require 'narray'
 class ObjectTable::BasicGrid < Hash
   ARRAY_LIKE = [Array, NArray]
 
+  def self.[](*args)
+    grid = super
+    grid.ensure_uniform_columns!
+  end
+
   def ensure_uniform_columns!
     arrays, scalars = partition{|k, v| ARRAY_LIKE.any?{|cls| v.is_a?(cls)} }
 
