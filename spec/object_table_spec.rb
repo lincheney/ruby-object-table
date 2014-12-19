@@ -136,4 +136,34 @@ describe ObjectTable do
     end
   end
 
+  describe '#append!' do
+    let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: 5) }
+
+    subject{ table.append! *others }
+
+    context 'with different columns' do
+      let(:others){ [ObjectTable.new(col3: 10)] }
+
+      it 'should fail' do
+        expect{subject}.to raise_error
+      end
+    end
+
+    context 'with the same columns' do
+      let(:others) do
+        [
+          ObjectTable.new(col1: 10, col2: 50),
+          ObjectTable.new(col2: [10, 30], col1: 15),
+          ObjectTable::BasicGrid[col2: [1, 2], col1: [3, 4]],
+        ]
+      end
+
+      it 'should append the rows to itself' do
+        subject
+        expect(table.col1.to_a).to eql ([1, 2, 3] + [10] + [15]*2 + [3, 4])
+        expect(table.col2.to_a).to eql ([5]*3 + [50] + [10, 30] + [1, 2])
+      end
+    end
+  end
+
 end
