@@ -12,6 +12,13 @@ module ObjectTable::TableMethods
     columns.keys.length
   end
 
+  def method_missing(meth, *args, &block)
+    columns[meth] or super
+  end
+
+  def respond_to?(meth)
+    super or columns.include?(meth)
+  end
 
   def inspect
     header = "#{self.class}(#{nrows}, #{ncols})\n"

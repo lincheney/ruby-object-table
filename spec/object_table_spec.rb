@@ -27,4 +27,16 @@ describe ObjectTable do
     end
   end
 
+  describe 'columns' do
+    let(:columns){ {a: [1, 2, 3], b: 5} }
+    subject{ ObjectTable.new(columns) }
+
+    it 'should respond to the column names as methods' do
+      columns.keys.each do |key|
+        expect(subject).to respond_to key
+        expect(subject.send(key)).to be subject.columns[key]
+      end
+    end
+  end
+
 end
