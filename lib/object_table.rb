@@ -17,6 +17,8 @@ class ObjectTable
     @columns.each do |k, v|
       @columns[k] = Column.make(v, k)
     end
+
+    __setup__
   end
 
 end

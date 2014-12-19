@@ -1,5 +1,9 @@
 module ObjectTable::TableMethods
 
+  def __setup__
+    @R = ObjectTable::BasicGrid
+  end
+
   def colnames
     columns.keys
   end

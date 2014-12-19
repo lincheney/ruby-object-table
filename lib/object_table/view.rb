@@ -6,6 +6,7 @@ class ObjectTable::View
   def initialize(parent, &block)
     @parent = parent
     @filter = block
+    __setup__
   end
 
   def columns
