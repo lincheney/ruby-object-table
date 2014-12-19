@@ -27,7 +27,7 @@ describe ObjectTable do
     end
   end
 
-  describe 'columns' do
+  describe 'column methods' do
     let(:columns){ {a: [1, 2, 3], b: 5} }
     subject{ ObjectTable.new(columns) }
 
@@ -35,6 +35,23 @@ describe ObjectTable do
       columns.keys.each do |key|
         expect(subject).to respond_to key
         expect(subject.send(key)).to be subject.columns[key]
+      end
+    end
+  end
+
+  describe '#apply' do
+    let(:table){ ObjectTable.new(a: [1, 2, 3], b: 5) }
+
+    it 'should evaluate in the context of the table' do
+      expect(table.apply{ b }).to eql table.b
+      expect(table.apply{ a.sum }).to eql table.a.sum
+    end
+
+    context 'with a block returning a grid' do
+      subject{ table.apply{ ObjectTable::BasicGrid[a: [4, 5, 6]] } }
+
+      it 'should coerce to a table' do
+        expect(subject).to be_a ObjectTable
       end
     end
   end

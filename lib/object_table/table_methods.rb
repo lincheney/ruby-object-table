@@ -12,6 +12,14 @@ module ObjectTable::TableMethods
     columns.keys.length
   end
 
+  def apply(&block)
+    result = instance_eval &block
+    if result.is_a? ObjectTable::BasicGrid
+      result = ObjectTable.new(result)
+    end
+    result
+  end
+
   def method_missing(meth, *args, &block)
     columns[meth] or super
   end
