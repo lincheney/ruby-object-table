@@ -3,7 +3,7 @@ require_relative "object_table/basic_grid"
 require_relative "object_table/table_methods"
 require_relative "object_table/view"
 require_relative "object_table/column"
-require 'narray'
+require_relative "object_table/grouped"
 
 class ObjectTable
   include TableMethods

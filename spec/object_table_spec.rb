@@ -108,7 +108,7 @@ describe ObjectTable do
     it 'should have access to a BasicGrid shortcut' do
       result = table.apply{ @R[value: col1 + 5] }
       expect(result).to be_a ObjectTable
-      expect(result.a).to eql (table.col1 + 5)
+      expect(result.value).to eql (table.col1 + 5)
     end
   end
 
@@ -121,6 +121,18 @@ describe ObjectTable do
     it 'should return a view' do
       expect(subject).to be_a ObjectTable::View
       expect(subject.instance_eval('@filter')).to eql block
+    end
+  end
+
+  describe '#group' do
+    let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: 5) }
+    let(:block){ Proc.new{col1 > 1} }
+
+    subject{ table.group &block }
+
+    it 'should return a view' do
+      expect(subject).to be_a ObjectTable::Grouped
+      expect(subject.instance_eval('@grouper')).to eql block
     end
   end
 

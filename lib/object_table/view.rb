@@ -3,8 +3,9 @@ require_relative 'table_methods'
 class ObjectTable::View
   include ObjectTable::TableMethods
 
-  def initialize(parent, &block)
+  def initialize(parent, mask: nil, &block)
     @parent = parent
+    @mask = mask
     @filter = block
     __setup__
   end

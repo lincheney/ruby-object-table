@@ -4,6 +4,11 @@ module ObjectTable::TableMethods
     @R = ObjectTable::BasicGrid
   end
 
+  def ==(other)
+    return false unless other.is_a?(ObjectTable) or other.is_a?(ObjectTable::View)
+    return columns == other.columns
+  end
+
   def colnames
     columns.keys
   end
@@ -42,6 +47,10 @@ module ObjectTable::TableMethods
 
   def where(&block)
     ObjectTable::View.new(self, &block)
+  end
+
+  def group(&block)
+    ObjectTable::Grouped.new(self, &block)
   end
 
   def method_missing(meth, *args, &block)

@@ -4,12 +4,12 @@ require 'object_table/view'
 describe ObjectTable::View do
 
   describe '#columns' do
-    let(:table){ ObjectTable.new(a: [1, 2, 3], b: 5) }
+    let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: 5) }
 
-    subject{ ObjectTable::View.new(table){ a > 2 } }
+    subject{ ObjectTable::View.new(table){ col1 > 2 } }
 
     it 'should mask the columns of the parent table' do
-      mask = table.a > 2
+      mask = table.col1 > 2
       table.columns.each do |k, v|
         expect(subject.columns[k]).to eql v[mask]
       end
@@ -17,10 +17,10 @@ describe ObjectTable::View do
   end
 
   describe '#[]=' do
-    let(:table) {  ObjectTable.new(a: [1, 2, 3], b: 5) }
-    let(:view)  { ObjectTable::View.new(table){ a > 1 } }
+    let(:table) {  ObjectTable.new(col1: [1, 2, 3], col2: 5) }
+    let(:view)  { ObjectTable::View.new(table){ col1 > 1 } }
 
-    let(:column){ :a }
+    let(:column){ :col1 }
     let(:value) { 1 }
 
     subject{ view[column] = value; view }
