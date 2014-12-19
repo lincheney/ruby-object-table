@@ -166,4 +166,23 @@ describe ObjectTable do
     end
   end
 
+  describe '.concat' do
+    let(:data) do
+      [
+        ObjectTable.new(col1: [1, 2, 3], col2: 5),
+        ObjectTable.new(col1: 10, col2: 50),
+        ObjectTable.new(col2: [10, 30], col1: 15),
+        ObjectTable::BasicGrid[col2: [1, 2], col1: [3, 4]],
+      ]
+    end
+
+    subject{ ObjectTable.concat *data }
+
+    it 'should join the tables and grids together' do
+      expect(subject).to be_a ObjectTable
+      expect(subject.col1.to_a).to eql ([1, 2, 3] + [10] + [15]*2 + [3, 4])
+      expect(subject.col2.to_a).to eql ([5]*3 + [50] + [10, 30] + [1, 2])
+    end
+  end
+
 end

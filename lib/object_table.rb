@@ -40,12 +40,18 @@ class ObjectTable
 
     return self if new_values.empty?
 
-    new_rows = nrows + new_values.first[1].length
     new_values.each do |k, v|
-      new_col = Column.make(@columns[k].to_a + v, k)
-      @columns[k] = new_col
+      @columns[k] = Column.make(@columns[k].to_a + v, k)
     end
     self
+  end
+
+  def self.concat(*values)
+    return self.new if values.empty?
+    base = values.shift
+    base = self.new(base) if base.is_a?(BasicGrid)
+    raise "Don't know how to join a #{base.class}" unless base.is_a?(ObjectTable)
+    base.append!(*values)
   end
 
 end
