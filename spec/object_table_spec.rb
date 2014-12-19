@@ -67,6 +67,13 @@ describe ObjectTable do
         end
       end
 
+      context 'with a scalar' do
+        let(:value){ 10 }
+        it 'should fill the column with that value' do
+          expect(subject.columns[:a].to_a).to eql ([value] * subject.nrows)
+        end
+      end
+
       context 'for a new column' do
         before do
           subject[:c] = value

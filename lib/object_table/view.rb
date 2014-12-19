@@ -12,6 +12,14 @@ class ObjectTable::View
     @columns ||= Hash[@parent.columns.map{|k, v| [k, v[mask]]}]
   end
 
+  def []=(name, value)
+    column = @parent.columns[name]
+    unless column
+      column = @parent.add_column(name)
+    end
+    column[mask] = value
+  end
+
   def mask
     @mask ||= @parent.apply &@filter
   end
