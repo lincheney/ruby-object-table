@@ -3,7 +3,7 @@ require 'narray'
 class ObjectTable::BasicGrid < Hash
   ARRAY_LIKE = [Array, NArray]
 
-  def ensure_uniform_columns
+  def ensure_uniform_columns!
     arrays, scalars = partition{|k, v| ARRAY_LIKE.any?{|cls| v.is_a?(cls)} }
 
     rows = arrays.map(&:last).map(&:length).uniq
