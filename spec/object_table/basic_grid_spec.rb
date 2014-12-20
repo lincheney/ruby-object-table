@@ -15,7 +15,7 @@ describe ObjectTable::BasicGrid do
 
     subject{ grid }
 
-    context 'with rows of the same' do
+    context 'with rows of the same length' do
       let(:columns){ {col1: [1, 2, 3], col2: [1, 2, 3]} }
       it 'should succeed' do
         subject
@@ -45,6 +45,14 @@ describe ObjectTable::BasicGrid do
         subject
         expect(grid[:col1]).to eql [columns[:col1]]
         expect(grid[:col2]).to eql [columns[:col2]]
+      end
+    end
+
+    context 'with ranges' do
+      let(:columns){ {col1: 0...3} }
+      it 'should succeed' do
+        subject
+        expect(grid[:col1]).to eql columns[:col1]
       end
     end
   end
