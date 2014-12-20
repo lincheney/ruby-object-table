@@ -7,7 +7,7 @@ class ObjectTable::Column < NArray
     value = case value
     when self
       value
-    when NArray
+    when NArray, Range
       to_na(value.to_a)
     when Array
       to_na(value)

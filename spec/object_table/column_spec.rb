@@ -1,5 +1,14 @@
 require 'object_table/column'
 
+shared_examples 'a column coercer' do |value|
+  subject{ ObjectTable::Column.make(value) }
+
+  it 'should convert it into a column' do
+    expect(subject).to be_a ObjectTable::Column
+    expect(subject.to_a).to eql value.to_a
+  end
+end
+
 describe ObjectTable::Column do
 
   describe '.make' do
@@ -14,19 +23,15 @@ describe ObjectTable::Column do
     end
 
     context 'on a NArray' do
-      let(:value){ NArray[1, 2, 3] }
-
-      it 'should convert it into a column' do
-        expect(subject).to be_a ObjectTable::Column
-      end
+      it_behaves_like "a column coercer", NArray[1, 2, 3]
     end
 
-    context 'on a Array' do
-      let(:value){ [1, 2, 3] }
+    context 'on a Range' do
+      it_behaves_like "a column coercer", 0...100
+    end
 
-      it 'should convert it into a column' do
-        expect(subject).to be_a ObjectTable::Column
-      end
+    context 'on an Array' do
+      it_behaves_like "a column coercer", [1, 2, 3]
     end
 
     context 'on something unsupported' do
