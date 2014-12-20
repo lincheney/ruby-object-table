@@ -1,4 +1,8 @@
+require 'forwardable'
+
 module ObjectTable::TableMethods
+  extend Forwardable
+  def_delegators :@columns, :_next_available_key, :[]
 
   def __setup__
     @R = ObjectTable::BasicGrid
@@ -19,10 +23,6 @@ module ObjectTable::TableMethods
 
   def ncols
     columns.keys.length
-  end
-
-  def [](name)
-    columns[name]
   end
 
   def []=(name, value)

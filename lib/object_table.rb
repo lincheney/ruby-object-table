@@ -12,7 +12,6 @@ class ObjectTable
 
   def initialize(columns = {})
     @columns = BasicGrid[columns]
-    @columns.ensure_uniform_columns!
 
     @columns.each do |k, v|
       @columns[k] = Column.make(v, k)
