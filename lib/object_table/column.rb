@@ -7,7 +7,9 @@ class ObjectTable::Column < NArray
     value = case value
     when self
       value
-    when NArray, Range
+    when NArray
+      self.cast(value)
+    when Range
       to_na(value.to_a)
     when Array
       to_na(value)
@@ -16,6 +18,40 @@ class ObjectTable::Column < NArray
     end
     value.name = name
     value
+  end
+
+  def coerce_rev(other, operator)
+    other.send(operator, NArray.refer(self))
+  end
+
+  def method_missing(*args)
+    map{|x| x.send(*args)}
+  end
+
+  def collect(*)
+    self.class.make super, name
+  end
+
+  def _refer(value)
+    value.is_a?(NArray) ? NArray.refer(value) : value
+  end
+
+  %w{ + - * / }.each do |op|
+    define_method(op) do |other|
+      self.class.make super(_refer(other)), name
+    end
+  end
+
+  %w{ xor or and <= >= le ge < > gt lt % ** ne eq & | ^ }.each do |op|
+    define_method(op) do |other|
+      self.class.make super(other), name
+    end
+  end
+
+  %w{ not abs -@ ~ }.each do |op|
+    define_method(op) do
+      self.class.make super(), name
+    end
   end
 
 end

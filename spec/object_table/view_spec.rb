@@ -21,7 +21,7 @@ describe ObjectTable::View do
     let(:view)  { ObjectTable::View.new(table){ col1 > 1 } }
 
     let(:column){ :col1 }
-    let(:value) { 1 }
+    let(:value) { 100 }
 
     subject{ view[column] = value; view }
 
