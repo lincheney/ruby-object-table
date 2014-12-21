@@ -1,6 +1,8 @@
 require_relative 'view'
 
 class ObjectTable::Grouped
+  DEFAULT_VALUE_PREFIX = 'v_'
+
   def initialize(parent, &grouper)
     @parent = parent
     @grouper = grouper
@@ -14,21 +16,27 @@ class ObjectTable::Grouped
   end
 
   def apply(&block)
-    values = groups.map do |k, v|
+    groups
+    value_key = self.class._generate_key(DEFAULT_VALUE_PREFIX, @keys).to_sym
+
+    data = groups.map do |k, v|
       value = ObjectTable::View.new(@parent, mask: v).instance_eval &block
       keys = @keys.zip(k)
 
-      case value
-      when ObjectTable::BasicGrid
-        ObjectTable::BasicGrid[keys + value.to_a]
-      when ObjectTable, ObjectTable::View
-        ObjectTable::BasicGrid[keys + value.columns.to_a]
-      else
-        ObjectTable::BasicGrid[keys + [[:value, value]]]
+      if value.is_a?(ObjectTable::TableMethods)
+        value = value.columns
       end
+
+      grid = case value
+      when ObjectTable::BasicGrid
+        ObjectTable::BasicGrid[keys].merge!(value)
+      else
+        ObjectTable::BasicGrid[keys + [[value_key, value]]]
+      end
+      grid._ensure_uniform_columns!
     end
 
-    ObjectTable.stack(*values)
+    ObjectTable.stack(*data)
   end
 
   def groups
@@ -46,6 +54,9 @@ class ObjectTable::Grouped
       groupers = @parent.instance_eval(&@grouper)
       raise 'Groups must be a hash' unless groupers.is_a?(Hash)
       @keys = groupers.keys
+
+      groupers = ObjectTable::BasicGrid.new.replace groupers
+      groupers._ensure_uniform_columns!(@parent.nrows)
       groupers = groupers.values.map(&:to_a).transpose
       groupers
     end

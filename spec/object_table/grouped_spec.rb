@@ -64,8 +64,22 @@ describe ObjectTable::Grouped do
     end
 
     it 'should concatenate the results of the block' do
-      expect(subject.where{parity.eq 0}.value.to_a).to eql [even_group.col1.sum]
-      expect(subject.where{parity.eq 1}.value.to_a).to eql [odd_group.col1.sum]
+      expect(subject.where{parity.eq 0}.v_0.to_a).to eql [even_group.col1.sum]
+      expect(subject.where{parity.eq 1}.v_0.to_a).to eql [odd_group.col1.sum]
+    end
+
+    describe 'value column auto naming' do
+      it 'should auto name the value column' do
+        grouped = ObjectTable::Grouped.new(table){ {parity: 123} }
+        result = grouped.apply{|group| group.col1.sum}
+        expect(result.v_0.to_a).to eql [table.col1.sum]
+      end
+
+      it 'should auto name the value column' do
+        grouped = ObjectTable::Grouped.new(table){ {v_0: 123} }
+        result = grouped.apply{|group| group.col1.sum}
+        expect(result.v_1.to_a).to eql [table.col1.sum]
+      end
     end
 
     context 'with results that are grids' do
