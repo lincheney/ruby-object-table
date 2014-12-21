@@ -28,8 +28,11 @@ class ObjectTable
     new_values = Hash.new{ [] }
 
     others.each do |x|
-      if x.is_a?(ObjectTable)
+      case x
+      when ObjectTable::TableMethods
         x = x.columns
+      when BasicGrid
+        x._ensure_uniform_columns!
       end
 
       raise "Don't know how to append a #{x.class}" unless x.is_a?(BasicGrid)

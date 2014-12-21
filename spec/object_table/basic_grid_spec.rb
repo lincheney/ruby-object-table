@@ -1,19 +1,19 @@
 require 'object_table/basic_grid'
 
 describe ObjectTable::BasicGrid do
-  describe '.[]' do
-    subject{ ObjectTable::BasicGrid[] }
-
-    it 'should ensure the columns have the same number of rows' do
-      expect_any_instance_of(ObjectTable::BasicGrid).to receive(:_ensure_uniform_columns!)
-      subject
-    end
-  end
+#   describe '.[]' do
+#     subject{ ObjectTable::BasicGrid[] }
+#
+#     it 'should ensure the columns have the same number of rows' do
+#       expect_any_instance_of(ObjectTable::BasicGrid).to receive(:_ensure_uniform_columns!)
+#       subject
+#     end
+#   end
 
   describe '#_ensure_uniform_columns!' do
     let(:grid){ ObjectTable::BasicGrid[columns] }
 
-    subject{ grid }
+    subject{ grid._ensure_uniform_columns! }
 
     context 'with rows of the same length' do
       let(:columns){ {col1: [1, 2, 3], col2: [1, 2, 3]} }
