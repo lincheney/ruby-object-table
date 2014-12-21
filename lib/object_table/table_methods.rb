@@ -2,14 +2,14 @@ require 'forwardable'
 
 module ObjectTable::TableMethods
   extend Forwardable
-  def_delegators :@columns, :_next_available_key, :[]
+  def_delegators :@columns, :[]
 
   def initialize
     @R = ObjectTable::BasicGrid
   end
 
   def ==(other)
-    return false unless other.is_a?(ObjectTable) or other.is_a?(ObjectTable::View)
+    return false unless other.is_a?(ObjectTable::TableMethods)
     return columns == other.columns
   end
 

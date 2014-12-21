@@ -136,6 +136,49 @@ EOS
 
   end
 
+  describe '==' do
+    let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: 5) }
+
+    it 'should fail for non-tables' do
+      expect(table == [1, 2, 3]).to be_falsey
+    end
+
+    context 'against a ObjectTable' do
+      context 'with different contents' do
+        let(:other){ ObjectTable.new(col1: [1, 2, 3], col2: 10000) }
+        it 'should fail' do
+          expect(table == other).to be_falsey
+        end
+      end
+
+      context 'with the same contents' do
+        let(:other){ ObjectTable.new(col1: [1, 2, 3], col2: [5, 5, 5]) }
+        it 'should succeed' do
+          expect(table == other).to be_truthy
+        end
+      end
+    end
+
+    context 'against a ObjectTable::View' do
+      let(:view_parent){ ObjectTable.new(col1: [1, 2, 3, 4], col2: [5, 5, 5, 1000]) }
+
+      context 'with different contents' do
+        let(:other){ view_parent.where{ col1 > 1} }
+        it 'should fail' do
+          expect(table == other).to be_falsey
+        end
+      end
+
+      context 'with the same contents' do
+        let(:other){ view_parent.where{ col1 < 4} }
+        it 'should succeed' do
+          expect(table == other).to be_truthy
+        end
+      end
+    end
+
+  end
+
   describe '#apply' do
     let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: 5) }
 
