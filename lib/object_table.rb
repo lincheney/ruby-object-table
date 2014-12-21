@@ -24,6 +24,12 @@ class ObjectTable
     end
   end
 
+  def add_column(name)
+    col = ObjectTable::Column.object(nrows)
+    col.name = name
+    columns[name] = col
+  end
+
   def stack!(*others)
     new_values = Hash.new{ [] }
 

@@ -54,6 +54,10 @@ describe ObjectTable do
         expect(subject.columns).to include :col3
         expect(subject.columns[:col3].to_a).to eql value
       end
+
+      it 'should assign the name of the column' do
+        expect(subject[:col3].name).to eql :col3
+      end
     end
   end
 

@@ -70,6 +70,10 @@ describe ObjectTable::View do
         subject
         expect(table.columns[column].to_a).to eql [nil] + value
       end
+
+      it 'should assign the name of the column' do
+        expect(subject[:col3].name).to eql :col3
+      end
     end
 
   end
