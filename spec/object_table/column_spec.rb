@@ -87,6 +87,19 @@ describe ObjectTable::Column do
     end
   end
 
+  describe '#uniq' do
+    subject{ ObjectTable::Column.make([1, 1, 2, 2, 3, 1]) }
+
+    it 'should return a column of unique elements' do
+      expect(subject.uniq).to be_a ObjectTable::Column
+      expect(subject.uniq.to_a).to eql subject.to_a.uniq
+    end
+
+    it 'should set the name of the unique-ed column' do
+      expect(subject.uniq.name).to eql subject.name
+    end
+  end
+
   describe 'vectorisation' do
     subject{ ObjectTable::Column.make(Date.today ... (Date.today+100)) }
 

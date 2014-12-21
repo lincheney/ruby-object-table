@@ -20,6 +20,10 @@ class ObjectTable::Column < NArray
     value
   end
 
+  def uniq
+    self.class.make to_a.uniq, name
+  end
+
   def coerce_rev(other, operator)
     other.send(operator, NArray.refer(self))
   end
