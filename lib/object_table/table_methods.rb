@@ -2,7 +2,7 @@ require 'forwardable'
 
 module ObjectTable::TableMethods
   extend Forwardable
-  def_delegators :@columns, :[]
+  def_delegators :columns, :[]
 
   def initialize
     @R = ObjectTable::BasicGrid
@@ -32,10 +32,6 @@ module ObjectTable::TableMethods
       column = add_column(name)
     end
     column[] = value
-  end
-
-  def add_column(name)
-    columns[name] = ObjectTable::Column.object(nrows)
   end
 
   def apply(&block)

@@ -8,7 +8,7 @@ class ObjectTable::Column < NArray
     when self
       value
     when NArray
-      self.cast(value)
+      cast(value)
     when Range
       to_na(value.to_a)
     when Array

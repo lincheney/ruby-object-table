@@ -14,19 +14,19 @@ describe ObjectTable::View do
     it 'should mask the columns of the parent table' do
       mask = table.col1 > 2
       table.columns.each do |k, v|
-        expect(subject.columns[k]).to eql v[mask]
+        expect(subject.columns[k].to_a).to eql v[mask].to_a
       end
     end
   end
 
   describe '#[]=' do
-    let(:table) {  ObjectTable.new(col1: [0, 1, 2, 3], col2: 5) }
+    let(:table) { ObjectTable.new(col1: [0, 1, 2, 3], col2: 5) }
     let(:view)  { ObjectTable::View.new(table){ col1 > 0 } }
 
     let(:column){ :col1 }
     let(:value) { [10, 20, 30] }
 
-    subject{ view[column] = value; view }
+    subject{ view.columns; view[column] = value; view }
 
     context 'on an existing column' do
       it 'should assign values to the column' do
