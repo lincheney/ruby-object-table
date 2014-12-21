@@ -297,4 +297,23 @@ EOS
     end
   end
 
+  describe '.sort_by' do
+    let(:table){ ObjectTable.new(col1: [2, 2, 1, 1], col2: [0, 1, 0, 1], col3: [5, 6, 7, 8]) }
+
+    subject{ table.sort_by(table.col1, table.col2) }
+
+    it 'should return a new table' do
+      expect(subject).to be_a ObjectTable
+      expect(subject).to_not be table
+    end
+
+    it 'should sort by the given columns' do
+      expect(subject).to eql ObjectTable.new(
+        col1: [1, 1, 2, 2],
+        col2: [0, 1, 0, 1],
+        col3: [7, 8, 5, 6],
+      )
+    end
+  end
+
 end

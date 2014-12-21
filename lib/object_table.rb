@@ -60,4 +60,10 @@ class ObjectTable
     base.stack!(*values)
   end
 
+  def sort_by(*keys)
+    index = (0...nrows).zip(keys.map(&:to_a).transpose).sort_by(&:last).map(&:first)
+    cols = Hash[columns.map{|k, v| [k, v[index]]}]
+    self.class.new cols
+  end
+
 end
