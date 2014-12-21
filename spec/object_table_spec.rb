@@ -160,7 +160,7 @@ EOS
     end
 
     context 'against a ObjectTable::View' do
-      let(:view_parent){ ObjectTable.new(col1: [1, 2, 3, 4], col2: [5, 5, 5, 1000]) }
+      let(:view_parent){ ObjectTable.new(col2: [5, 5, 5, 1000], col1: [1, 2, 3, 4]) }
 
       context 'with different contents' do
         let(:other){ view_parent.where{ col1 > 1} }
@@ -272,6 +272,28 @@ EOS
       expect(subject).to be_a ObjectTable
       expect(subject.col1.to_a).to eql ([1, 2, 3] + [10] + [15]*2 + [3, 4])
       expect(subject.col2.to_a).to eql ([5]*3 + [50] + [10, 30] + [1, 2])
+    end
+  end
+
+  describe '.clone' do
+    let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: 5) }
+
+    subject{ table.clone }
+
+    it 'should return a new table' do
+      expect(subject).to be_a ObjectTable
+      expect(subject).to_not be table
+    end
+
+    it 'should be equivalent to the original table' do
+      expect(subject).to eql table
+    end
+
+    it 'should have cloned columns' do
+      table.columns.each do |k, v|
+        expect(subject.columns[k]).to eql v
+        expect(subject.columns[k]).to_not be v
+      end
     end
   end
 

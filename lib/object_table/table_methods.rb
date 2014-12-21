@@ -12,6 +12,7 @@ module ObjectTable::TableMethods
     return false unless other.is_a?(ObjectTable::TableMethods)
     return columns == other.columns
   end
+  alias_method :eql?, :==
 
   def colnames
     columns.keys
@@ -93,6 +94,11 @@ module ObjectTable::TableMethods
       end
       row
     end.join("\n")
+  end
+
+  def clone
+    cols = ObjectTable::BasicGrid[columns.map{|k, v| [k, v.clone]}]
+    ObjectTable.new(cols)
   end
 
 end
