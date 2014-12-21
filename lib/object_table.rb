@@ -11,7 +11,11 @@ class ObjectTable
   attr_reader :columns
 
   def initialize(columns = {})
-    @columns = BasicGrid[columns]
+    unless columns.is_a? BasicGrid
+      columns = BasicGrid[columns]
+    end
+    columns._ensure_uniform_columns!
+    @columns = columns
 
     @columns.each do |k, v|
       @columns[k] = Column.make(v, k)
