@@ -3,9 +3,14 @@ require_relative 'view'
 class ObjectTable::Grouped
   DEFAULT_VALUE_PREFIX = 'v_'
 
-  def initialize(parent, &grouper)
+  def initialize(parent, *keys, &grouper)
     @parent = parent
     @grouper = grouper
+
+    keys.each do |k|
+      raise "Expected a ObjectTable::Column, got #{k}" unless k.is_a?(ObjectTable::Column)
+    end
+    @keys = keys
   end
 
   def each(&block)
@@ -51,12 +56,16 @@ class ObjectTable::Grouped
 
   def groupers
     @groupers ||= begin
-      groupers = @parent.instance_eval(&@grouper)
-      raise 'Groups must be a hash' unless groupers.is_a?(Hash)
-      @keys = groupers.keys
+      if @keys.empty?
+        groupers = @parent.instance_eval(&@grouper)
+        raise 'Groups must be a hash' unless groupers.is_a?(Hash)
+        groupers = ObjectTable::BasicGrid.new.replace groupers
+      else
+        groupers = ObjectTable::BasicGrid[@keys.map{|k| [k.name, k]}]
+      end
 
-      groupers = ObjectTable::BasicGrid.new.replace groupers
       groupers._ensure_uniform_columns!(@parent.nrows)
+      @keys = groupers.keys
       groupers = groupers.values.map(&:to_a).transpose
       groupers
     end

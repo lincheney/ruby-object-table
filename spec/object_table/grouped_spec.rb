@@ -64,8 +64,7 @@ describe ObjectTable::Grouped do
     end
 
     it 'should concatenate the results of the block' do
-      expect(subject.where{parity.eq 0}.v_0.to_a).to eql [even_group.col1.sum]
-      expect(subject.where{parity.eq 1}.v_0.to_a).to eql [odd_group.col1.sum]
+      expect(subject.sort_by(subject.parity)).to eql ObjectTable.new(parity: [0, 1], v_0: [6, 4])
     end
 
     describe 'value column auto naming' do
@@ -91,11 +90,29 @@ describe ObjectTable::Grouped do
       end
 
       it 'should stack the grids' do
-        expect(subject.where{parity.eq 0}.sum.to_a).to eql [even_group.col1.sum]
-        expect(subject.where{parity.eq 0}.mean.to_a).to eql [even_group.col2.mean]
-        expect(subject.where{parity.eq 1}.sum.to_a).to eql [odd_group.col1.sum]
-        expect(subject.where{parity.eq 1}.mean.to_a).to eql [odd_group.col2.mean]
+        expect(subject.sort_by(subject.parity)).to eql ObjectTable.new(
+          parity: [0, 1],
+          sum:    [even_group.col1.sum, odd_group.col1.sum],
+          mean:   [even_group.col2.mean, odd_group.col2.mean],
+        )
       end
+    end
+  end
+
+
+  context 'when grouping by columns' do
+    let(:table){ ObjectTable.new(key1: [0]*4 + [1]*4, key2: [0, 0, 1, 1]*2, data: 1..8 ) }
+    let(:grouped){ ObjectTable::Grouped.new(table, table.key1, table.key2) }
+
+    subject{ grouped.apply{ @R[sum: data.sum] } }
+
+    it 'should use the columns as keys' do
+      expect(subject.colnames).to match_array [:key1, :key2, :sum]
+      expect(subject.sort_by(subject.key1, subject.key2)).to eql ObjectTable.new(
+        key1: [0, 0, 1, 1],
+        key2: [0, 1, 0, 1],
+        sum:  [3, 7, 11, 15],
+      )
     end
   end
 

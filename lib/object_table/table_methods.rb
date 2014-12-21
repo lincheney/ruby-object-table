@@ -50,8 +50,8 @@ module ObjectTable::TableMethods
     ObjectTable::View.new(self, &block)
   end
 
-  def group(&block)
-    ObjectTable::Grouped.new(self, &block)
+  def group(*args, &block)
+    ObjectTable::Grouped.new(self, *args, &block)
   end
 
   def sort_by(*keys)
