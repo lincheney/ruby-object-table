@@ -54,6 +54,12 @@ module ObjectTable::TableMethods
     ObjectTable::Grouped.new(self, &block)
   end
 
+  def sort_by(*keys)
+    sort_index = _get_sort_index(keys)
+    cols = ObjectTable::BasicGrid[columns.map{|k, v| [k, v[sort_index]]}]
+    self.class.new(cols)
+  end
+
   def method_missing(meth, *args, &block)
     columns[meth] or super
   end
@@ -99,6 +105,10 @@ module ObjectTable::TableMethods
   def clone
     cols = ObjectTable::BasicGrid[columns.map{|k, v| [k, v.clone]}]
     ObjectTable.new(cols)
+  end
+
+  def _get_sort_index(columns)
+    (0...nrows).zip(columns.map(&:to_a).transpose).sort_by(&:last).map(&:first)
   end
 
 end
