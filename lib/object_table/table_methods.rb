@@ -61,19 +61,37 @@ module ObjectTable::TableMethods
     super or columns.include?(meth)
   end
 
-  def inspect
+  def inspect(max_section = 5)
     header = "#{self.class}(#{nrows}, #{ncols})\n"
+    printed_columns = []
 
-    cols = [''] + (0...nrows).map{|i| "#{i}: "} + ['']
-    cols = [cols] + columns.map do |name, c|
-      [name.to_s] + c.to_a.map(&:inspect) + [name.to_s]
+    if nrows > max_section * 2
+      head = (0...max_section)
+      tail = ((nrows - max_section)...nrows)
+
+      printed_columns.push [''] + (head.to_a + tail.to_a).map{|i| "#{i}: "} + ['']
+      printed_columns += columns.map do |name, c|
+        [name.to_s] + c[[head, tail]].to_a.map(&:inspect) + [name.to_s]
+      end
+    else
+      max_section = -1
+      printed_columns.push [''] + (0...nrows).map{|i| "#{i}: "} + ['']
+      printed_columns += columns.map do |name, c|
+        [name.to_s] + c.to_a.map(&:inspect) + [name.to_s]
+      end
     end
-    widths = cols.map{|c| c.map(&:length).max + 2}
 
-    header + cols.transpose.map do |row|
-      row.zip(widths).map do |cell, width|
+    widths = printed_columns.map{|col| col.map(&:length).max + 2}
+
+    header + printed_columns.transpose.each_with_index.map do |row, index|
+      row = row.zip(widths).map do |cell, width|
         cell.rjust(width)
       end.join('')
+
+      if index == max_section
+        row += "\n" + '-'*widths.reduce(:+)
+      end
+      row
     end.join("\n")
   end
 

@@ -18,6 +18,60 @@ describe ObjectTable do
     it 'should succeed' do
       expect{subject.inspect}.to_not raise_error
     end
+
+    it 'should have a header listing the dimensions' do
+      expect(subject.inspect.lines.first).to eql "ObjectTable(#{subject.nrows}, #{subject.ncols})\n"
+    end
+
+    it 'should include the column names at the top and bottom' do
+      expect(subject.inspect.lines[1].split).to eql subject.colnames.map(&:to_s)
+      expect(subject.inspect.lines[-1].split).to eql subject.colnames.map(&:to_s)
+    end
+
+    context 'with few rows' do
+      subject{ ObjectTable.new(col1: 1..10, col2: 5) }
+
+      it 'should include all the rows' do
+        table = subject.inspect.lines[1..-1].join + "\n"
+        expect(table).to eql <<EOS
+       col1  col2
+  0:      1     5
+  1:      2     5
+  2:      3     5
+  3:      4     5
+  4:      5     5
+  5:      6     5
+  6:      7     5
+  7:      8     5
+  8:      9     5
+  9:     10     5
+       col1  col2
+EOS
+      end
+    end
+
+    context 'with many rows' do
+      subject{ ObjectTable.new(col1: 1..100, col2: 5) }
+
+      it 'should only include the top and bottom 5 rows' do
+        table = subject.inspect.lines[1..-1].join + "\n"
+        expect(table).to eql <<EOS
+        col1  col2
+   0:      1     5
+   1:      2     5
+   2:      3     5
+   3:      4     5
+   4:      5     5
+------------------
+  95:     96     5
+  96:     97     5
+  97:     98     5
+  98:     99     5
+  99:    100     5
+        col1  col2
+EOS
+      end
+    end
   end
 
   describe 'column methods' do
