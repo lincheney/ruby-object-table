@@ -1,4 +1,5 @@
 require_relative 'table_methods'
+require_relative 'basic_grid'
 
 class ObjectTable::View
   include ObjectTable::TableMethods
@@ -11,7 +12,7 @@ class ObjectTable::View
   end
 
   def columns
-    @columns ||= Hash[@parent.columns.map{|k, v| [k, v[mask]]}]
+    @columns ||= ObjectTable::BasicGrid[@parent.columns.map{|k, v| [k, v[mask]]}]
   end
 
   def []=(name, value)

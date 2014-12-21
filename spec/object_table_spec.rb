@@ -231,6 +231,14 @@ EOS
 
     subject{ table.stack! *others }
 
+    context 'with non grids/tables' do
+      let(:others){ [ObjectTable.new(col1: 10, col2: 50), 'not a table'] }
+
+      it 'should fail' do
+        expect{subject}.to raise_error
+      end
+    end
+
     context 'with different columns' do
       let(:others){ [ObjectTable.new(col3: 10)] }
 
@@ -254,24 +262,41 @@ EOS
         expect(table.col2.to_a).to eql ([5]*3 + [50] + [10, 30] + [1, 2])
       end
     end
+
   end
 
   describe '.stack' do
-    let(:data) do
+    let(:others) do
       [
         ObjectTable.new(col1: [1, 2, 3], col2: 5),
         ObjectTable.new(col1: 10, col2: 50),
-        ObjectTable.new(col2: [10, 30], col1: 15),
+        ObjectTable.new(col2: [10, 30], col1: 15).where{col2.eq 10},
         ObjectTable::BasicGrid[col2: [1, 2], col1: [3, 4]],
       ]
     end
 
-    subject{ ObjectTable.stack *data }
+    subject{ ObjectTable.stack *others }
 
     it 'should join the tables and grids together' do
       expect(subject).to be_a ObjectTable
-      expect(subject.col1.to_a).to eql ([1, 2, 3] + [10] + [15]*2 + [3, 4])
-      expect(subject.col2.to_a).to eql ([5]*3 + [50] + [10, 30] + [1, 2])
+      expect(subject).to eql ObjectTable.new(
+        col1: others.flat_map{|x| x[:col1].to_a},
+        col2: others.flat_map{|x| x[:col2].to_a},
+        )
+    end
+
+    it 'should duplicate the contents' do
+      others.each do |chunk|
+        expect(subject).to_not be chunk
+      end
+    end
+
+    context 'with non grids/tables' do
+      let(:others){ [ObjectTable.new(col1: 10, col2: 50), 'not a table'] }
+
+      it 'should fail' do
+        expect{subject}.to raise_error
+      end
     end
   end
 

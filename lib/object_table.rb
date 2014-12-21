@@ -55,8 +55,15 @@ class ObjectTable
   def self.stack(*values)
     return self.new if values.empty?
     base = values.shift
-    base = self.new(base) if base.is_a?(BasicGrid)
-    raise "Don't know how to join a #{base.class}" unless base.is_a?(ObjectTable)
+
+    case base
+    when BasicGrid
+      base = self.new(base.clone)
+    when ObjectTable, ObjectTable::View
+      base = base.clone
+    else
+      raise "Don't know how to join a #{base.class}"
+    end
     base.stack!(*values)
   end
 
