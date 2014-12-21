@@ -57,24 +57,4 @@ describe ObjectTable::BasicGrid do
     end
   end
 
-  describe '#_next_available_key' do
-    let(:grid){ ObjectTable::BasicGrid[col1: 1, col2: 2, col5: 5] }
-
-    subject{ grid._next_available_key(prefix) }
-
-    context 'with no matching keys' do
-      let(:prefix){ 'prefix' }
-      it 'should suffix the key with 0' do
-        expect(subject).to eql 'prefix0'
-      end
-    end
-
-    context 'with matching keys' do
-      let(:prefix){ 'col' }
-      it 'should suffix the key with the next available number' do
-        expect(subject).to eql 'col6'
-      end
-    end
-
-  end
 end

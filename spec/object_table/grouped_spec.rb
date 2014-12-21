@@ -18,6 +18,26 @@ describe ObjectTable::Grouped do
     end
   end
 
+  describe '#_generate_key' do
+    let(:prefix){ 'key_' }
+    subject{ ObjectTable::Grouped._generate_key(prefix, existing_keys) }
+
+    context 'with no matching keys' do
+      let(:existing_keys){ ['a', 'b', 'c'] }
+      it 'should suffix the key with 0' do
+        expect(subject).to eql "key_0"
+      end
+    end
+
+    context 'with matching keys' do
+      let(:existing_keys){ ['key_1', 'key_67', 'key_8', 'abcd'] }
+      it 'should suffix the key with the next available number' do
+        expect(subject).to eql "key_68"
+      end
+    end
+
+  end
+
   describe '#each' do
     let(:even_group){ table.where{ (col1 % 2).eq(0) } }
     let(:odd_group) { table.where{ (col1 % 2).eq(1) } }

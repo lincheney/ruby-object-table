@@ -51,4 +51,10 @@ class ObjectTable::Grouped
     end
   end
 
+  def self._generate_key(prefix, existing_keys)
+    regex = Regexp.new(Regexp.quote(prefix) + '(\d+)')
+    i = existing_keys.map(&regex.method(:match)).compact.map{|match| match[-1].to_i}.max || -1
+    "#{prefix}#{i + 1}"
+  end
+
 end
