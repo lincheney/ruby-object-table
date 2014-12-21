@@ -1,7 +1,10 @@
 require 'object_table'
 require 'object_table/view'
 
+require 'support/object_table_example'
+
 describe ObjectTable::View do
+  it_behaves_like 'an object table', ObjectTable::View
 
   describe '#columns' do
     let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: 5) }

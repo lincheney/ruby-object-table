@@ -57,7 +57,7 @@ module ObjectTable::TableMethods
   def sort_by(*keys)
     sort_index = _get_sort_index(keys)
     cols = ObjectTable::BasicGrid[columns.map{|k, v| [k, v[sort_index]]}]
-    self.class.new(cols)
+    ObjectTable.new(cols)
   end
 
   def method_missing(meth, *args, &block)
