@@ -4,10 +4,10 @@ class ObjectTable::View
   include ObjectTable::TableMethods
 
   def initialize(parent, mask: nil, &block)
+    super()
     @parent = parent
     @mask = mask
     @filter = block
-    __setup__
   end
 
   def columns

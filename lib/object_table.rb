@@ -11,6 +11,8 @@ class ObjectTable
   attr_reader :columns
 
   def initialize(columns = {})
+    super()
+
     unless columns.is_a? BasicGrid
       columns = BasicGrid[columns]
     end
@@ -20,8 +22,6 @@ class ObjectTable
     @columns.each do |k, v|
       @columns[k] = Column.make(v, k)
     end
-
-    __setup__
   end
 
   def stack!(*others)

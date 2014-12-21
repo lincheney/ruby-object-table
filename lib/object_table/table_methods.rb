@@ -4,7 +4,7 @@ module ObjectTable::TableMethods
   extend Forwardable
   def_delegators :@columns, :_next_available_key, :[]
 
-  def __setup__
+  def initialize
     @R = ObjectTable::BasicGrid
   end
 
