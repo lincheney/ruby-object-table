@@ -6,6 +6,17 @@ require 'support/object_table_example'
 describe ObjectTable::TempView do
   it_behaves_like 'an object table', ObjectTable::TempView
 
+  context 'with changes to the parent' do
+    let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: 5) }
+    subject{ ObjectTable::TempView.new(table){ col1 > 2 } }
+
+    it 'should mirror changes to the parent' do
+      expect(subject).to eql ObjectTable.new(col1: 3, col2: 5)
+      table[:col1] = [5, 6, 7]
+      expect(subject).to eql ObjectTable.new(col1: [5, 6, 7], col2: 5)
+    end
+  end
+
   describe '#apply' do
     let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: 5) }
     let(:block){ Proc.new{col1 + 100} }

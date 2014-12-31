@@ -9,6 +9,16 @@ describe ObjectTable::TempGrouped do
   let(:even){ (table.col1 % 2).eq(0).where }
   let(:odd) { (table.col1 % 2).eq(1).where }
 
+  context 'with changes to the parent' do
+    subject{ grouped }
+
+    it 'should mirror changes to the parent' do
+      expect(subject._groups[1]).to eql ({[0] => NArray[1, 3], [1] => NArray[0, 2]})
+      table[:col1] = [2, 3, 4, 5]
+      expect(subject._groups[1]).to eql ({[0] => NArray[0, 2], [1] => NArray[1, 3]})
+    end
+  end
+
   describe '#_groups' do
     subject{ grouped._groups }
 
