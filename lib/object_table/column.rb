@@ -46,7 +46,7 @@ class ObjectTable::Column < NArray
     end
   end
 
-  %w{ xor or and <= >= le ge < > gt lt % ** ne eq & | ^ }.each do |op|
+  %w{ xor or and <= >= le ge < > gt lt % ** ne eq & | ^ to_type }.each do |op|
     define_method(op) do |other|
       self.class.make super(other), name
     end

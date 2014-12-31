@@ -123,6 +123,7 @@ describe ObjectTable::Column do
     it_behaves_like 'a NArray', 'and'
     it_behaves_like 'a NArray', 'or'
     it_behaves_like 'a NArray', 'xor'
+    it_behaves_like 'a NArray', 'to_type'
 
     it_behaves_like 'a NArray', '~', unary: true
     it_behaves_like 'a NArray', '-@', unary: true
