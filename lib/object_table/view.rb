@@ -1,32 +1,26 @@
-require_relative 'table_methods'
+require_relative 'view_methods'
 require_relative 'basic_grid'
 require_relative 'masked_column'
 
 class ObjectTable::View
-  include ObjectTable::TableMethods
+  include ObjectTable::ViewMethods
+  attr_reader :indices
 
-  def initialize(parent, mask: nil, &block)
+  def initialize(parent, indices)
     super()
     @parent = parent
-    @indices = NArray.int(parent.nrows).indgen![mask] if mask
-    @filter = block
+    @indices = indices
+    columns
   end
 
   def columns
-    @columns ||= ObjectTable::BasicGrid[@parent.columns.map{|k, v| [k, ObjectTable::MaskedColumn.mask(v, indices)]}]
+    @columns ||= super
   end
 
   def []=(name, value)
-    col = @parent.columns[name]
-    unless col
-      col = @parent.add_column(name)
-    end
+    col = (@parent.columns[name] or add_column(name))
     col[indices] = value
     columns[name] = ObjectTable::MaskedColumn.mask(col, indices)
-  end
-
-  def indices
-    @indices ||= NArray.int(@parent.nrows).indgen![@parent.apply &@filter]
   end
 
 end

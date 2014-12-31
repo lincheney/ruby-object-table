@@ -15,7 +15,7 @@ class ObjectTable::Grouped
 
   def each(&block)
     groups.each do |k, v|
-      ObjectTable::View.new(@parent, mask: v).instance_eval &block
+      ObjectTable::View.new(@parent, v).apply &block
     end
     @parent
   end
@@ -25,7 +25,7 @@ class ObjectTable::Grouped
     value_key = self.class._generate_key(DEFAULT_VALUE_PREFIX, @keys).to_sym
 
     data = groups.map do |k, v|
-      value = ObjectTable::View.new(@parent, mask: v).instance_eval &block
+      value = ObjectTable::View.new(@parent, v).apply &block
       keys = @keys.zip(k)
 
       if value.is_a?(ObjectTable::TableMethods)

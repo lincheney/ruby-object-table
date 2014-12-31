@@ -9,11 +9,17 @@ RSpec.shared_examples 'an object table' do |cls|
     if @cls == ObjectTable
       table
 
-    elsif @cls == ObjectTable::View
+    elsif @cls == ObjectTable::TempView
       table.stack! ObjectTable::BasicGrid[table.columns.map{|k, v| [k, v.max]}]
       column = table.colnames.first
       table[column][-1] += 1
       table.where{table[column] < table[column][-1]}
+
+    elsif @cls == ObjectTable::View
+      table.stack! ObjectTable::BasicGrid[table.columns.map{|k, v| [k, v.max]}]
+      column = table.colnames.first
+      table[column][-1] += 1
+      table.where{table[column] < table[column][-1]}.apply{ self }
 
     else
       nil
@@ -177,8 +183,8 @@ EOS
     let(:block){ Proc.new{col1 > 1} }
     let(:filtered){ subject.where &block }
 
-    it 'should return a view' do
-      expect(filtered).to be_a ObjectTable::View
+    it 'should return a temp view' do
+      expect(filtered).to be_a ObjectTable::TempView
       expect(filtered.instance_eval('@filter')).to eql block
     end
   end

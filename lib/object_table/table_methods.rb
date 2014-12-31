@@ -2,7 +2,6 @@ require 'forwardable'
 
 module ObjectTable::TableMethods
   extend Forwardable
-  def_delegators :columns, :[]
 
   def initialize
     @R = ObjectTable::BasicGrid
@@ -26,13 +25,19 @@ module ObjectTable::TableMethods
     columns.keys.length
   end
 
-  def []=(name, value)
+  def_delegator :columns, :include?, :has_column?
+
+  def_delegator :columns, :[], :get_column
+  alias_method :[], :get_column
+
+  def set_column(name, value)
     column = columns[name]
     unless column
       column = add_column(name)
     end
     column[] = value
   end
+  alias_method :[]=, :set_column
 
   def apply(&block)
     result = instance_eval &block
@@ -43,7 +48,7 @@ module ObjectTable::TableMethods
   end
 
   def where(&block)
-    ObjectTable::View.new(self, &block)
+    ObjectTable::TempView.new(self, &block)
   end
 
   def group(*args, &block)
@@ -57,11 +62,11 @@ module ObjectTable::TableMethods
   end
 
   def method_missing(meth, *args, &block)
-    columns[meth] or super
+    get_column(meth) or super
   end
 
   def respond_to?(meth)
-    super or columns.include?(meth)
+    super or has_column?(meth)
   end
 
   def inspect(max_section = 5)
