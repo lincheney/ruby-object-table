@@ -95,14 +95,14 @@ EOS
     it 'should respond to the column names as methods' do
       subject.columns.keys.each do |key|
         expect(subject).to respond_to key
-        expect(subject.send(key)).to be subject.columns[key]
+        expect(subject.send(key)).to eql subject.columns[key]
       end
     end
 
     describe '#[]' do
       it 'should allow access to columns through []' do
         subject.columns.keys.each do |key|
-          expect(subject[key]).to be subject.columns[key]
+          expect(subject[key]).to eql subject.columns[key]
         end
       end
     end

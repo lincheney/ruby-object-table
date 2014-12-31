@@ -55,7 +55,7 @@ describe ObjectTable::TempView do
   describe '#columns' do
     let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: 5) }
 
-    subject{ ObjectTable::View.new(table){ col1 > 2 } }
+    subject{ ObjectTable::TempView.new(table){ col1 > 2 } }
 
     it 'should mask the columns of the parent table' do
       mask = table.col1 > 2
@@ -67,12 +67,12 @@ describe ObjectTable::TempView do
 
   describe '#[]=' do
     let(:table) { ObjectTable.new(col1: [0, 1, 2, 3], col2: 5) }
-    let(:view)  { ObjectTable::View.new(table){ col1 > 0 } }
+    let(:view)  { ObjectTable::TempView.new(table){ col1 > 0 } }
 
     let(:column){ :col1 }
     let(:value) { [10, 20, 30] }
 
-    subject{ view.columns; view[column] = value; view }
+    subject{ view[column] = value; view }
 
     context 'on an existing column' do
       it 'should assign values to the column' do

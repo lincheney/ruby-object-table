@@ -1,6 +1,5 @@
 require 'forwardable'
 require_relative 'view_methods'
-require_relative 'basic_grid'
 require_relative 'masked_column'
 require_relative 'view'
 
@@ -22,6 +21,7 @@ class ObjectTable::TempView
     col = @parent.get_column(name)
     ObjectTable::MaskedColumn.mask(col, indices) if col
   end
+  alias_method :[], :get_column
 
   def set_column(name, value)
     col = (@parent.get_column(name) or add_column(name))
@@ -29,6 +29,7 @@ class ObjectTable::TempView
     col[mask] = value
 #     ObjectTable::MaskedColumn.mask(col, mask)
   end
+  alias_method :[]=, :set_column
 
   def indices
     NArray.int(@parent.nrows).indgen![@parent.apply &@filter]
