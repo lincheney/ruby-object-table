@@ -18,9 +18,9 @@ describe ObjectTable::TempView do
       subject.apply(&block)
     end
 
-    it 'should call apply on the view' do
+    it 'should call #apply on the view' do
       view = spy('view')
-      expect(ObjectTable::View).to receive(:new).and_return(view)
+      expect(ObjectTable::View).to receive(:new){ view }
       expect(view).to receive(:apply) do |&b|
         expect(b).to be block
       end
@@ -41,9 +41,9 @@ describe ObjectTable::TempView do
       subject.group(&block)
     end
 
-    it 'should call group on the view' do
+    it 'should call #group on the view' do
       view = spy('view')
-      expect(ObjectTable::View).to receive(:new).and_return(view)
+      expect(ObjectTable::View).to receive(:new){ view }
       expect(view).to receive(:group) do |&b|
         expect(b).to be block
       end

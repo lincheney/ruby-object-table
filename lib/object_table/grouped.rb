@@ -3,30 +3,25 @@ require_relative 'view'
 class ObjectTable::Grouped
   DEFAULT_VALUE_PREFIX = 'v_'
 
-  def initialize(parent, *keys, &grouper)
+  def initialize(parent, names, groups)
     @parent = parent
-    @grouper = grouper
-
-    keys.each do |k|
-      raise "Expected a ObjectTable::Column, got #{k}" unless k.is_a?(ObjectTable::Column)
-    end
-    @keys = keys
+    @names = names
+    @groups = groups
   end
 
   def each(&block)
-    groups.each do |k, v|
+    @groups.each do |k, v|
       ObjectTable::View.new(@parent, v).apply &block
     end
     @parent
   end
 
   def apply(&block)
-    groups
-    value_key = self.class._generate_key(DEFAULT_VALUE_PREFIX, @keys).to_sym
+    value_key = self.class._generate_name(DEFAULT_VALUE_PREFIX, @names).to_sym
 
-    data = groups.map do |k, v|
+    data = @groups.map do |k, v|
       value = ObjectTable::View.new(@parent, v).apply &block
-      keys = @keys.zip(k)
+      names = @names.zip(k)
 
       if value.is_a?(ObjectTable::TableMethods)
         value = value.columns
@@ -34,9 +29,9 @@ class ObjectTable::Grouped
 
       grid = case value
       when ObjectTable::BasicGrid
-        ObjectTable::BasicGrid[keys].merge!(value)
+        ObjectTable::BasicGrid[names].merge!(value)
       else
-        ObjectTable::BasicGrid[keys + [[value_key, value]]]
+        ObjectTable::BasicGrid[names + [[value_key, value]]]
       end
       grid._ensure_uniform_columns!
     end
@@ -44,36 +39,9 @@ class ObjectTable::Grouped
     ObjectTable.stack(*data)
   end
 
-  def groups
-    @groups ||= begin
-      groups = (0...@parent.nrows).zip(groupers).group_by{|row, value| value}
-      groups.each do |k, v|
-        groups[k] = v.map &:first
-      end
-      groups
-    end
-  end
-
-  def groupers
-    @groupers ||= begin
-      if @keys.empty?
-        groupers = @parent.instance_eval(&@grouper)
-        raise 'Groups must be a hash' unless groupers.is_a?(Hash)
-        groupers = ObjectTable::BasicGrid.new.replace groupers
-      else
-        groupers = ObjectTable::BasicGrid[@keys.map{|k| [k.name, k]}]
-      end
-
-      groupers._ensure_uniform_columns!(@parent.nrows)
-      @keys = groupers.keys
-      groupers = groupers.values.map(&:to_a).transpose
-      groupers
-    end
-  end
-
-  def self._generate_key(prefix, existing_keys)
+  def self._generate_name(prefix, existing_names)
     regex = Regexp.new(Regexp.quote(prefix) + '(\d+)')
-    i = existing_keys.map(&regex.method(:match)).compact.map{|match| match[-1].to_i}.max || -1
+    i = existing_names.map(&regex.method(:match)).compact.map{|match| match[-1].to_i}.max || -1
     "#{prefix}#{i + 1}"
   end
 

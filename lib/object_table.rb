@@ -5,6 +5,7 @@ require_relative "object_table/view"
 require_relative "object_table/temp_view"
 require_relative "object_table/column"
 require_relative "object_table/grouped"
+require_relative "object_table/temp_grouped"
 
 class ObjectTable
   include TableMethods

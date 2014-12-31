@@ -52,7 +52,7 @@ module ObjectTable::TableMethods
   end
 
   def group(*args, &block)
-    ObjectTable::Grouped.new(self, *args, &block)
+    ObjectTable::TempGrouped.new(self, *args, &block)
   end
 
   def sort_by(*keys)

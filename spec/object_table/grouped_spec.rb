@@ -4,23 +4,16 @@ require 'object_table/grouped'
 describe ObjectTable::Grouped do
   let(:table){ ObjectTable.new(col1: [1, 2, 3, 4], col2: [5, 6, 7, 8] ) }
 #     group based on parity (even vs odd)
-  let(:grouped){ ObjectTable::Grouped.new(table){ {parity: col1 % 2} } }
+  let(:names){ [:parity] }
+  let(:groups){ {[0] => even, [1] => odd} }
+  let(:grouped){ ObjectTable::Grouped.new(table, names, groups) }
 
   let(:even){ (table.col1 % 2).eq(0).where }
   let(:odd) { (table.col1 % 2).eq(1).where }
 
-  describe '#groups' do
-    subject{ grouped.groups }
-
-    it 'should return a group key => row mapping' do
-      expect(subject[[0]]).to eql even.to_a
-      expect(subject[[1]]).to eql odd.to_a
-    end
-  end
-
-  describe '#_generate_key' do
+  describe '._generate_name' do
     let(:prefix){ 'key_' }
-    subject{ ObjectTable::Grouped._generate_key(prefix, existing_keys) }
+    subject{ ObjectTable::Grouped._generate_name(prefix, existing_keys) }
 
     context 'with no matching keys' do
       let(:existing_keys){ ['a', 'b', 'c'] }
@@ -69,13 +62,13 @@ describe ObjectTable::Grouped do
 
     describe 'value column auto naming' do
       it 'should auto name the value column' do
-        grouped = ObjectTable::Grouped.new(table){ {parity: 123} }
+        grouped = ObjectTable::Grouped.new(table, names, {[123] => NArray[0, 1, 2, 3]})
         result = grouped.apply{|group| group.col1.sum}
         expect(result.v_0.to_a).to eql [table.col1.sum]
       end
 
       it 'should auto name the value column' do
-        grouped = ObjectTable::Grouped.new(table){ {v_0: 123} }
+        grouped = ObjectTable::Grouped.new(table, [:v_0], {[123] => NArray[0, 1, 2, 3]})
         result = grouped.apply{|group| group.col1.sum}
         expect(result.v_1.to_a).to eql [table.col1.sum]
       end
@@ -96,23 +89,6 @@ describe ObjectTable::Grouped do
           mean:   [even_group.col2.mean, odd_group.col2.mean],
         )
       end
-    end
-  end
-
-
-  context 'when grouping by columns' do
-    let(:table){ ObjectTable.new(key1: [0]*4 + [1]*4, key2: [0, 0, 1, 1]*2, data: 1..8 ) }
-    let(:grouped){ ObjectTable::Grouped.new(table, table.key1, table.key2) }
-
-    subject{ grouped.apply{ @R[sum: data.sum] } }
-
-    it 'should use the columns as keys' do
-      expect(subject.colnames).to match_array [:key1, :key2, :sum]
-      expect(subject.sort_by(subject.key1, subject.key2)).to eql ObjectTable.new(
-        key1: [0, 0, 1, 1],
-        key2: [0, 1, 0, 1],
-        sum:  [3, 7, 11, 15],
-      )
     end
   end
 
