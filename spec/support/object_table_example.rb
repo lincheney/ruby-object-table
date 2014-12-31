@@ -215,7 +215,7 @@ EOS
 
     it 'should have cloned columns' do
       subject.columns.each do |k, v|
-        expect(clone.columns[k]).to eql v
+        expect(clone.columns[k].to_a).to eql v.to_a
         expect(clone.columns[k]).to_not be v
       end
     end

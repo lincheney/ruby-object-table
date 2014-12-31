@@ -80,4 +80,18 @@ describe ObjectTable::MaskedColumn do
     it_behaves_like 'a parent modifier', 'mod!', 2
   end
 
+  describe '#clone' do
+    let(:clone){ subject.clone }
+
+    it 'returns a Column' do
+      expect(clone).to be_an_instance_of ObjectTable::Column
+      expect(clone).to_not be_an_instance_of ObjectTable::MaskedColumn
+    end
+
+    it 'should clone the data' do
+      expect(clone.to_a).to eql subject.to_a
+      expect(clone.name).to eql subject.name
+    end
+  end
+
 end

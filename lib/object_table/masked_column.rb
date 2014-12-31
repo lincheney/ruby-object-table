@@ -33,4 +33,10 @@ class ObjectTable::MaskedColumn < ObjectTable::Column
     end
   end
 
+  def clone
+    col = ObjectTable::Column.cast(self).clone
+    col.name = name
+    col
+  end
+
 end

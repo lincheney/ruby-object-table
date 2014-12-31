@@ -39,4 +39,9 @@ class ObjectTable::TempView
     ObjectTable::View.new @parent, indices
   end
 
+  def clone
+    cols = ObjectTable::BasicGrid[@parent.columns.map{|k, v| [k, v[indices]]}]
+    ObjectTable.new(cols)
+  end
+
 end
