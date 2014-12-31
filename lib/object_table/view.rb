@@ -17,10 +17,14 @@ class ObjectTable::View
     @columns ||= super
   end
 
-  def []=(name, value)
-    col = (@parent.columns[name] or add_column(name))
-    col[indices] = value
-    columns[name] = ObjectTable::MaskedColumn.mask(col, indices)
+  def set_column(name, value)
+    col = get_column(name)
+    unless col
+      col = add_column(name)
+      columns[name] = col
+    end
+    col[] = value
   end
+  alias_method :[]=, :set_column
 
 end

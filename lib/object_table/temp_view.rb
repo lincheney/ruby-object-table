@@ -24,16 +24,15 @@ class ObjectTable::TempView
   alias_method :[], :get_column
 
   def set_column(name, value)
-    col = (@parent.get_column(name) or add_column(name))
-    mask = indices
-    col[mask] = value
-#     ObjectTable::MaskedColumn.mask(col, mask)
+    col = @parent.get_column(name)
+    if col
+      col[indices] = value
+    else
+      col = add_column(name)
+      col[] = value
+    end
   end
   alias_method :[]=, :set_column
-
-  def indices
-    NArray.int(@parent.nrows).indgen![@parent.apply &@filter]
-  end
 
   def make_view
     ObjectTable::View.new @parent, indices
@@ -42,6 +41,32 @@ class ObjectTable::TempView
   def clone
     cols = ObjectTable::BasicGrid[@parent.columns.map{|k, v| [k, v[indices]]}]
     ObjectTable.new(cols)
+  end
+
+  def inspect(*args)
+    cache_columns{ super }
+  end
+
+  def indices
+    @indices or NArray.int(@parent.nrows).indgen![@parent.apply &@filter]
+  end
+
+  def cache_indices(&block)
+    @indices = indices
+    value = block.call()
+    @indices = nil
+    value
+  end
+
+  def columns
+    @columns or super
+  end
+
+  def cache_columns(&block)
+    @columns = columns
+    value = block.call()
+    @columns = nil
+    value
   end
 
 end
