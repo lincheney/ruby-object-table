@@ -42,7 +42,7 @@ class ObjectTable
       end
 
       raise "Don't know how to append a #{x.class}" unless x.is_a?(BasicGrid)
-      raise 'Mismatch in column names' unless colnames.sort == x.keys.sort
+      raise 'Mismatch in column names' unless (colnames | x.keys).length == colnames.length
 
       x.each do |k, v|
         v = v.to_a if v.is_a? NArray

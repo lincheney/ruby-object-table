@@ -94,6 +94,14 @@ describe ObjectTable do
         expect{subject}.to raise_error
       end
     end
+
+    context 'with differing column names' do
+      let(:others){ [ObjectTable.new(col1: 10, col2: 50), ObjectTable.new(col1: 10, col3: 50)] }
+
+      it 'should fail' do
+        expect{subject}.to raise_error
+      end
+    end
   end
 
   describe '#sort_by!' do
