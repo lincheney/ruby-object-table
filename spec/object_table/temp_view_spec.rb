@@ -17,6 +17,19 @@ describe ObjectTable::TempView do
     end
   end
 
+  context 'with nested views' do
+    let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: 5) }
+    let(:view1){ table.where{col1 > 1} }
+    let(:view2){ view1.where{col1 < 3} }
+
+    it 'should add columns correctly' do
+      view2[:col3] = 5
+      expect(view2.col3.to_a).to eql [5]
+      expect(view1.col3.to_a).to eql [5, nil]
+      expect(table.col3.to_a).to eql [nil, 5, nil]
+    end
+  end
+
   describe '#apply' do
     let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: 5) }
     let(:block){ Proc.new{col1 + 100} }
