@@ -75,6 +75,26 @@ describe ObjectTable::MaskedColumn do
   it_behaves_like 'a parent modifier', 'mul!', 56
   it_behaves_like 'a parent modifier', 'div!', 56
 
+  %w{ xor or and <= >= le ge < > gt lt % ** ne eq & | ^ to_type }.each do |op|
+    context "when performing #{op}" do
+      let(:parent)    { ObjectTable::Column.make([0, 1, 2, 3, *(4...10)], name) }
+
+      it 'should return a ObjectTable::Column' do
+        expect(subject.send(op, subject)).to be_a ObjectTable::Column
+      end
+    end
+  end
+
+  %w{ not abs -@ ~ }.each do |op|
+    context "when performing #{op}" do
+      let(:parent)    { ObjectTable::Column.make([0, 1, 2, 3, *(4...10)], name) }
+
+      it 'should return a ObjectTable::Column' do
+        expect(subject.send(op)).to be_a ObjectTable::Column
+      end
+    end
+  end
+
   context 'with real values' do
     let(:parent)    { ObjectTable::Column.make(0...10, name) }
     it_behaves_like 'a parent modifier', 'mod!', 2

@@ -42,13 +42,14 @@ class ObjectTable::Column < NArray
 
   %w{ + - * / }.each do |op|
     define_method(op) do |other|
-      self.class.make super(_refer(other)), name
+      #self.class.make super(_refer(other)), name
+      super(_refer(other))
     end
   end
 
   %w{ xor or and <= >= le ge < > gt lt % ** ne eq & | ^ to_type }.each do |op|
     define_method(op) do |other|
-      self.class.make super(other), name
+      self.class.make super(other)
     end
   end
 

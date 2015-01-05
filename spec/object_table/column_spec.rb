@@ -29,8 +29,10 @@ shared_examples 'a NArray' do |operator, unary: false|
     expect(subject.to_a).to eql expected_result.to_a
   end
 
-  it "should set the name of the result of :#{operator}" do
-    expect(subject.name).to eql x.name
+  if unary
+    it "should set the name of the result of :#{operator}" do
+      expect(subject.name).to eql x.name
+    end
   end
 end
 
