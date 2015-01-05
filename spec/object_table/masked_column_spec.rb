@@ -75,7 +75,7 @@ describe ObjectTable::MaskedColumn do
   it_behaves_like 'a parent modifier', 'mul!', 56
   it_behaves_like 'a parent modifier', 'div!', 56
 
-  %w{ xor or and <= >= le ge < > gt lt % ** ne eq & | ^ to_type }.each do |op|
+  %w{ * + / - xor or and <= >= le ge < > gt lt % ** ne eq & | ^ to_type }.each do |op|
     context "when performing '#{op}'" do
       let(:parent)    { ObjectTable::Column.make([0, 1, 2, 3, *(4...10)], name) }
 
