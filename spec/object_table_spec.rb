@@ -45,6 +45,13 @@ describe ObjectTable do
       end
     end
 
+    context 'with a range' do
+      let(:value){ 0...3 }
+      it 'should assign the range values' do
+        expect(subject.columns[:col1].to_a).to eql value.to_a
+      end
+    end
+
     context 'for a new column' do
       before do
         subject[:col3] = value
@@ -57,6 +64,13 @@ describe ObjectTable do
 
       it 'should assign the name of the column' do
         expect(subject[:col3].name).to eql :col3
+      end
+
+      context 'with a range' do
+        let(:value){ 0...3 }
+        it 'should assign the range values' do
+          expect(subject.columns[:col3].to_a).to eql value.to_a
+        end
       end
     end
   end

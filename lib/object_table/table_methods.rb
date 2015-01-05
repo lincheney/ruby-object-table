@@ -35,6 +35,8 @@ module ObjectTable::TableMethods
     unless column
       column = add_column(name)
     end
+
+    value = value.to_a if value.is_a?(Range)
     column[] = value
   end
   alias_method :[]=, :set_column
