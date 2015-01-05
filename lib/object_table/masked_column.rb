@@ -33,6 +33,12 @@ class ObjectTable::MaskedColumn < ObjectTable::Column
     end
   end
 
+  %w{ % ** to_type not abs -@ ~ }.each do |op|
+    define_method(op) do |*args|
+      ObjectTable::Column.cast super(*args)
+    end
+  end
+
   def clone
     col = ObjectTable::Column.cast(self).clone
     col.name = name
