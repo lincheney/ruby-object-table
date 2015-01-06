@@ -4,7 +4,8 @@ class ObjectTable::MaskedColumn < ObjectTable::Column
   attr_accessor :indices, :parent
 
   def self.mask(parent, indices)
-    masked = parent[indices]
+    padded_dims = [nil] * (parent.rank - 1)
+    masked = parent.slice(*padded_dims, indices)
     column = self.new(masked.typecode, *masked.shape)
     column.super_slice_assign(masked)
     column.parent = parent

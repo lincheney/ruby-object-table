@@ -1,7 +1,7 @@
 require 'narray'
 
 class ObjectTable::BasicGrid < Hash
-  ARRAY_LIKE = [Array, NArray, Range]
+  ARRAY_LIKE = [Array, Range]
 
 #   def self.[](*args)
 #     grid = super
@@ -10,8 +10,11 @@ class ObjectTable::BasicGrid < Hash
 
   def _ensure_uniform_columns!(rows = nil)
     arrays, scalars = partition{|k, v| ARRAY_LIKE.any?{|cls| v.is_a?(cls)} }
+    narrays, scalars = scalars.partition{|k, v| v.is_a?(NArray) }
 
-    unique_rows = arrays.map(&:last).map(&:size).uniq
+    unique_rows = arrays.map{|k, v| v.size}
+    unique_rows += narrays.map{|k, v| v.shape.last}
+    unique_rows = unique_rows.uniq
 
     if rows
       raise "Differing number of rows: #{unique_rows}" unless unique_rows.empty? or unique_rows == [rows]

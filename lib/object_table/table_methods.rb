@@ -81,7 +81,8 @@ module ObjectTable::TableMethods
 
       printed_columns.push [''] + (head.to_a + tail.to_a).map{|i| "#{i}: "} + ['']
       printed_columns += columns.map do |name, c|
-        [name.to_s] + c[[head, tail]].to_a.map(&:inspect) + [name.to_s]
+        padded_dims = [nil] * (c.rank - 1)
+        [name.to_s] + c.slice(*padded_dims, [head, tail]).to_a.map(&:inspect) + [name.to_s]
       end
     else
       max_section = -1

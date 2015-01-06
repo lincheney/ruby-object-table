@@ -58,6 +58,15 @@ describe ObjectTable do
       end
     end
 
+#     context 'with an NArray' do
+#       let(:value){ NArray.int(table.nrows, ) }
+
+#       it 'should assign the range values' do
+#         subject
+#         expect(table.columns[column].to_a).to eql value.to_a
+#       end
+#     end
+
     context 'for a new column' do
       let(:column) { :col3 }
 
@@ -88,7 +97,7 @@ describe ObjectTable do
 
     context 'with narray args' do
       let(:args) { ['int', 3, 4] }
-      let(:value){ NArray.float(table.nrows, 3, 4) }
+      let(:value){ NArray.float(3, 4, table.nrows) }
 
       context 'for a new column' do
         let(:column) { :col3 }
@@ -100,8 +109,8 @@ describe ObjectTable do
 
         it 'should create a column with the correct size' do
           subject
-          expect(table.columns[column].shape[0]).to eql table.nrows
-          expect(table.columns[column].shape[1..-1]).to eql args[1..-1]
+          expect(table.columns[column].shape[-1]).to eql table.nrows
+          expect(table.columns[column].shape[0...-1]).to eql args[1..-1]
         end
       end
 

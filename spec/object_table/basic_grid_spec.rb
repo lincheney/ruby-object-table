@@ -55,6 +55,26 @@ describe ObjectTable::BasicGrid do
         expect(grid[:col1]).to eql columns[:col1]
       end
     end
+
+    context 'with rank>2 narrays' do
+      context 'with the correct last dimension' do
+        let(:columns) { {col1: NArray[[1, 1], [2, 2], [3, 3]], col2: [1, 2, 3]} }
+
+        it 'should succeed' do
+          subject
+          expect(grid).to eql columns
+        end
+      end
+
+      context 'with an incorrect last dimension' do
+        let(:columns) { {col1: NArray[[1, 2, 3]], col2: [1, 2, 3]} }
+
+        it 'should succeed' do
+          expect{subject}.to raise_error
+        end
+      end
+    end
+
   end
 
 end

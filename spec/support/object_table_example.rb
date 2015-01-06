@@ -87,6 +87,29 @@ EOS
 EOS
       end
     end
+
+    context 'with matrixy columns' do
+      let(:table){ ObjectTable.new(col1: 1..100, col2: NArray.to_na([[1, 2]] * 100) ) }
+
+      it 'should handle the matrixy columns' do
+        table = subject.inspect.lines[1..-1].join + "\n"
+        expect(table).to eql <<EOS
+        col1    col2
+   0:      1  [1, 2]
+   1:      2  [1, 2]
+   2:      3  [1, 2]
+   3:      4  [1, 2]
+   4:      5  [1, 2]
+--------------------
+  95:     96  [1, 2]
+  96:     97  [1, 2]
+  97:     98  [1, 2]
+  98:     99  [1, 2]
+  99:    100  [1, 2]
+        col1    col2
+EOS
+      end
+    end
   end
 
   describe 'column methods' do
