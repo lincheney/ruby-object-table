@@ -32,6 +32,10 @@ class ObjectTable
     columns[name] = col
   end
 
+  def pop_column(name)
+    columns.delete name
+  end
+
   def stack!(*others)
     new_values = Hash.new{ [] }
 

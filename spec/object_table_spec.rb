@@ -75,6 +75,24 @@ describe ObjectTable do
     end
   end
 
+  describe '#pop_column' do
+    let(:table)   { ObjectTable.new(col1: [1, 2, 3], col2: 5) }
+    let(:name)    { :col2 }
+
+    subject{ table.pop_column(name) }
+
+    it 'should remove the column' do
+      subject
+      expect(table.colnames).to_not include name
+      expect(table.columns).to_not include name
+    end
+
+    it 'should return the column' do
+      column = table[name]
+      expect(subject).to be column
+    end
+  end
+
   describe '.stack' do
     let(:others) do
       [
