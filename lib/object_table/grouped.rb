@@ -3,6 +3,15 @@ require_relative 'view'
 class ObjectTable::Grouped
   DEFAULT_VALUE_PREFIX = 'v_'
 
+  class Group < ObjectTable::View
+    attr_reader :_keys
+
+    def initialize(parent, keys, value)
+      super(parent, value)
+      @_keys = keys
+    end
+  end
+
   def initialize(parent, names, groups)
     @parent = parent
     @names = names
@@ -11,7 +20,8 @@ class ObjectTable::Grouped
 
   def each(&block)
     @groups.each do |k, v|
-      ObjectTable::View.new(@parent, v).apply &block
+      names = @names.zip(k)
+      Group.new(@parent, Hash[names], v).apply &block
     end
     @parent
   end
@@ -20,8 +30,8 @@ class ObjectTable::Grouped
     value_key = self.class._generate_name(DEFAULT_VALUE_PREFIX, @names).to_sym
 
     data = @groups.map do |k, v|
-      value = ObjectTable::View.new(@parent, v).apply &block
       names = @names.zip(k)
+      value = Group.new(@parent, Hash[names], v).apply &block
 
       if value.is_a?(ObjectTable::TableMethods)
         value = value.columns

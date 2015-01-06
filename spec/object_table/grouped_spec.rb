@@ -43,6 +43,26 @@ describe ObjectTable::Grouped do
 
       expect(groups).to match_array [even_group, odd_group]
     end
+
+    it 'should give access to the keys' do
+      keys = []
+      grouped.each do |group|
+        keys << _keys
+      end
+
+      expect(keys).to match_array [{parity: 0}, {parity: 1}]
+    end
+
+    it 'should give access to the correct key' do
+      keys = []
+      correct_keys = []
+      grouped.each do |group|
+        keys << [_keys[:parity]]
+        correct_keys << (self.col1 % 2).uniq.to_a
+      end
+
+      expect(keys).to match_array(correct_keys)
+    end
   end
 
   describe '#apply' do
