@@ -32,11 +32,16 @@ module ObjectTable::TableMethods
 
   def set_column(name, value, *args)
     column = columns[name]
+    value = value.to_a if value.is_a?(Range)
+
     unless column
+      if (value.is_a?(Array) or value.is_a?(NArray)) and args.empty?
+        value =  NArray.to_na(value)
+        args = [value.typecode] + value.shape[0...-1]
+      end
       column = add_column(name, *args)
     end
 
-    value = value.to_a if value.is_a?(Range)
     column[] = value
   end
   alias_method :[]=, :set_column

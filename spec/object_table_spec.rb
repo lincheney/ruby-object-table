@@ -58,15 +58,6 @@ describe ObjectTable do
       end
     end
 
-#     context 'with an NArray' do
-#       let(:value){ NArray.int(table.nrows, ) }
-
-#       it 'should assign the range values' do
-#         subject
-#         expect(table.columns[column].to_a).to eql value.to_a
-#       end
-#     end
-
     context 'for a new column' do
       let(:column) { :col3 }
 
@@ -89,9 +80,13 @@ describe ObjectTable do
         end
       end
 
-      it 'should create an object column by default' do
-        subject
-        expect(table.columns[column].typecode).to eql NArray.object(0).typecode
+      context 'with an NArray' do
+        let(:value){ NArray.int(3, 4, table.nrows) }
+
+        it 'should use the narray parameters' do
+          subject
+          expect(table.columns[column].to_a).to eql value.to_a
+        end
       end
     end
 
