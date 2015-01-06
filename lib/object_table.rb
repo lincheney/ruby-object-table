@@ -26,8 +26,8 @@ class ObjectTable
     end
   end
 
-  def add_column(name)
-    col = ObjectTable::Column.object(nrows)
+  def add_column(name, typecode='object', *args)
+    col = ObjectTable::Column.new(typecode, nrows, *args)
     col.name = name
     columns[name] = col
   end

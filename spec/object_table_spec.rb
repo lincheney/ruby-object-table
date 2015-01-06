@@ -16,63 +16,97 @@ describe ObjectTable do
     end
   end
 
-  describe '#[]=' do
+  context '#set_column' do
     let(:value){ [4, 5, 6] }
-    subject{ ObjectTable.new(col1: [1, 2, 3], col2: 5) }
+    let(:args) { [] }
+    let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: 5) }
 
-    before do
-      subject[:col1] = value
-    end
+    let(:column) { table.colnames[0] }
+
+    subject{ table.set_column(column, value, *args) }
 
     it 'should allow assigning columns' do
-      expect(subject.columns[:col1].to_a).to eql value
+      subject
+      expect(table.columns[column].to_a).to eql value
     end
 
     it 'should coerce the value to a column' do
-      expect(subject.columns[:col1]).to be_a ObjectTable::Column
+      subject
+      expect(table.columns[column]).to be_a ObjectTable::Column
     end
 
     context 'with the wrong length' do
+      let(:value) { [1, 2] }
       it 'should fail' do
-        expect{subject[:col1] = [1, 2]}.to raise_error
+        expect{subject}.to raise_error
       end
     end
 
     context 'with a scalar' do
       let(:value){ 10 }
       it 'should fill the column with that value' do
-        expect(subject.columns[:col1].to_a).to eql ([value] * subject.nrows)
+        subject
+        expect(table.columns[column].to_a).to eql ([value] * table.nrows)
       end
     end
 
     context 'with a range' do
       let(:value){ 0...3 }
       it 'should assign the range values' do
-        expect(subject.columns[:col1].to_a).to eql value.to_a
+        subject
+        expect(table.columns[column].to_a).to eql value.to_a
       end
     end
 
     context 'for a new column' do
-      before do
-        subject[:col3] = value
-      end
+      let(:column) { :col3 }
 
       it 'should create a new column' do
-        expect(subject.columns).to include :col3
-        expect(subject.columns[:col3].to_a).to eql value
+        subject
+        expect(table.columns).to include column
+        expect(table.columns[column].to_a).to eql value
       end
 
       it 'should assign the name of the column' do
-        expect(subject[:col3].name).to eql :col3
+        subject
+        expect(table[column].name).to eql column
       end
 
       context 'with a range' do
         let(:value){ 0...3 }
         it 'should assign the range values' do
-          expect(subject.columns[:col3].to_a).to eql value.to_a
+          subject
+          expect(table.columns[column].to_a).to eql value.to_a
         end
       end
+
+      it 'should create an object column by default' do
+        subject
+        expect(table.columns[column].typecode).to eql NArray.object(0).typecode
+      end
     end
+
+    context 'with narray args' do
+      let(:args) { ['int', 3, 4] }
+      let(:value){ NArray.float(table.nrows, 3, 4) }
+
+      context 'for a new column' do
+        let(:column) { :col3 }
+
+        it 'should create a column with the typecode' do
+          subject
+          expect(table.columns[column].typecode).to eql NArray.new(*args).typecode
+        end
+
+        it 'should create a column with the correct size' do
+          subject
+          expect(table.columns[column].shape[0]).to eql table.nrows
+          expect(table.columns[column].shape[1..-1]).to eql args[1..-1]
+        end
+      end
+
+    end
+
   end
 
   describe '#pop_column' do
