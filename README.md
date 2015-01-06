@@ -10,42 +10,16 @@ Uses NArrays (https://github.com/masa16/narray) for storing data.
 Just pass a hash of columns into the constructor.
 You can use vectors types (Array, NArray, Range) or scalars (basically anything else).
 
-```ruby
->>> ObjectTable.new(a: [1, 2, 3], b: ['array', 'of', 'strings'], c: :a_repeated_scalar)
- => ObjectTable(3, 3)
-       a          b                   c
-  0:   1    "array"  :a_repeated_scalar
-  1:   2       "of"  :a_repeated_scalar
-  2:   3  "strings"  :a_repeated_scalar
-       a          b                   c 
-```
-
-### With vector types
+### Initialising with vector types
 
 ```ruby
-# with data in arrays
->>> ObjectTable.new(a: [1, 2, 3], b: [4, 5, 6])
- => ObjectTable(3, 2)
-       a  b
-  0:   1  4
-  1:   2  5
-  2:   3  6
-       a  b
-
-# ... or narrays
->>> ObjectTable.new(a: NArray[1, 2, 3], b: NArray[4, 5, 6])
-
-# ... or ranges
->>> ObjectTable.new(a: 1..3, b: 4..6)
-
-# ... or a mixture
->>> ObjectTable.new(a: [1, 2, 3], b: NArray[4, 5, 6], c: 7..9)
+>>> ObjectTable.new(array: [1, 2, 3], narray: NArray[4, 5, 6], range: 7..9)
  => ObjectTable(3, 3)
-       a  b  c                                       
-  0:   1  4  7                                       
-  1:   2  5  8                                       
-  2:   3  6  9                                       
-       a  b  c
+       array  narray  range
+  0:       1       4      7
+  1:       2       5      8
+  2:       3       6      9
+       array  narray  range 
 
 # columns with uneven lengths gives an error
 >>> ObjectTable.new(a: [1, 2, 3], b: [4, 5, 6, 7])
@@ -63,7 +37,7 @@ With all scalar columns, a one-row table is assumed
        a  b 
 ```
 
-Otherwise the scalars are extended to match the lentgh of the vector columns
+Otherwise the scalars are extended to match the length of the vector columns
 ```ruby
 >>> ObjectTable.new(a: [1, 2, 3], b: 100)
  => ObjectTable(3, 2)
@@ -74,13 +48,20 @@ Otherwise the scalars are extended to match the lentgh of the vector columns
        a    b 
 ```
 
-### Clone
+## Methods
 
-You can also clone another object table.
+- `#ncols` returns the number of columns
+- `#nrows` returns the number of rows
+- `#colnames` returns an array of the column names
+- `#clone` make a copy of the table
+- `#stack(table1, table2, ...)` appends then supplied tables
+- `#apply(&block)` evaluates `block` in the context of the table
+- `#where(&block)` filters the table
+- `#group(&block)` splits the table into groups
 
-## Columns
+### Getting columns
 
-### Extracting columns
+You can get a column by using `#[]` or using the column name as a method.
 
 ```ruby
 >>> data = ObjectTable.new(a: [1, 2, 3], b: 100, c: ['a', 'b', 'c'])
@@ -97,6 +78,8 @@ You can also clone another object table.
 ```
 
 ### Setting columns
+
+You can set/add columns by using `#[]=`.
 
 ```ruby
 >>> data = ObjectTable.new(a: [1, 2, 3], b: 100, c: ['a', 'b', 'c'])
@@ -152,14 +135,18 @@ Missing methods are vectorised over the column
 
 ### `#apply`
 
-There is a convenience method `#apply` for operating on tables.
+This is just a convenience method.
 It basically `#instance_eval`s the block passed to it.
 
 ```ruby
 >>> data = ObjectTable.new(a: [1, 2, 3], b: [4, 5, 6])
->>> data.apply{ a + b}
+
+# this is exactly the same as (data.a + data.b)
+>>> data.apply{ a + b }
  => ObjectTable::Column.int(3): 
 [ 5, 7, 9 ] 
+
+# you can use self to set/add columns
 >>> data.apply{ self[:c] = a * b }
 >>> data
  => ObjectTable(3, 3)
@@ -172,8 +159,10 @@ It basically `#instance_eval`s the block passed to it.
 
 ## Filtering
 
-User the `#where` method and pass a block (as for `#apply`).
+Use the `#where` method and pass a filtering block.
+The block is evaluated in the context of the table (like for `#apply`).
 This creates a `TempView` which syncs with the parent table.
+This means any changes made to the parent also affect the view.
 
 ```ruby
 >>> data = ObjectTable.new(a: 0...5, b: 5...10)
@@ -186,28 +175,29 @@ This creates a `TempView` which syncs with the parent table.
        a  b 
 
 # update the parent table
->>> data[:a] = data.a.reverse
+>>> data[:b] = data.b.reverse
+# and the view gets updated too
 >>> a_lt_3
  => ObjectTable::TempView(3, 2)
        a  b
-  0:   2  7
+  0:   0  9
   1:   1  8
-  2:   0  9
+  2:   2  7
        a  b 
 
 # you can also chain #where calls
->>> data.where{ a < 3 }.where{ b > 5 }
+>>> data.where{ a < 3 }.where{ b > 7 }
  => ObjectTable::TempView(3, 2)
        a  b
-  0:   2  7
+  0:   0  9
   1:   1  8
-  2:   0  9
        a  b 
 # which is the same as
->>> data.where{ a < 3 && b > 5 }
+>>> data.where{ a < 3 && b > 7 }
 ```
 
 Changes are propagated to the parent.
+This means any changes made to the view also affect the parent.
 
 ```ruby
 >>> data.where{ a < 3 }[:b] = 100
@@ -240,6 +230,7 @@ Added columns have a default value of `nil` outside the view.
 
 ```ruby
 >>> data = ObjectTable.new(a: 0...5, b: 5...10)
+# where a < 3, c will be 5, elsewhere it will be nil
 >>> data.where{ a < 3 }[:c] = 5
 >>> data
  => ObjectTable(5, 3)
@@ -252,63 +243,52 @@ Added columns have a default value of `nil` outside the view.
        a  b    c 
 ```
 
-You can also use `#apply` on a view/filtered table.
+### Other notes
 
-```ruby
->>> data = ObjectTable.new(a: 0...5, b: 5...10)
->>> data.where{ a < 3 }.apply{ a + b }
- => ObjectTable::Column.int(3): 
-[ 5, 7, 9 ] 
+You can also use `#apply` on a view (as for a table).
 
->>> data.where{ a < 3 }.apply{ self[:c] = a + b  }
->>> data
- => ObjectTable(5, 3)
-       a  b    c
-  0:   0  5    5
-  1:   1  6    7
-  2:   2  7    9
-  3:   3  8  nil
-  4:   4  9  nil
-       a  b    c 
-```
-
-### Cloning
-
-If you want to filter a table and keep that data (i.e. without it syncing with the parent, propagating changes etc.) just use the `#clone` method.
+If you want to filter a table and keep that data (i.e. without it syncing with the parent, propagating changes etc.) just `#clone` it.
 
 ## Grouping (and aggregating)
 
-Grouping is similar to filtering, but with the `#group` method.
-You can then call `#each` to iterate through the groups or `#apply` if you want to aggregate the results into a table.
+Use the `#group` method and pass a block that returns grouping keys.
+Then call `#each` to iterate through the groups or `#apply` to aggregate the results.
+The blocks are evaluated in the context of the table (in the case of `#apply`, the context of the group).
 
 The argument to `#group` should be a hash mapping key name => key. See the below example.
 
 ```ruby
->>> data = ObjectTable.new(a: [1] * 4 + [0] * 4, b: 0...8)
- => ObjectTable(8, 2)
-       a  b
-  0:   1  0
-  1:   1  1
-  2:   1  2
-  3:   1  3
-  4:   0  4
-  5:   0  5
-  6:   0  6
-  7:   0  7
-       a  b 
+>>> data = ObjectTable.new(name: ['John', 'Tom', 'Jim', 'Tim', 'Jack'], value: 1..5)
+         name  value
+  0:   "John"      1
+  1:    "Tom"      2
+  2:    "Jim"      3
+  3:    "Tim"      4
+  4:   "Jack"      5
+         name  value 
 
->>> data.group{ {b_odd: b % 2} }.each{ p b }
-ObjectTable::MaskedColumn.int(4): 
-[ 0, 2, 4, 6 ]
-ObjectTable::MaskedColumn.int(4): 
-[ 1, 3, 5, 7 ]
+# group by the first letter of the name and print out each group
+>>> data.group{ {initial: name.map{|n| n[0]}} }.each{ p self; puts }
+ObjectTable::View(3, 2)
+         name  value
+  0:   "John"      1
+  1:    "Jim"      3
+  2:   "John"      5
+         name  value
 
->>> data.group{ {b_odd: b % 2} }.apply{ b.sum }
+ObjectTable::View(2, 2)
+        name  value
+  0:   "Tom"      2
+  1:   "Tim"      4
+        name  value
+
+# calculate the average 'value' for each group and get the result in a table
+>>> data.group{ {initial: name.map{|n| n[0]}} }.apply{ value.mean }
  => ObjectTable(2, 2)
-       b_odd  v_0
-  0:       0   12
-  1:       1   16
-       b_odd  v_0 
+       initial  v_0                                        
+  0:       "J"  3.0                                        
+  1:       "T"  3.0                                        
+       initial  v_0
 ```
 
 ### Aggregation
@@ -317,14 +297,12 @@ Normally you can only have one aggregated column with a default name of v_0.
 You can have more columns and set column names by making a `ObjectTable` or using the @R shortcut.
 
 ```ruby
->>> data = ObjectTable.new(a: [1] * 4 + [0] * 4, b: 0...8)
-
->>> data.group{ {b_odd: b % 2} }.apply{ @R[ b_sum: b.sum, b_mean: b.mean, count: nrows, a_sum: a.sum] }
- => ObjectTable(2, 5)
-       b_odd  b_sum  b_mean  count  a_sum
-  0:       0     12     3.0      4      2
-  1:       1     16     4.0      4      2
-       b_odd  b_sum  b_mean  count  a_sum 
+>>> data.group{ {initial: name.map{|n| n[0]}} }.apply{ @R[ mean: value.mean, sum: value.sum ] }
+ => ObjectTable(2, 4)
+       initial  mean  sum                 std
+  0:       "J"   3.0    9                 2.0
+  1:       "T"   3.0    6  1.4142135623730951
+       initial  mean  sum                 std 
 ```
 
 ### Assigning to columns
@@ -332,19 +310,13 @@ You can have more columns and set column names by making a `ObjectTable` or usin
 Assigning to columns will assign by group.
 
 ```ruby
->>> data = ObjectTable.new(a: [1] * 4 + [0] * 4, b: 0...8)
-
->>> data.group{ {b_odd: b % 2} }.each{ self[:b_sum] = b.sum }
->>> data
- => ObjectTable(8, 3)
-       a  b  b_sum
-  0:   1  0     12
-  1:   1  1     16
-  2:   1  2     12
-  3:   1  3     16
-  4:   0  4     12
-  5:   0  5     16
-  6:   0  6     12
-  7:   0  7     16
-       a  b  b_sum 
+>>> data.group{ {initial: name.map{|n| n[0]}} }.each{ self[:num_same_initial] = nrows }
+ => ObjectTable(5, 3)
+         name  value  num_same_initial
+  0:   "John"      1                 3
+  1:    "Tom"      2                 2
+  2:    "Jim"      3                 3
+  3:    "Tim"      4                 2
+  4:   "John"      5                 3
+         name  value  num_same_initial 
 ```
