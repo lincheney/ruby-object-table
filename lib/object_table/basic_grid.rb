@@ -29,4 +29,5 @@ class ObjectTable::BasicGrid < Hash
 
     self
   end
+
 end

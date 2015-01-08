@@ -23,17 +23,6 @@ class ObjectTable::TempView
   end
   alias_method :[], :get_column
 
-  def set_column(name, value)
-    col = @parent.get_column(name)
-    if col
-      col[indices] = value
-    else
-      col = add_column(name)
-      col[] = value
-    end
-  end
-  alias_method :[]=, :set_column
-
   def make_view
     ObjectTable::View.new @parent, indices
   end

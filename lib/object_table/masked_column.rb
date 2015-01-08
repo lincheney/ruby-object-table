@@ -1,7 +1,7 @@
 require_relative 'column'
 
 class ObjectTable::MaskedColumn < ObjectTable::Column
-  attr_accessor :indices, :parent
+  attr_accessor :indices, :parent, :padded_dims
 
   def self.mask(parent, indices)
     padded_dims = [nil] * (parent.rank - 1)
@@ -11,6 +11,7 @@ class ObjectTable::MaskedColumn < ObjectTable::Column
     column.parent = parent
     column.indices = indices
     column.name = parent.name
+    column.padded_dims = padded_dims
     column
   end
 
@@ -22,14 +23,15 @@ class ObjectTable::MaskedColumn < ObjectTable::Column
   alias_method :super_slice_assign, :[]=
 
   def []=(*keys, value)
-    parent[indices[*keys]] = value
+    parent[*padded_dims, indices[*keys]] = value
     super
   end
 
+#   make destructive methods affect parent
   %w{ fill! indgen! indgen random! map! collect! conj! imag= mod! add! div! sbt! mul! }.each do |op|
     define_method(op) do |*args, &block|
       result = super(*args, &block)
-      parent[indices] = result
+      parent[*padded_dims, indices] = result
       result
     end
   end

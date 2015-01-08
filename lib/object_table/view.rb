@@ -1,8 +1,10 @@
+require_relative 'table_methods'
 require_relative 'view_methods'
 require_relative 'basic_grid'
 require_relative 'masked_column'
 
 class ObjectTable::View
+  include ObjectTable::TableMethods
   include ObjectTable::ViewMethods
   attr_reader :indices
 
@@ -17,14 +19,8 @@ class ObjectTable::View
     @columns ||= super
   end
 
-  def set_column(name, value)
-    col = get_column(name)
-    unless col
-      col = add_column(name)
-      columns[name] = col
-    end
-    col[] = value
+  def add_column(name, *args)
+    @columns[name] = super
   end
-  alias_method :[]=, :set_column
 
 end

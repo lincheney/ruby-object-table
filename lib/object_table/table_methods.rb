@@ -30,8 +30,8 @@ module ObjectTable::TableMethods
   def_delegator :columns, :[], :get_column
   alias_method :[], :get_column
 
-  def set_column(name, value, *args)
-    column = columns[name]
+  def set_column(name, value, *args, column: nil)
+    column ||= get_column(name)
     value = value.to_a if value.is_a?(Range)
 
     unless column

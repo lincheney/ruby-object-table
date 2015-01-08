@@ -6,7 +6,7 @@ describe ObjectTable do
   it_behaves_like 'an object table', ObjectTable
 
   describe '#initialize' do
-    let(:columns){ {} }
+    let(:columns){ {col1: [1, 2, 3], col2: NArray[4, 5, 6], col3: 7..9, col4: 10} }
     subject{ ObjectTable.new columns }
 
     it 'should convert all columns into ObjectTable::Columns' do
@@ -14,6 +14,39 @@ describe ObjectTable do
         expect(v).to be_a ObjectTable::Column
       end
     end
+
+    it 'should include all the columns' do
+      grid = ObjectTable::BasicGrid[columns]
+      grid._ensure_uniform_columns!
+
+      grid.each do |k, v|
+        expect(subject[k].to_a).to eql v.to_a
+      end
+    end
+
+    context 'with multi dimensional columns' do
+      let(:columns){ {col1: [1, 2, 3], col2: NArray[[4, 4], [5, 5], [6, 6]]} }
+
+      it 'should convert all columns into ObjectTable::Columns' do
+        subject.columns.values.each do |v|
+          expect(v).to be_a ObjectTable::Column
+        end
+      end
+
+      it 'should include all the columns' do
+        grid = ObjectTable::BasicGrid[columns]
+        grid._ensure_uniform_columns!
+
+        grid.each do |k, v|
+          expect(subject[k].to_a).to eql v.to_a
+        end
+      end
+
+      it 'should preserve the dimensions' do
+        expect(subject[:col2].shape).to eql columns[:col2].shape
+      end
+    end
+
   end
 
   context '#set_column' do

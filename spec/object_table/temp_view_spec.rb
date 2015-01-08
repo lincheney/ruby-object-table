@@ -89,23 +89,25 @@ describe ObjectTable::TempView do
     end
   end
 
-  describe '#[]=' do
+  describe '#set_column' do
     let(:table) { ObjectTable.new(col1: [0, 1, 2, 3], col2: 5) }
     let(:view)  { ObjectTable::TempView.new(table){ col1 > 0 } }
 
-    let(:column){ :col1 }
+    let(:column){ :col2 }
     let(:value) { [10, 20, 30] }
+    let(:args)  { [] }
 
-    subject{ view[column] = value; view }
+    subject{ view.set_column(column, value, *args) }
 
     context 'on an existing column' do
       it 'should assign values to the column' do
-        expect(subject.columns[column].to_a).to eql value
+        subject
+        expect(view.columns[column].to_a).to eql value
       end
 
       it 'should not modify anything outside the view' do
         subject
-        expect(table.columns[column].to_a).to eql [0] + value
+        expect(table.columns[column].to_a).to eql [5] + value
       end
 
     end
@@ -113,13 +115,24 @@ describe ObjectTable::TempView do
     context 'with a scalar' do
       let(:value){ 10 }
       it 'should fill the column with that value' do
-        expect(subject.columns[column].to_a).to eql ([value] * subject.nrows)
+        subject
+        expect(view.columns[column].to_a).to eql ([value] * view.nrows)
+      end
+    end
+
+    context 'with a range' do
+      let(:value){ 0...3 }
+      it 'should assign the range values' do
+        subject
+        expect(view.columns[column].to_a).to eql value.to_a
       end
     end
 
     context 'with the wrong length' do
+      let(:value) { [1, 2] }
+
       it 'should fail' do
-        expect{subject[column] = [1, 2]}.to raise_error
+        expect{subject}.to raise_error
       end
     end
 
@@ -127,8 +140,9 @@ describe ObjectTable::TempView do
       let(:column){ :col3 }
 
       it 'should create a new column' do
-        expect(subject.columns).to include column
-        expect(subject.columns[column].to_a).to eql value
+        subject
+        expect(view.columns).to include column
+        expect(view.columns[column].to_a).to eql value
       end
 
       it 'should affect the parent table' do
@@ -136,13 +150,24 @@ describe ObjectTable::TempView do
         expect(table.columns).to include column
       end
 
-      it 'should fill values outside the view with nil' do
+      it 'should fill values outside the view with a default value' do
         subject
-        expect(table.columns[column].to_a).to eql [nil] + value
+        default = NArray.new(table.columns[column].typecode, 1)[0]
+        expect(table.columns[column].to_a).to eql [default] + value
       end
 
       it 'should assign the name of the column' do
-        expect(subject[:col3].name).to eql :col3
+        subject
+        expect(view[:col3].name).to eql :col3
+      end
+
+      context 'with an NArray' do
+        let(:value){ NArray.int(3, 4, view.nrows).random! }
+
+        it 'should use the narray parameters' do
+          subject
+          expect(view.columns[column].to_a).to eql value.to_a
+        end
       end
     end
 

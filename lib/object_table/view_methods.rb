@@ -9,8 +9,8 @@ module ObjectTable::ViewMethods
     ObjectTable::BasicGrid[@parent.columns.map{|k, v| [k, ObjectTable::MaskedColumn.mask(v, indices)]}]
   end
 
-  def add_column(name)
-    col = @parent.add_column(name)
+  def add_column(name, *args)
+    col = @parent.add_column(name, *args)
     ObjectTable::MaskedColumn.mask(col, indices)
   end
 
