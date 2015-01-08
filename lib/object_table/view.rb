@@ -1,10 +1,8 @@
-require_relative 'table_methods'
 require_relative 'view_methods'
 require_relative 'basic_grid'
 require_relative 'masked_column'
 
 class ObjectTable::View
-  include ObjectTable::TableMethods
   include ObjectTable::ViewMethods
   attr_reader :indices
 

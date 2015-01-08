@@ -57,6 +57,10 @@ module ObjectTable::TableMethods
   end
   alias_method :[]=, :set_column
 
+  def pop_column(name)
+    columns.delete name
+  end
+
   def apply(&block)
     result = instance_eval &block
     if result.is_a? ObjectTable::BasicGrid

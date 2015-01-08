@@ -14,4 +14,9 @@ module ObjectTable::ViewMethods
     ObjectTable::MaskedColumn.mask(col, indices)
   end
 
+  def pop_column(name)
+    @parent.pop_column(name)
+    super if @columns
+  end
+
 end

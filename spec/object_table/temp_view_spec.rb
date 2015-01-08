@@ -169,8 +169,46 @@ describe ObjectTable::TempView do
           expect(view.columns[column].to_a).to eql value.to_a
         end
       end
+
+       context 'when failed to add column' do
+        let(:value){ NArray[1, 2, 3] }
+
+        it 'should not have that column' do
+          expect(view).to receive(:add_column).with(column, value.typecode) do
+            view.columns[column] = ObjectTable::Column.make([0] * 10)
+            table.columns[column] = ObjectTable::Column.make([0] * 10)
+          end
+
+#           the assignment is going to chuck an error
+          subject rescue nil
+          expect(view.columns).to_not include column
+          expect(table.columns).to_not include column
+        end
+      end
+
     end
 
+  end
+
+  describe '#pop_column' do
+    let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: 5) }
+
+    let(:view) { ObjectTable::TempView.new(table){ col1 > 2 } }
+    let(:name)    { :col2 }
+
+    subject{ view.pop_column(name) }
+
+    it 'should remove the column' do
+      subject
+      expect(view.colnames).to_not include name
+      expect(view.columns).to_not include name
+    end
+
+    it 'should remove the column from the parent too' do
+      subject
+      expect(table.colnames).to_not include name
+      expect(table.columns).to_not include name
+    end
   end
 
 end
