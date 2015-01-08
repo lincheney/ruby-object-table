@@ -35,19 +35,19 @@ RSpec.shared_examples 'an object table' do |cls|
     end
 
     it 'should have a header listing the dimensions' do
-      expect(subject.inspect.lines.first).to eql "#{subject.class}(#{subject.nrows}, #{subject.ncols})\n"
+      expect(subject.inspect.lines.to_a.first).to eql "#{subject.class}(#{subject.nrows}, #{subject.ncols})\n"
     end
 
     it 'should include the column names at the top and bottom' do
-      expect(subject.inspect.lines[1].split).to eql subject.colnames.map(&:to_s)
-      expect(subject.inspect.lines[-1].split).to eql subject.colnames.map(&:to_s)
+      expect(subject.inspect.lines.to_a[1].split).to eql subject.colnames.map(&:to_s)
+      expect(subject.inspect.lines.to_a[-1].split).to eql subject.colnames.map(&:to_s)
     end
 
     context 'with few rows' do
       let(:table){ ObjectTable.new(col1: 1..10, col2: 5) }
 
       it 'should include all the rows' do
-        table = subject.inspect.lines[1..-1].join + "\n"
+        table = subject.inspect.lines.to_a[1..-1].join + "\n"
         expect(table).to eql <<EOS
        col1  col2
   0:      1     5
@@ -69,7 +69,7 @@ EOS
       let(:table){ ObjectTable.new(col1: 1..100, col2: 5) }
 
       it 'should only include the top and bottom 5 rows' do
-        table = subject.inspect.lines[1..-1].join + "\n"
+        table = subject.inspect.lines.to_a[1..-1].join + "\n"
         expect(table).to eql <<EOS
         col1  col2
    0:      1     5
@@ -92,7 +92,7 @@ EOS
       let(:table){ ObjectTable.new(col1: 1..100, col2: NArray.to_na([[1, 2]] * 100) ) }
 
       it 'should handle the matrixy columns' do
-        table = subject.inspect.lines[1..-1].join + "\n"
+        table = subject.inspect.lines.to_a[1..-1].join + "\n"
         expect(table).to eql <<EOS
         col1      col2
    0:      1  [ 1, 2 ]
@@ -114,7 +114,7 @@ EOS
         let(:table){ ObjectTable.new(col1: 1..100, col2: NArray.to_na([(0...100).to_a] * 100) ) }
 
         it 'should let NArray truncate them' do
-          table = subject.inspect.lines[1..-1].join + "\n"
+          table = subject.inspect.lines.to_a[1..-1].join + "\n"
         expect(table).to eql <<EOS
         col1                                                                           col2
    0:      1  [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, ... ]

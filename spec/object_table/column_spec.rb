@@ -9,7 +9,9 @@ shared_examples 'a column coercer' do |value|
   end
 end
 
-shared_examples 'a NArray' do |operator, unary: false|
+shared_examples 'a NArray' do |operator, options={}|
+  unary = options[:unary]
+
   let(:x){ ObjectTable::Column.make(0..10) }
   let(:y){ ObjectTable::Column.make(5..15) }
 

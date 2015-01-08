@@ -12,7 +12,7 @@ class ObjectTable::BasicGrid < Hash
     arrays, scalars = partition{|k, v| ARRAY_LIKE.any?{|cls| v.is_a?(cls)} }
     narrays, scalars = scalars.partition{|k, v| v.is_a?(NArray) }
 
-    unique_rows = arrays.map{|k, v| v.size}
+    unique_rows = arrays.map{|k, v| v.count}
     unique_rows += narrays.map{|k, v| v.shape.last}
     unique_rows = unique_rows.uniq
 

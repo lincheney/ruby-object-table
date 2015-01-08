@@ -52,10 +52,10 @@ describe ObjectTable::MaskedColumn do
   it_behaves_like 'a parent slice modifier', nil
 
 
-  shared_examples 'a parent modifier' do |method, *args, block: nil|
+  shared_examples 'a parent modifier' do |method, *args|
     let!(:original) { parent.clone }
     it "should affect the parent table on #{method}" do
-      if block
+      if defined? block
         subject.send(method, *args, &block)
       else
         subject.send(method, *args)
@@ -71,8 +71,12 @@ describe ObjectTable::MaskedColumn do
   it_behaves_like 'a parent modifier', 'fill!', 100
   it_behaves_like 'a parent modifier', 'random!'
   it_behaves_like 'a parent modifier', 'conj!'
-  it_behaves_like 'a parent modifier', 'map!', block: proc{|x| x + 1}
-  it_behaves_like 'a parent modifier', 'collect!', block: proc{|x| x + 1}
+  it_behaves_like 'a parent modifier', 'map!' do
+    let(:block) { proc{|x| x + 1} }
+  end
+  it_behaves_like 'a parent modifier', 'collect!' do
+    let(:block) { proc{|x| x + 1} }
+  end
   it_behaves_like 'a parent modifier', 'imag=', 56
   it_behaves_like 'a parent modifier', 'add!', 56
   it_behaves_like 'a parent modifier', 'sbt!', 56
