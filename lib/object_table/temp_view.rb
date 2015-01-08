@@ -34,6 +34,8 @@ class ObjectTable::TempView
 
   def inspect(*args)
     cache_columns{ super }
+  rescue NoMethodError => e
+    raise Exception.new(e)
   end
 
   def indices

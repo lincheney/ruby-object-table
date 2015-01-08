@@ -133,6 +133,16 @@ EOS
         end
       end
     end
+
+    context 'when raising a no method error' do
+      it 'should propagate it as some other exception' do
+        expect(subject).to receive(:columns){ raise NoMethodError.new('asd') }
+        expect{subject.inspect}.to raise_error do |error|
+          expect(error).to_not be_a NoMethodError
+          expect(error.message).to eql 'asd'
+        end
+      end
+    end
   end
 
   describe 'column methods' do

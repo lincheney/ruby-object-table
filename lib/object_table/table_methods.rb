@@ -130,6 +130,8 @@ module ObjectTable::TableMethods
       end
       row
     end.join("\n")
+  rescue NoMethodError => e
+    raise Exception.new(e)
   end
 
   def clone
