@@ -34,15 +34,26 @@ module ObjectTable::TableMethods
     column ||= get_column(name)
     value = value.to_a if value.is_a?(Range)
 
-    unless column
-      if (value.is_a?(Array) or value.is_a?(NArray)) and args.empty?
-        value =  NArray.to_na(value)
-        args = [value.typecode] + value.shape[0...-1]
-      end
-      column = add_column(name, *args)
+    if column
+      return (column[] = value)
     end
 
-    column[] = value
+    if (value.is_a?(Array) or value.is_a?(NArray)) and args.empty?
+      value =  NArray.to_na(value)
+      unless value.shape[-1] == nrows
+        raise ArgumentError.new("Expected size of last dimension to be #{nrows}, was #{value.shape[-1]}")
+      end
+
+      args = [value.typecode] + value.shape[0...-1]
+    end
+
+    column = add_column(name, *args)
+    begin
+      column[] = value
+    rescue Exception => e
+      pop_column(name)
+      raise e
+    end
   end
   alias_method :[]=, :set_column
 

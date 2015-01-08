@@ -121,6 +121,20 @@ describe ObjectTable do
           expect(table.columns[column].to_a).to eql value.to_a
         end
       end
+
+      context 'when failed to add column' do
+        let(:value){ NArray[1, 2, 3] }
+
+        it 'should not have that column' do
+          expect(table).to receive(:add_column).with(column, value.typecode) do
+            table.columns[column] = 12345
+          end
+
+#           the assignment is going to chuck an error
+          subject rescue nil
+          expect(table.columns).to_not include column
+        end
+      end
     end
 
     context 'with narray args' do
