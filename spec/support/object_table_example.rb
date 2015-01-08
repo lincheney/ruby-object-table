@@ -145,6 +145,22 @@ EOS
     end
   end
 
+  describe '#nrows' do
+    let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: [5, 5, 5]) }
+
+    it 'should return the number of rows' do
+      expect(table.nrows).to eql 3
+    end
+
+    context 'on an empty table' do
+      let(:table){ ObjectTable.new }
+
+      it 'should return 0' do
+        expect(table.nrows).to eql 0
+      end
+    end
+  end
+
   describe 'column methods' do
     let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: [5, 5, 5]) }
 
