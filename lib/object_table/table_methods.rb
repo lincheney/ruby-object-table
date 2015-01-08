@@ -3,6 +3,7 @@ require 'forwardable'
 module ObjectTable::TableMethods
   extend Forwardable
 
+  attr_reader :R
   def initialize
     @R = ObjectTable::BasicGrid
   end

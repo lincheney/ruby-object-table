@@ -4,11 +4,11 @@ class ObjectTable::Grouped
   DEFAULT_VALUE_PREFIX = 'v_'
 
   class Group < ObjectTable::View
-    attr_reader :_keys
+    attr_reader :K
 
     def initialize(parent, keys, value)
       super(parent, value)
-      @_keys = keys
+      @K = keys
     end
   end
 
