@@ -159,6 +159,14 @@ EOS
         expect(table.nrows).to eql 0
       end
     end
+
+    context 'on a table with empty columns' do
+      let(:table){ ObjectTable.new(a: []) }
+
+      it 'should return 0' do
+        expect(table.nrows).to eql 0
+      end
+    end
   end
 
   describe 'column methods' do

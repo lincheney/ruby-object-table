@@ -19,7 +19,7 @@ module ObjectTable::TableMethods
   end
 
   def nrows
-    columns.empty? ? 0 : columns.values.first.shape[-1]
+    columns.empty? ? 0 : (columns.values.first.shape[-1] or 0)
   end
 
   def ncols
