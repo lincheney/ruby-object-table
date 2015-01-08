@@ -8,10 +8,6 @@ class ObjectTable::TempGrouped
   def initialize(parent, *names, &grouper)
     @parent = parent
     @grouper = grouper
-
-    names.each do |k|
-      raise "Expected a ObjectTable::Column, got #{k}" unless k.is_a?(ObjectTable::Column)
-    end
     @names = names
   end
 
@@ -29,8 +25,8 @@ class ObjectTable::TempGrouped
       keys = @parent.instance_eval(&@grouper)
       raise 'Group keys must be hashes' unless keys.is_a?(Hash)
       keys = ObjectTable::BasicGrid.new.replace keys
-#     else
-#       keys = ObjectTable::BasicGrid[@names.map{|k| [k.name, k]}]
+    else
+      keys = ObjectTable::BasicGrid[@names.map{|n| [n, @parent.get_column(n)]}]
     end
 
     keys._ensure_uniform_columns!(@parent.nrows)
