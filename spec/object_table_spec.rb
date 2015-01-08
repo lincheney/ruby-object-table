@@ -153,6 +153,17 @@ describe ObjectTable do
 
     end
 
+    context 'with an empty table' do
+      let(:table) { ObjectTable.new }
+      let(:value) { [] }
+
+      context 'adding an empty column' do
+        it 'should add the column' do
+          expect(subject.columns[column].to_a).to eq value
+        end
+      end
+    end
+
   end
 
   describe '#pop_column' do

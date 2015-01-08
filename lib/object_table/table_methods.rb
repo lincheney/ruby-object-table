@@ -41,14 +41,16 @@ module ObjectTable::TableMethods
 
     if (value.is_a?(Array) or value.is_a?(NArray)) and args.empty?
       value =  NArray.to_na(value)
-      unless value.shape[-1] == nrows
-        raise ArgumentError.new("Expected size of last dimension to be #{nrows}, was #{value.shape[-1]}")
+      unless (value.shape[-1] or 0) == nrows
+        raise ArgumentError.new("Expected size of last dimension to be #{nrows}, was #{value.shape[-1].inspect}")
       end
 
       args = [value.typecode] + value.shape[0...-1]
     end
 
     column = add_column(name, *args)
+    return column if value.is_a?(NArray) and value.empty?
+
     begin
       column[] = value
     rescue Exception => e
