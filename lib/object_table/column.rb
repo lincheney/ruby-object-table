@@ -8,7 +8,11 @@ class ObjectTable::Column < NArray
     when self
       value
     when NArray
-      cast(value)
+      if value.rank <= 0
+        self.new(value.typecode, 0)
+      else
+        cast(value)
+      end
     when Range
       to_na(value.to_a)
     when Array
@@ -18,6 +22,23 @@ class ObjectTable::Column < NArray
     end
     value.name = name
     value
+  end
+
+  def slice(*)
+    self.class.make super
+  end
+
+  def [](*)
+    result = super
+    result.is_a?(NArray) ? self.class.make(result) : result
+  end
+
+  def get_rows(rows, slice=false)
+    if slice
+      slice(*([nil] * (rank - 1)), rows)
+    else
+      self[*([nil] * (rank - 1)), rows]
+    end
   end
 
   def uniq

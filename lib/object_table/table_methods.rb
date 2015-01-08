@@ -102,8 +102,13 @@ module ObjectTable::TableMethods
 
       printed_columns.push [''] + (head.to_a + tail.to_a).map{|i| "#{i}: "} + ['']
       printed_columns += columns.map do |name, c|
-        padded_dims = [nil] * (c.rank - 1)
-        [name.to_s] + c.slice(*padded_dims, [head, tail]).to_a.map(&:inspect) + [name.to_s]
+        c = c.get_rows([head, tail], true)
+        strings = c.shape[-1].times.map do |i|
+          row = c.get_rows(i)
+          row.is_a?(NArray) ? row.inspect.partition("\n")[-1].strip : row.inspect
+        end
+
+        [name.to_s] + strings + [name.to_s]
       end
     else
       max_section = -1

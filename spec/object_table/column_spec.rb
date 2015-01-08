@@ -81,6 +81,18 @@ describe ObjectTable::Column do
     end
   end
 
+  describe '#get_rows' do
+    let(:value)   { NArray.float(50, 50, 50, 50).random! }
+    let(:column)  { ObjectTable::Column.make(value) }
+    let(:index)   { 30 }
+
+    subject{ column.get_rows(index) }
+
+    it 'should retrieve the row from the last dimension' do
+      expect(subject).to eql column[nil, nil, nil, index]
+    end
+  end
+
   describe '#uniq' do
     subject{ ObjectTable::Column.make([1, 1, 2, 2, 3, 1]) }
 
