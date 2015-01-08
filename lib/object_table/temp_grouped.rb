@@ -29,8 +29,8 @@ class ObjectTable::TempGrouped
       keys = @parent.instance_eval(&@grouper)
       raise 'Group keys must be hashes' unless keys.is_a?(Hash)
       keys = ObjectTable::BasicGrid.new.replace keys
-    else
-      keys = ObjectTable::BasicGrid[@names.map{|k| [k.name, k]}]
+#     else
+#       keys = ObjectTable::BasicGrid[@names.map{|k| [k.name, k]}]
     end
 
     keys._ensure_uniform_columns!(@parent.nrows)

@@ -1,9 +1,7 @@
 require 'narray'
 
 class ObjectTable::Column < NArray
-  attr_accessor :name
-
-  def self.make(value, name = nil)
+  def self.make(value)
     value = case value
     when self
       value
@@ -20,7 +18,6 @@ class ObjectTable::Column < NArray
     else
       raise ArgumentError.new("Expected NArray or Array, got #{value.class}")
     end
-    value.name = name
     value
   end
 
@@ -42,7 +39,7 @@ class ObjectTable::Column < NArray
   end
 
   def uniq
-    self.class.make to_a.uniq, name
+    self.class.make to_a.uniq
   end
 
   def coerce_rev(other, operator)
@@ -50,12 +47,12 @@ class ObjectTable::Column < NArray
   end
 
   def method_missing(*args)
-    map{|x| x.send(*args)}
+    collect{|x| x.send(*args)}
   end
 
-  def collect(*)
-    self.class.make super, name
-  end
+#   def collect(*)
+#     self.class.make super, name
+#   end
 
   def _refer(value)
     value.is_a?(NArray) ? NArray.refer(value) : value
@@ -74,10 +71,10 @@ class ObjectTable::Column < NArray
     end
   end
 
-  %w{ not abs -@ ~ }.each do |op|
-    define_method(op) do
-      self.class.make super(), name
-    end
-  end
+#   %w{ not abs -@ ~ }.each do |op|
+#     define_method(op) do
+#       self.class.make super()
+# #     end
+#   end
 
 end

@@ -2,8 +2,7 @@ require 'object_table/masked_column'
 
 describe ObjectTable::MaskedColumn do
 
-  let(:name)      { 'abcdef' }
-  let(:parent)    { ObjectTable::Column.make([0, 1, 2, Complex(2, 3), *(4...10)], name) }
+  let(:parent)    { ObjectTable::Column.make([0, 1, 2, Complex(2, 3), *(4...10)]) }
   let(:indices)   { NArray[1, 3, 4, 6] }
   let(:other_indices) { NArray.to_na((0...parent.length).to_a - indices.to_a) }
 
@@ -20,10 +19,6 @@ describe ObjectTable::MaskedColumn do
 
     it 'should set the indices' do
       expect(subject.indices).to eql indices
-    end
-
-    it 'should have the same name as its parent' do
-      expect(subject.name).to eql parent.name
     end
 
     context 'with no indices' do
@@ -86,7 +81,7 @@ describe ObjectTable::MaskedColumn do
 
   %w{ * + / - xor or and <= >= le ge < > gt lt % ** ne eq & | ^ to_type }.each do |op|
     context "when performing '#{op}'" do
-      let(:parent)    { ObjectTable::Column.make([0, 1, 2, 3, *(4...10)], name) }
+      let(:parent)    { ObjectTable::Column.make([0, 1, 2, 3, *(4...10)]) }
 
       it 'should return a ObjectTable::Column' do
         expect(subject.send(op, subject)).to be_a ObjectTable::Column
@@ -100,7 +95,7 @@ describe ObjectTable::MaskedColumn do
 
   %w{ not abs -@ ~ }.each do |op|
     context "when performing '#{op}'" do
-      let(:parent)    { ObjectTable::Column.make([0, 1, 2, 3, *(4...10)], name) }
+      let(:parent)    { ObjectTable::Column.make([0, 1, 2, 3, *(4...10)]) }
 
       it 'should return a ObjectTable::Column' do
         expect(subject.send(op)).to be_a ObjectTable::Column
@@ -113,7 +108,7 @@ describe ObjectTable::MaskedColumn do
   end
 
   context 'with real values' do
-    let(:parent)    { ObjectTable::Column.make(0...10, name) }
+    let(:parent)    { ObjectTable::Column.make(0...10) }
     it_behaves_like 'a parent modifier', 'mod!', 2
   end
 
@@ -127,7 +122,6 @@ describe ObjectTable::MaskedColumn do
 
     it 'should clone the data' do
       expect(clone.to_a).to eql subject.to_a
-      expect(clone.name).to eql subject.name
     end
   end
 

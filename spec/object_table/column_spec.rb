@@ -10,8 +10,7 @@ shared_examples 'a column coercer' do |value|
 end
 
 shared_examples 'a NArray' do |operator, unary: false|
-  let(:name){ 'abcd' }
-  let(:x){ ObjectTable::Column.make(0..10, name) }
+  let(:x){ ObjectTable::Column.make(0..10) }
   let(:y){ ObjectTable::Column.make(5..15) }
 
   let(:x_na){ NArray.to_na((0..10).to_a) }
@@ -28,21 +27,11 @@ shared_examples 'a NArray' do |operator, unary: false|
   it "should give the correct result for :#{operator}" do
     expect(subject.to_a).to eql expected_result.to_a
   end
-
-  if unary
-    it "should set the name of the result of :#{operator}" do
-      expect(subject.name).to eql x.name
-    end
-  end
 end
 
 shared_examples 'a vectorized operator' do |method|
   it "should vectorize :#{method} over the array" do
     expect(subject.send(method).to_a).to eql subject.to_a.map{|x| x.send(method)}
-  end
-
-  it "should set the name of the result of :#{method}" do
-    expect(subject.send(method).name).to eql subject.name
   end
 end
 
@@ -71,14 +60,6 @@ describe ObjectTable::Column do
       end
     end
 
-    context 'with a name' do
-      let(:name){ 'abcd' }
-      subject{ ObjectTable::Column.make([1, 2, 3], name) }
-
-      it 'should set the name' do
-        expect(subject.name).to eql name
-      end
-    end
   end
 
   describe '#get_rows' do
@@ -101,9 +82,6 @@ describe ObjectTable::Column do
       expect(subject.uniq.to_a).to eql subject.to_a.uniq
     end
 
-    it 'should set the name of the unique-ed column' do
-      expect(subject.uniq.name).to eql subject.name
-    end
   end
 
   describe 'vectorisation' do

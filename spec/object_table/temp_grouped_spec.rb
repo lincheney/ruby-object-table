@@ -32,22 +32,22 @@ describe ObjectTable::TempGrouped do
       expect(groups[[1]]).to eql odd
     end
 
-    context 'when grouping by columns' do
-      let(:table){ ObjectTable.new(key1: [0]*4 + [1]*4, key2: [0, 0, 1, 1]*2, data: 1..8 ) }
-      let(:grouped){ ObjectTable::TempGrouped.new(table, table.key1, table.key2) }
-
-      it 'should use the columns as group names' do
-        expect(subject[0]).to eql [:key1, :key2]
-      end
-
-      it 'should use the columns as groups' do
-        groups = subject[1]
-        expect(groups[[0, 0]]).to eql (table.key1.eq(0) & table.key2.eq(0)).where
-        expect(groups[[0, 1]]).to eql (table.key1.eq(0) & table.key2.eq(1)).where
-        expect(groups[[1, 0]]).to eql (table.key1.eq(1) & table.key2.eq(0)).where
-        expect(groups[[1, 1]]).to eql (table.key1.eq(1) & table.key2.eq(1)).where
-      end
-    end
+#     context 'when grouping by columns' do
+#       let(:table){ ObjectTable.new(key1: [0]*4 + [1]*4, key2: [0, 0, 1, 1]*2, data: 1..8 ) }
+#       let(:grouped){ ObjectTable::TempGrouped.new(table, table.key1, table.key2) }
+#
+#       it 'should use the columns as group names' do
+#         expect(subject[0]).to eql [:key1, :key2]
+#       end
+#
+#       it 'should use the columns as groups' do
+#         groups = subject[1]
+#         expect(groups[[0, 0]]).to eql (table.key1.eq(0) & table.key2.eq(0)).where
+#         expect(groups[[0, 1]]).to eql (table.key1.eq(0) & table.key2.eq(1)).where
+#         expect(groups[[1, 0]]).to eql (table.key1.eq(1) & table.key2.eq(0)).where
+#         expect(groups[[1, 1]]).to eql (table.key1.eq(1) & table.key2.eq(1)).where
+#       end
+#     end
   end
 
   describe '#each' do

@@ -100,11 +100,6 @@ describe ObjectTable do
         expect(table.columns[column].to_a).to eql value
       end
 
-      it 'should assign the name of the column' do
-        subject
-        expect(table[column].name).to eql column
-      end
-
       context 'with a range' do
         let(:value){ 0...3 }
         it 'should assign the range values' do

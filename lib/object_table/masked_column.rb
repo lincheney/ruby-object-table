@@ -16,7 +16,6 @@ class ObjectTable::MaskedColumn < ObjectTable::Column
 
     column.parent = parent
     column.indices = indices
-    column.name = parent.name
     column.padded_dims = padded_dims
     column
   end
@@ -49,9 +48,7 @@ class ObjectTable::MaskedColumn < ObjectTable::Column
   end
 
   def clone
-    col = ObjectTable::Column.cast(self).clone
-    col.name = name
-    col
+    ObjectTable::Column.cast(self).clone
   end
 
 end

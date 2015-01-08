@@ -88,11 +88,6 @@ describe ObjectTable::View do
         expect(table.columns[column].to_a).to eql [default] + value
       end
 
-      it 'should assign the name of the column' do
-        subject
-        expect(view[:col3].name).to eql :col3
-      end
-
       context 'with an NArray' do
         let(:value){ NArray.int(3, 4, view.nrows).random! }
 

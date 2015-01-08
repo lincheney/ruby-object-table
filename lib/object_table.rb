@@ -22,13 +22,12 @@ class ObjectTable
     @columns = columns
 
     @columns.each do |k, v|
-      @columns[k] = Column.make(v, k)
+      @columns[k] = Column.make(v)
     end
   end
 
   def add_column(name, typecode='object', *args)
     col = ObjectTable::Column.new(typecode, *args, nrows)
-    col.name = name
     columns[name] = col
   end
 
@@ -55,7 +54,7 @@ class ObjectTable
     return self if new_values.empty?
 
     new_values.each do |k, v|
-      @columns[k] = Column.make(@columns[k].to_a + v, k)
+      @columns[k] = Column.make(@columns[k].to_a + v)
     end
     self
   end
