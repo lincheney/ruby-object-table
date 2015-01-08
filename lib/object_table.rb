@@ -43,6 +43,7 @@ class ObjectTable
       end
 
       raise "Don't know how to append a #{x.class}" unless x.is_a?(ObjectTable::BasicGrid)
+      next if x.empty?
       raise 'Mismatch in column names' unless (colnames | x.keys) == (colnames & x.keys)
 
       x.each do |k, v|

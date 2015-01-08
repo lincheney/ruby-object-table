@@ -214,6 +214,23 @@ describe ObjectTable do
         expect{subject}.to raise_error
       end
     end
+
+    context 'with empty tables' do
+      let(:others) { [ ObjectTable.new(col1: [1, 2, 3], col2: 5), ObjectTable.new ] }
+
+      it 'should ignore empty tables' do
+        expect(subject).to eql others[0]
+      end
+    end
+
+    context 'with empty grids' do
+      let(:others) { [ ObjectTable.new(col1: [1, 2, 3], col2: 5), ObjectTable::BasicGrid.new ] }
+
+      it 'should ignore empty grids' do
+        expect(subject).to eql others[0]
+      end
+    end
+
   end
 
   describe '#sort_by!' do
