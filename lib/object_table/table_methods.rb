@@ -19,7 +19,7 @@ module ObjectTable::TableMethods
   end
 
   def nrows
-    columns.values.first.length
+    columns.values.first.shape[-1]
   end
 
   def ncols

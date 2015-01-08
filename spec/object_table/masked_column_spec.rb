@@ -25,6 +25,15 @@ describe ObjectTable::MaskedColumn do
     it 'should have the same name as its parent' do
       expect(subject.name).to eql parent.name
     end
+
+    context 'with no indices' do
+      let(:indices)   { NArray.int(0) }
+
+      it 'should still work' do
+        expect{subject}.to_not raise_error
+        expect(subject.rank).to eql 0
+      end
+    end
   end
 
 

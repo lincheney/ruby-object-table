@@ -6,8 +6,14 @@ class ObjectTable::MaskedColumn < ObjectTable::Column
   def self.mask(parent, indices)
     padded_dims = [nil] * (parent.rank - 1)
     masked = parent.slice(*padded_dims, indices)
-    column = self.new(masked.typecode, *masked.shape)
-    column.super_slice_assign(masked)
+
+    if masked.rank <= 0
+      column = self.new(masked.typecode, 0)
+    else
+      column = self.new(masked.typecode, *masked.shape)
+      column.super_slice_assign(masked)
+    end
+
     column.parent = parent
     column.indices = indices
     column.name = parent.name
