@@ -22,7 +22,7 @@ class ObjectTable
     @columns = columns
 
     @columns.each do |k, v|
-      @columns[k] = Column.make(v)
+      @columns[k] = ObjectTable::Column.make(v)
     end
   end
 
@@ -38,11 +38,11 @@ class ObjectTable
       case x
       when ObjectTable::TableMethods
         x = x.columns
-      when BasicGrid
+      when ObjectTable::BasicGrid
         x._ensure_uniform_columns!
       end
 
-      raise "Don't know how to append a #{x.class}" unless x.is_a?(BasicGrid)
+      raise "Don't know how to append a #{x.class}" unless x.is_a?(ObjectTable::BasicGrid)
       raise 'Mismatch in column names' unless (colnames | x.keys).length == colnames.length
 
       x.each do |k, v|
@@ -54,7 +54,7 @@ class ObjectTable
     return self if new_values.empty?
 
     new_values.each do |k, v|
-      @columns[k] = Column.make(@columns[k].to_a + v)
+      @columns[k] = ObjectTable::Column.make(@columns[k].to_a + v)
     end
     self
   end
@@ -64,7 +64,7 @@ class ObjectTable
     base = values.shift
 
     case base
-    when BasicGrid
+    when ObjectTable::BasicGrid
       base = self.new(base.clone)
     when ObjectTable, ObjectTable::View
       base = base.clone

@@ -75,6 +75,26 @@ describe ObjectTable::BasicGrid do
       end
     end
 
+    context 'with empty narrays' do
+
+      context 'with all other columns empty' do
+        let(:columns) { {col1: [], col2: NArray[]} }
+
+        it 'should succeed' do
+          expect{subject}.to_not raise_error
+        end
+      end
+
+
+      context 'with other non-empty columns' do
+        let(:columns) { {col1: [], col2: NArray[]} }
+
+        it 'should fail' do
+          expect{subject}.to_not raise_error
+        end
+      end
+    end
+
   end
 
 end

@@ -13,7 +13,7 @@ class ObjectTable::BasicGrid < Hash
     narrays, scalars = scalars.partition{|k, v| v.is_a?(NArray) }
 
     unique_rows = arrays.map{|k, v| v.count}
-    unique_rows += narrays.map{|k, v| v.shape.last}
+    unique_rows += narrays.map{|k, v| v.shape.last or 0}
     unique_rows = unique_rows.uniq
 
     if rows
