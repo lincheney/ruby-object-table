@@ -162,6 +162,15 @@ describe ObjectTable do
           subject
           expect(table.columns[column].to_a).to eq value
         end
+
+        context 'and setting an empty array to the column' do
+          it 'should work' do
+            subject
+            expect{table[column] = []}.to_not raise_error
+            expect(table[column]).to be_empty
+          end
+        end
+
       end
     end
 

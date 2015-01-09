@@ -25,9 +25,17 @@ class ObjectTable::Column < NArray
     self.class.make super
   end
 
-  def [](*)
+  def [](*a)
     result = super
     result.is_a?(NArray) ? self.class.make(result) : result
+  end
+
+  def []=(*args)
+    if (args[-1].is_a?(Array) or args[-1].is_a?(NArray)) and args[-1].empty? and self.empty?
+      return args[-1]
+    end
+
+    super
   end
 
   def get_rows(rows, slice=false)

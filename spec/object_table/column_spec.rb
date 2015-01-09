@@ -26,10 +26,38 @@ shared_examples 'a NArray' do |operator, options={}|
     let(:expected_result){ x_na.send(operator, y_na) }
   end
 
-  it "should give the correct result for :#{operator}" do
-    expect(subject.to_a).to eql expected_result.to_a
+  describe "#{operator}" do
+    it "should give the correct result" do
+      expect(subject).to eq expected_result
+    end
+
+    it 'should return a column' do
+      expect(subject).to be_a ObjectTable::Column
+    end
   end
 end
+
+shared_examples 'NArray slicing' do |is_column, *args|
+  let(:x_na)            { NArray.to_na(x.to_a) }
+
+  %w{ [] slice }.each do |method|
+    describe "##{method}" do
+      let(:result)          { x.send(method, *args) }
+      let(:expected_result) { x_na.send(method, *args) }
+
+      it "should give the correct result" do
+        expect(result).to eq expected_result
+      end
+
+      if is_column
+        it 'should return a column' do
+          expect(result).to be_a ObjectTable::Column
+        end
+      end
+    end
+  end
+end
+
 
 shared_examples 'a vectorized operator' do |method|
   it "should vectorize :#{method} over the array" do
@@ -133,6 +161,41 @@ describe ObjectTable::Column do
     it_behaves_like 'a NArray', '-@', unary: true
     it_behaves_like 'a NArray', 'abs', unary: true
     it_behaves_like 'a NArray', 'not', unary: true
+
+  end
+
+  describe 'slicing' do
+    let(:x){ ObjectTable::Column.float(10, 10, 10).random! }
+
+    it_behaves_like 'NArray slicing', false, 0
+    it_behaves_like 'NArray slicing', true, nil
+    it_behaves_like 'NArray slicing', false, 1, 2, 3
+    it_behaves_like 'NArray slicing', true, nil, nil, 5
+    it_behaves_like 'NArray slicing', true, nil, 5, 5
+    it_behaves_like 'NArray slicing', true, nil, true, false
+    it_behaves_like 'NArray slicing', true, [1, 2, 3, 4], nil, nil
+    it_behaves_like 'NArray slicing', true, [1, 2, 3, 4], nil, [1, 2]
+    it_behaves_like 'NArray slicing', true, 3...6
+    it_behaves_like 'NArray slicing', true, nil, nil, 3...6
+    it_behaves_like 'NArray slicing', true, 6...3, nil, 3...6
+    it_behaves_like 'NArray slicing', true, NArray[1..10] > 5, nil, nil
+  end
+
+  describe "#mask" do
+    let(:x)     { ObjectTable::Column.float(10, 10, 10).random! }
+    let(:mask)  { x < 0.5 }
+
+    let(:expected_result) { NArray.to_na(x.to_a)[mask] }
+
+    subject{ x.mask(mask) }
+
+    it "should give the correct result" do
+      expect(subject).to eq expected_result
+    end
+
+    it 'should return a column' do
+      expect(subject).to be_a ObjectTable::Column
+    end
   end
 
 end
