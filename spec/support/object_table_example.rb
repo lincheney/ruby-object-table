@@ -271,10 +271,10 @@ EOS
     end
   end
 
-  describe '#group' do
+  describe '#group_by' do
     let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: 5) }
     let(:block){ Proc.new{col1 > 1} }
-    let(:grouped){ subject.group &block }
+    let(:grouped){ subject.group_by &block }
 
     it 'should return groups' do
       expect(grouped).to be_a ObjectTable::TempGrouped

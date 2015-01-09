@@ -75,8 +75,8 @@ describe 'Subclassing ObjectTable and friends' do
     end
   end
 
-  describe '#group' do
-    subject{ table.group{{gt_50: a > 50}} }
+  describe '#group_by' do
+    subject{ table.group_by{{gt_50: a > 50}} }
 
     describe '#each' do
       let(:groups) do

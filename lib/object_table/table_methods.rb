@@ -81,7 +81,7 @@ module ObjectTable::TableMethods
     self.class::Table::View.new(self, &block)
   end
 
-  def group(*args, &block)
+  def group_by(*args, &block)
     ObjectTable::TempGrouped.new(self, *args, &block)
   end
 
