@@ -72,7 +72,7 @@ module ObjectTable::TableMethods
   def apply(&block)
     result = instance_eval &block
     if result.is_a? ObjectTable::BasicGrid
-      result = ObjectTable.new(result)
+      result = self.class::Table.new(result)
     end
     result
   end
@@ -88,7 +88,7 @@ module ObjectTable::TableMethods
   def sort_by(*keys)
     sort_index = _get_sort_index(keys)
     cols = ObjectTable::BasicGrid[columns.map{|k, v| [k, v[sort_index]]}]
-    ObjectTable.new(cols)
+    self.class::Table.new(cols)
   end
 
   def method_missing(meth, *args, &block)

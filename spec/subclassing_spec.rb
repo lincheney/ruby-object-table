@@ -35,8 +35,18 @@ describe 'Subclassing ObjectTable and friends' do
   end
 
   describe '#clone' do
-    it 'should be an instance of the subclass' do
+    it 'should be an instance of the table subclass' do
       expect(table.clone).to be_a MyTable
+    end
+  end
+
+  describe '#apply' do
+    context 'with a block returning a grid' do
+      subject{ table.apply{ ObjectTable::BasicGrid[col1: [4, 5, 6]] } }
+
+      it 'should coerce to the table subclass' do
+        expect(subject).to be_a MyTable
+      end
     end
   end
 
@@ -67,7 +77,7 @@ describe 'Subclassing ObjectTable and friends' do
       end
 
       describe '#clone' do
-        it 'should be an instance of the subclass' do
+        it 'should be an instance of the table subclass' do
           expect(subject.clone).to be_a MyTable
         end
       end
@@ -99,7 +109,7 @@ describe 'Subclassing ObjectTable and friends' do
       end
 
       describe '#clone' do
-        it 'should be an instance of the subclass' do
+        it 'should be an instance of the table subclass' do
           groups.each do |g|
             expect(g.clone).to be_a MyTable
           end
@@ -127,12 +137,12 @@ describe 'Subclassing ObjectTable and friends' do
         end
       end
 
-      it 'should aggregate into the subclassed table' do
+      it 'should aggregate into a subclassed table' do
         expect(subject.apply{nil}).to be_a MyTable
       end
 
       describe '#clone' do
-        it 'should be an instance of the subclass' do
+        it 'should be an instance of the table subclass' do
           groups.each do |g|
             expect(g.clone).to be_a MyTable
           end
@@ -141,6 +151,14 @@ describe 'Subclassing ObjectTable and friends' do
 
     end
 
+  end
+
+  describe '#sort_by' do
+    let(:sorted){ table.sort_by(table.b) }
+
+    it 'should return an instance of the table subclass' do
+      expect(sorted).to be_a MyTable
+    end
   end
 
 end
