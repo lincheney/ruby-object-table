@@ -476,14 +476,12 @@ The act of subclassing itself is easy, but any methods you add won't be availabl
 NoMethodError: undefined method `a_plus_b' for #<ObjectTable::View:0x000000011d4dd0>
 ```
 
-To make it work, you'll need to subclass `View`, `StaticView` and `Group` too. Then set the `Table` constant on each. The easiest way is just to include a module.
+To make it work, you'll need to subclass `View`, `StaticView` and `Group` too and assign those subclasses under your ObjectTable subclass.
+The easiest way is just to include a module with your common methods.
 
 ```ruby
 >>> class WorkingTable < ObjectTable
       module Mixin
-        # this mixin will set the Table constant on each of the subclasses
-        Table = WorkingTable
-
         def a_plus_b
           a + b
         end

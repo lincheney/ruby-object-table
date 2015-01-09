@@ -12,8 +12,6 @@ describe 'Subclassing ObjectTable and friends' do
 
   class MyTable < ObjectTable
     module Mixin
-      Table = MyTable
-
       def a_plus_b
         a + b
       end

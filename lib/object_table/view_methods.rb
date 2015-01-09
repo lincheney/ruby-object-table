@@ -1,9 +1,11 @@
 require 'forwardable'
 require_relative 'table_methods'
+require_relative 'table_child'
 
 module ObjectTable::ViewMethods
   extend Forwardable
   include ObjectTable::TableMethods
+  include ObjectTable::TableChild
 
   def columns
     ObjectTable::BasicGrid[@parent.columns.map{|k, v| [k, ObjectTable::MaskedColumn.mask(v, indices)]}]

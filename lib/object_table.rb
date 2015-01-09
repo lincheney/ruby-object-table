@@ -84,4 +84,21 @@ class ObjectTable
     self
   end
 
+
+  def __static_view_cls__
+    self.class::StaticView
+  end
+
+  def __view_cls__
+    self.class::View
+  end
+
+  def __group_cls__
+    self.class::Group
+  end
+
+  def __table_cls__
+    self.class
+  end
+
 end
