@@ -2,11 +2,12 @@ require 'object_table/masked_column'
 
 describe ObjectTable::MaskedColumn do
 
-  let(:parent)    { ObjectTable::Column.make([0, 1, 2, Complex(2, 3), *(4...10)]) }
+  let(:parent)    { ObjectTable::Column.float(10).random! }
   let(:indices)   { NArray[1, 3, 4, 6] }
   let(:other_indices) { NArray.to_na((0...parent.length).to_a - indices.to_a) }
+  let(:masked)    { ObjectTable::MaskedColumn.mask(parent, indices) }
 
-  subject{ ObjectTable::MaskedColumn.mask(parent, indices) }
+  subject{ masked }
 
   describe '.mask' do
     it 'should mask the parent' do
@@ -42,101 +43,85 @@ describe ObjectTable::MaskedColumn do
   end
 
 
-  shared_examples 'a parent slice modifier' do |slice|
+  shared_examples '#[]=' do |slice|
     let(:value) { 1000 }
     let!(:original){ parent.clone }
     let(:slice){ slice }
 
-    it "should modify the parent with a #{slice.class} slice" do
-      subject[slice] = value
-      expect(parent[indices].to_a).to eql subject.to_a
-      expect(parent[other_indices].to_a).to eql original[other_indices].to_a
+    context "slicing with a #{slice.class}" do
+
+      it "should modify the parent" do
+        subject[slice] = value
+        expect(parent[indices].to_a).to eql subject.to_a
+        expect(parent[other_indices].to_a).to eql original[other_indices].to_a
+      end
+
+      context 'without a parent' do
+        subject{ ObjectTable::MaskedColumn[1, 2, 3, 4] }
+
+        it 'should still work' do
+          expect{subject[slice] = value}.to_not raise_error
+        end
+      end
+
     end
   end
 
-  it_behaves_like 'a parent slice modifier', 0
-  it_behaves_like 'a parent slice modifier', NArray.cast([1, 0, 0, 1], 'byte')
-  it_behaves_like 'a parent slice modifier', 1...4
-  it_behaves_like 'a parent slice modifier', [0, 2]
-  it_behaves_like 'a parent slice modifier', true
-  it_behaves_like 'a parent slice modifier', nil
+  include_examples '#[]=', 0
+  include_examples '#[]=', NArray.cast([1, 0, 0, 1], 'byte')
+  include_examples '#[]=', 1...4
+  include_examples '#[]=', [0, 2]
+  include_examples '#[]=', true
+  include_examples '#[]=', nil
 
 
-  shared_examples 'a parent modifier' do |method, *args|
+  shared_examples 'destructive methods' do |method, *args|
     let!(:original) { parent.clone }
-    it "should affect the parent table on #{method}" do
+
+    let(:perform) do
       if defined? block
         subject.send(method, *args, &block)
       else
         subject.send(method, *args)
       end
+    end
 
+    it "#{method} should affect the parent" do
+      perform
       expect(parent[indices].to_a).to eql subject.to_a
       expect(parent[other_indices].to_a).to eql original[other_indices].to_a
     end
+
+    context 'without a parent' do
+      subject{ ObjectTable::MaskedColumn[1, 2, 3, 4] }
+
+      it "#{method} should still work" do
+        expect{perform}.to_not raise_error
+      end
+    end
   end
 
-  it_behaves_like 'a parent modifier', 'indgen!'
-  it_behaves_like 'a parent modifier', 'indgen'
-  it_behaves_like 'a parent modifier', 'fill!', 100
-  it_behaves_like 'a parent modifier', 'random!'
-  it_behaves_like 'a parent modifier', 'conj!'
-  it_behaves_like 'a parent modifier', 'map!' do
+  include_examples 'destructive methods', 'indgen!'
+  include_examples 'destructive methods', 'indgen'
+  include_examples 'destructive methods', 'fill!', 100
+  include_examples 'destructive methods', 'random!'
+  include_examples 'destructive methods', 'mod!', 2
+  include_examples 'destructive methods', 'add!', 56
+  include_examples 'destructive methods', 'sbt!', 56
+  include_examples 'destructive methods', 'mul!', 56
+  include_examples 'destructive methods', 'div!', 56
+  include_examples 'destructive methods', 'map!' do
     let(:block) { proc{|x| x + 1} }
   end
-  it_behaves_like 'a parent modifier', 'collect!' do
+  include_examples 'destructive methods', 'collect!' do
     let(:block) { proc{|x| x + 1} }
   end
-  it_behaves_like 'a parent modifier', 'imag=', 56
-  it_behaves_like 'a parent modifier', 'add!', 56
-  it_behaves_like 'a parent modifier', 'sbt!', 56
-  it_behaves_like 'a parent modifier', 'mul!', 56
-  it_behaves_like 'a parent modifier', 'div!', 56
 
-  %w{ * + / - xor or and <= >= le ge < > gt lt % ** ne eq & | ^ to_type }.each do |op|
-    context "when performing '#{op}'" do
-      let(:parent)    { ObjectTable::Column.make([0, 1, 2, 3, *(4...10)]) }
+  context 'with complex numbers' do
+    let(:parent)    { ObjectTable::Column.complex(10).indgen! }
 
-      it 'should return a ObjectTable::Column' do
-        expect(subject.send(op, subject)).to be_a ObjectTable::Column
-      end
-
-      it 'should not be a masked' do
-        expect(subject.send(op, subject)).to_not be_a ObjectTable::MaskedColumn
-      end
-    end
-  end
-
-  %w{ not abs -@ ~ floor ceil round to_f to_i to_object }.each do |op|
-    describe "##{op}" do
-      let(:parent)    { ObjectTable::Column.make([0, 1, 2, 3, *(4...10)]) }
-
-      it 'should return a ObjectTable::Column' do
-        expect(subject.send(op)).to be_a ObjectTable::Column
-      end
-
-      it 'should not be a masked' do
-        expect(subject.send(op)).to_not be_a ObjectTable::MaskedColumn
-      end
-    end
-  end
-
-  describe '#collect' do
-    let(:parent)    { ObjectTable::Column.make([0, 1, 2, 3, *(4...10)]) }
-    let(:block)     { Proc.new{|i| i * 5} }
-
-    it 'should return a ObjectTable::Column' do
-      expect(subject.collect &block).to be_a ObjectTable::Column
-    end
-
-    it 'should not be a masked' do
-      expect(subject.collect &block).to_not be_a ObjectTable::MaskedColumn
-    end
-  end
-
-  context 'with real values' do
-    let(:parent)    { ObjectTable::Column.make(0...10) }
-    it_behaves_like 'a parent modifier', 'mod!', 2
+    include_examples 'destructive methods', 'imag=', 56
+    include_examples 'destructive methods', 'conj!'
   end
 
   describe '#clone' do

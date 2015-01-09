@@ -32,24 +32,18 @@ class ObjectTable::MaskedColumn < ObjectTable::Column
   alias_method :super_slice_assign, :[]=
 
   def []=(*keys, value)
-    unless (value.is_a?(Array) or value.is_a?(NArray)) and value.empty?
+    unless parent.nil? or ((value.is_a?(Array) or value.is_a?(NArray)) and value.empty?)
       parent[*padded_dims, indices[*keys]] = value
-      super
     end
+    super
   end
 
 #   make destructive methods affect parent
   %w{ fill! indgen! indgen random! map! collect! conj! imag= mod! add! div! sbt! mul! }.each do |op|
     define_method(op) do |*args, &block|
       result = super(*args, &block)
-      parent[*padded_dims, indices] = result
+      parent[*padded_dims, indices] = result if parent
       result
-    end
-  end
-
-  %w{ + - / * % ** to_type not abs -@ ~ ceil floor round to_i to_f to_object collect }.each do |op|
-    define_method(op) do |*args, &block|
-      ObjectTable::Column.cast super(*args, &block)
     end
   end
 
