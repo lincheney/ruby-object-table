@@ -198,4 +198,35 @@ describe ObjectTable::Column do
     end
   end
 
+  context 'when empty' do
+    let(:col) { ObjectTable::Column.float(0) }
+
+    describe '#[]=' do
+      context 'on an empty array' do
+        subject{ col[] = [] }
+
+        it 'should work' do
+          expect{subject}.to_not raise_error
+        end
+      end
+
+      context 'on an empty narray' do
+        subject{ col[] = NArray[] }
+
+        it 'should work' do
+          expect{subject}.to_not raise_error
+        end
+      end
+
+      context 'on anything else' do
+        subject{ col[] = 3 }
+
+        it 'should not work' do
+          expect{subject}.to raise_error
+        end
+      end
+
+    end
+  end
+
 end
