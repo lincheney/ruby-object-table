@@ -64,6 +64,16 @@ describe ObjectTable::Column do
 
   end
 
+  describe '#to_object' do
+    let(:column){ ObjectTable::Column[1, 2, 3] }
+
+    it 'should coerce the column into objects' do
+      expect(column.typecode).to eql NArray.int(0).typecode
+      expect(column.to_object.typecode).to eql NArray.object(0).typecode
+      expect(column.to_object).to eq column
+    end
+  end
+
   describe '#get_rows' do
     let(:value)   { NArray.float(50, 50, 50, 50).random! }
     let(:column)  { ObjectTable::Column.make(value) }

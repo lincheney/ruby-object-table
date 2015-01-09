@@ -107,7 +107,7 @@ describe ObjectTable::MaskedColumn do
     end
   end
 
-  %w{ not abs -@ ~ floor ceil round to_f to_i }.each do |op|
+  %w{ not abs -@ ~ floor ceil round to_f to_i to_object }.each do |op|
     describe "##{op}" do
       let(:parent)    { ObjectTable::Column.make([0, 1, 2, 3, *(4...10)]) }
 

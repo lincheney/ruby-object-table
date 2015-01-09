@@ -38,6 +38,10 @@ class ObjectTable::Column < NArray
     end
   end
 
+  def to_object
+    self.class.cast(self, 'object')
+  end
+
   def uniq
     self.class.make to_a.uniq
   end

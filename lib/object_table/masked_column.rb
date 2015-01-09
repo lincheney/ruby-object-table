@@ -47,7 +47,7 @@ class ObjectTable::MaskedColumn < ObjectTable::Column
     end
   end
 
-  %w{ + - / * % ** to_type not abs -@ ~ ceil floor round to_i to_f collect }.each do |op|
+  %w{ + - / * % ** to_type not abs -@ ~ ceil floor round to_i to_f to_object collect }.each do |op|
     define_method(op) do |*args, &block|
       ObjectTable::Column.cast super(*args, &block)
     end
