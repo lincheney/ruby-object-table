@@ -29,6 +29,16 @@ describe ObjectTable::MaskedColumn do
         expect(subject.rank).to eql 0
       end
     end
+
+    context 'with an empty parent' do
+      let(:parent) { NArray.int(0) }
+      let(:indices){ NArray.int(0) }
+
+      it 'should still work' do
+        expect{subject}.to_not raise_error
+        expect(subject.rank).to eql 0
+      end
+    end
   end
 
 

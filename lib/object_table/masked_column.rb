@@ -4,7 +4,11 @@ class ObjectTable::MaskedColumn < ObjectTable::Column
   attr_accessor :indices, :parent, :padded_dims
 
   def self.mask(parent, indices)
-    padded_dims = [nil] * (parent.rank - 1)
+    if parent.rank > 1
+      padded_dims = [nil] * (parent.rank - 1)
+    else
+      padded_dims = []
+    end
     masked = parent.slice(*padded_dims, indices)
 
     if masked.rank <= 0
