@@ -37,8 +37,14 @@ RSpec.shared_examples 'a table view' do |cls|
       end
     end
 
-    context 'with a matrix in a column' do
-      let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: 5) }
+    context 'with a matrixy narray in a column' do
+      let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: NArray[[1,2,3], [4, 5, 6], [7, 8, 9]] ) }
+
+      it 'should mask the matrixy narray too' do
+        indices = (table.col1 > 2).where
+        expect(subject.columns[:col2]).to eq table.col2[nil, indices]
+      end
+
     end
   end
 
