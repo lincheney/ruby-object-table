@@ -464,6 +464,7 @@ The act of subclassing itself is easy, but any methods you add won't be availabl
         a + b
       end
     end
+...
 
 >>> data = BrokenTable.new(a: 1..3, b: 4..6)
 >>> data.a_plus_b
@@ -495,6 +496,7 @@ To make it work, you'll need to subclass `View`, `StaticView` and `Group` too. T
       class View < View; include Mixin; end
       class Group < Group; include Mixin; end
     end
+...
 
 >>> data = WorkingTable.new(a: 1..3, b: 4..6)
 >>> data.a_plus_b
@@ -510,6 +512,8 @@ To make it work, you'll need to subclass `View`, `StaticView` and `Group` too. T
 >>> data.group_by{{odd: a % 2}}.each do
       p "when a % 2 == #{@K[:odd]}, a + b == #{a_plus_b.to_a}"
     end
+...
+
 "when a % 2 == 1, a + b == [5, 9]"
 "when a % 2 == 0, a + b == [7]"
 ```
