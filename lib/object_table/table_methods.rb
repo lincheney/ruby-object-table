@@ -73,7 +73,7 @@ module ObjectTable::TableMethods
   end
 
   def where(&block)
-    ObjectTable::TempView.new(self, &block)
+    ObjectTable::View.new(self, &block)
   end
 
   def group(*args, &block)

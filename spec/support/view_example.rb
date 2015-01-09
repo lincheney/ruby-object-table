@@ -6,10 +6,10 @@ RSpec.shared_examples 'a table view' do |cls|
   end
 
   def _make_relevant_view(table, block)
-    if @cls == ObjectTable::TempView
+    if @cls == ObjectTable::View
       @cls.new(table, &block)
 
-    elsif @cls == ObjectTable::View
+    elsif @cls == ObjectTable::StaticView
       indices = table.apply(&block).where
       @cls.new(table, indices)
 

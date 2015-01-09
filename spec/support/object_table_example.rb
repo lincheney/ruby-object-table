@@ -9,13 +9,15 @@ RSpec.shared_examples 'an object table' do |cls|
     if @cls == ObjectTable
       table
 
-    elsif @cls == ObjectTable::TempView
+#       for views, basically add one row to the parent and mask the view
+#       so that it only includes the original rows
+    elsif @cls == ObjectTable::View
       table.stack! ObjectTable::BasicGrid[table.columns.map{|k, v| [k, v.max]}]
       column = table.colnames.first
       table[column][-1] += 1
       table.where{table[column] < table[column][-1]}
 
-    elsif @cls == ObjectTable::View
+    elsif @cls == ObjectTable::StaticView
       table.stack! ObjectTable::BasicGrid[table.columns.map{|k, v| [k, v.max]}]
       column = table.colnames.first
       table[column][-1] += 1
@@ -264,7 +266,7 @@ EOS
     let(:filtered){ subject.where &block }
 
     it 'should return a temp view' do
-      expect(filtered).to be_a ObjectTable::TempView
+      expect(filtered).to be_a ObjectTable::View
       expect(filtered.instance_eval('@filter')).to eql block
     end
   end

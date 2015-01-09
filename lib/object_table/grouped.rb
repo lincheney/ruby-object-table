@@ -1,9 +1,9 @@
-require_relative 'view'
+require_relative 'static_view'
 
 class ObjectTable::Grouped
   DEFAULT_VALUE_PREFIX = 'v_'
 
-  class Group < ObjectTable::View
+  class Group < ObjectTable::StaticView
     attr_reader :K
 
     def initialize(parent, keys, value)
