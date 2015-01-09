@@ -107,8 +107,8 @@ describe ObjectTable::MaskedColumn do
     end
   end
 
-  %w{ not abs -@ ~ }.each do |op|
-    context "when performing '#{op}'" do
+  %w{ not abs -@ ~ floor ceil round to_f to_i }.each do |op|
+    describe "##{op}" do
       let(:parent)    { ObjectTable::Column.make([0, 1, 2, 3, *(4...10)]) }
 
       it 'should return a ObjectTable::Column' do
@@ -118,6 +118,19 @@ describe ObjectTable::MaskedColumn do
       it 'should not be a masked' do
         expect(subject.send(op)).to_not be_a ObjectTable::MaskedColumn
       end
+    end
+  end
+
+  describe '#collect' do
+    let(:parent)    { ObjectTable::Column.make([0, 1, 2, 3, *(4...10)]) }
+    let(:block)     { Proc.new{|i| i * 5} }
+
+    it 'should return a ObjectTable::Column' do
+      expect(subject.collect &block).to be_a ObjectTable::Column
+    end
+
+    it 'should not be a masked' do
+      expect(subject.collect &block).to_not be_a ObjectTable::MaskedColumn
     end
   end
 
