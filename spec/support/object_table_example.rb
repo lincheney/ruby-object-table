@@ -134,6 +134,40 @@ EOS
 EOS
         end
       end
+
+      context 'with > 3 dimensions in the matrix' do
+        let(:table){ ObjectTable.new(col1: 1..100, col2: NArray.int(2, 2, 100).indgen! ) }
+
+        it 'should align the columns' do
+          table = subject.inspect.split("\n")[1..-1].map(&:rstrip).join("\n") + "\n"
+          expect(table).to eql <<EOS
+        col1              col2
+   0:      1      [ [ 0, 1 ],
+                    [ 2, 3 ] ]
+   1:      2      [ [ 4, 5 ],
+                    [ 6, 7 ] ]
+   2:      3      [ [ 8, 9 ],
+                  [ 10, 11 ] ]
+   3:      4    [ [ 12, 13 ],
+                  [ 14, 15 ] ]
+   4:      5    [ [ 16, 17 ],
+                  [ 18, 19 ] ]
+------------------------------
+  95:     96  [ [ 380, 381 ],
+                [ 382, 383 ] ]
+  96:     97  [ [ 384, 385 ],
+                [ 386, 387 ] ]
+  97:     98  [ [ 388, 389 ],
+                [ 390, 391 ] ]
+  98:     99  [ [ 392, 393 ],
+                [ 394, 395 ] ]
+  99:    100  [ [ 396, 397 ],
+                [ 398, 399 ] ]
+        col1              col2
+EOS
+        end
+      end
+
     end
 
     context 'when raising a no method error' do
