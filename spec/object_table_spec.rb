@@ -159,7 +159,8 @@ describe ObjectTable do
 
       context 'adding an empty column' do
         it 'should add the column' do
-          expect(subject.columns[column].to_a).to eq value
+          subject
+          expect(table.columns[column].to_a).to eq value
         end
       end
     end

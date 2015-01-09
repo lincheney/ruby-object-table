@@ -114,6 +114,18 @@ describe ObjectTable::View do
       end
     end
 
+    context 'with an empty view' do
+      let(:view)  { ObjectTable::View.new(table, (table.col1 < 0).where) }
+
+      context 'adding an empty column' do
+        let(:value) { [] }
+        it 'should add the column' do
+          subject
+          expect(view.columns[column].to_a).to eq value
+        end
+      end
+    end
+
   end
 
   describe '#pop_column' do

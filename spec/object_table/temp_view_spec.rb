@@ -183,6 +183,18 @@ describe ObjectTable::TempView do
 
     end
 
+    context 'with an empty view' do
+      let(:view)  { ObjectTable::TempView.new(table){col1 < 0} }
+
+      context 'adding an empty column' do
+        let(:value) { [] }
+        it 'should add the column' do
+          subject
+          expect(view.columns[column].to_a).to eq value
+        end
+      end
+    end
+
   end
 
   describe '#pop_column' do
