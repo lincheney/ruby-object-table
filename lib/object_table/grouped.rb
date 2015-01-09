@@ -1,16 +1,7 @@
-require_relative 'static_view'
+require_relative 'group'
 
 class ObjectTable::Grouped
   DEFAULT_VALUE_PREFIX = 'v_'
-
-  class Group < ObjectTable::StaticView
-    attr_reader :K
-
-    def initialize(parent, keys, value)
-      super(parent, value)
-      @K = keys
-    end
-  end
 
   def initialize(parent, names, groups)
     @parent = parent
@@ -19,19 +10,23 @@ class ObjectTable::Grouped
   end
 
   def each(&block)
+    group_cls = @parent.class::Table::Group
+
     @groups.each do |k, v|
       names = @names.zip(k)
-      Group.new(@parent, Hash[names], v).apply &block
+      group_cls.new(@parent, Hash[names], v).apply &block
     end
     @parent
   end
 
   def apply(&block)
+    table_cls = @parent.class::Table
+    group_cls = table_cls::Group
     value_key = self.class._generate_name(DEFAULT_VALUE_PREFIX, @names).to_sym
 
     data = @groups.map do |k, v|
       names = @names.zip(k)
-      value = Group.new(@parent, Hash[names], v).apply &block
+      value = group_cls.new(@parent, Hash[names], v).apply &block
 
       if value.is_a?(ObjectTable::TableMethods)
         value = value.columns
@@ -46,7 +41,7 @@ class ObjectTable::Grouped
       grid._ensure_uniform_columns!
     end
 
-    ObjectTable.stack(*data)
+    table_cls.stack(*data)
   end
 
   def self._generate_name(prefix, existing_names)

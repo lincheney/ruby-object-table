@@ -1,6 +1,11 @@
 require 'forwardable'
 
 module ObjectTable::TableMethods
+  # this line is important!! which classes to use to make Views/StaticViews/Groups
+  # are taken from this constant, e.g. Table::View
+  Table = ObjectTable
+
+
   extend Forwardable
 
   attr_reader :R
@@ -73,7 +78,7 @@ module ObjectTable::TableMethods
   end
 
   def where(&block)
-    ObjectTable::View.new(self, &block)
+    self.class::Table::View.new(self, &block)
   end
 
   def group(*args, &block)
@@ -138,7 +143,7 @@ module ObjectTable::TableMethods
 
   def clone
     cols = ObjectTable::BasicGrid[columns.map{|k, v| [k, v.clone]}]
-    ObjectTable.new(cols)
+    self.class::Table.new(cols)
   end
 
   def _get_sort_index(columns)

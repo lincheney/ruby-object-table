@@ -22,7 +22,7 @@ class ObjectTable::TempGrouped
 
   def _keys
     if @names.empty?
-      keys = @parent.instance_eval(&@grouper)
+      keys = @parent.apply(&@grouper)
       raise 'Group keys must be hashes' unless keys.is_a?(Hash)
       keys = ObjectTable::BasicGrid.new.replace keys
     else

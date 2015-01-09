@@ -55,27 +55,4 @@ describe ObjectTable::View do
     end
   end
 
-  describe '#group' do
-    let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: 5) }
-    let(:block){ Proc.new{col1 + 100} }
-
-    subject{ ObjectTable::View.new(table){ col1 > 2 } }
-
-    it 'should create a view' do
-      view = spy('view')
-      expect(ObjectTable::StaticView).to receive(:new).with(table, (table.col1 > 2).where){ view }
-      subject.group(&block)
-    end
-
-    it 'should call #group on the view' do
-      view = spy('view')
-      expect(ObjectTable::StaticView).to receive(:new){ view }
-      expect(view).to receive(:group) do |&b|
-        expect(b).to be block
-      end
-
-      subject.group(&block)
-    end
-  end
-
 end

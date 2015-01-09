@@ -1,13 +1,13 @@
 require 'forwardable'
 require_relative 'view_methods'
 require_relative 'masked_column'
-require_relative 'static_view'
 
 class ObjectTable::View
+  Table = ObjectTable
   include ObjectTable::ViewMethods
 
   extend Forwardable
-  def_delegators :make_view, :group, :apply
+  def_delegators :make_view, :apply
 
   def initialize(parent, &block)
     super()
@@ -24,12 +24,12 @@ class ObjectTable::View
   alias_method :[], :get_column
 
   def make_view
-    ObjectTable::StaticView.new @parent, indices
+    self.class::Table::StaticView.new @parent, indices
   end
 
   def clone
     cols = ObjectTable::BasicGrid[@parent.columns.map{|k, v| [k, v[indices]]}]
-    ObjectTable.new(cols)
+    self.class::Table.new(cols)
   end
 
   def inspect(*args)
