@@ -8,6 +8,43 @@ describe ObjectTable::View do
   it_behaves_like 'an object table', ObjectTable::View
   it_behaves_like 'a table view', ObjectTable::View
 
+  describe '#initialize' do
+    let(:table) { ObjectTable.new(col1: [1, 2, 3], col2: 5) }
+
+    context 'when the block takes an argument' do
+
+      it 'should not evaluate in the context of the table' do
+        rspec_context = self
+
+        view = ObjectTable::View.new(table) do |tbl|
+          receiver = eval('self', binding)
+          expect(receiver).to_not be table
+          expect(receiver).to be rspec_context
+        end
+        view.columns # call columns to make it call the block
+      end
+
+      it 'should pass the table into the block' do
+        view = ObjectTable::View.new(table) do |tbl|
+          expect(tbl).to be table
+        end
+        view.columns # call columns to make it call the block
+      end
+    end
+
+    context 'when the block takes no arguments' do
+      it 'should call the block in the context of the table' do
+        _ = self
+        view = ObjectTable::View.new(table) do
+          receiver = eval('self', binding)
+          _.expect(receiver).to _.be _.table
+        end
+        view.columns # call columns to make it call the block
+      end
+    end
+
+  end
+
   context 'with changes to the parent' do
     let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: 5) }
     subject{ ObjectTable::View.new(table){ col1 > 2 } }

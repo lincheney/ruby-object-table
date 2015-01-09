@@ -70,7 +70,12 @@ module ObjectTable::TableMethods
   end
 
   def apply(&block)
-    result = instance_eval &block
+    if block.arity == 0
+      result = instance_eval &block
+    else
+      result = block.call(self)
+    end
+
     if result.is_a? ObjectTable::BasicGrid
       result = self.class::Table.new(result)
     end

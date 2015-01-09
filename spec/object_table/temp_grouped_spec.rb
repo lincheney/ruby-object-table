@@ -9,6 +9,44 @@ describe ObjectTable::TempGrouped do
   let(:even){ (table.col1 % 2).eq(0).where }
   let(:odd) { (table.col1 % 2).eq(1).where }
 
+  describe '#initialize' do
+
+    context 'when the block takes an argument' do
+      it 'should not evaluate in the context of the table' do
+        rspec_context = self
+
+        grouped = ObjectTable::TempGrouped.new(table) do |tbl|
+          receiver = eval('self', binding)
+          expect(receiver).to_not be table
+          expect(receiver).to be rspec_context
+          {}
+        end
+        grouped._groups # call _groups to make it call the block
+      end
+
+      it 'should pass the table into the block' do
+        grouped = ObjectTable::TempGrouped.new(table) do |tbl|
+          expect(tbl).to be table
+          {}
+        end
+        grouped._groups # call _groups to make it call the block
+      end
+    end
+
+    context 'when the block takes no arguments' do
+      it 'should call the block in the context of the table' do
+        _ = self
+        grouped = ObjectTable::TempGrouped.new(table) do
+          receiver = eval('self', binding)
+          _.expect(receiver).to _.be _.table
+          {}
+        end
+        grouped._groups # call _groups to make it call the block
+      end
+    end
+
+  end
+
   context 'with changes to the parent' do
     subject{ grouped }
 

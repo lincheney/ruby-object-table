@@ -35,18 +35,39 @@ describe ObjectTable::Grouped do
     let(:even_group){ table.where{ (col1 % 2).eq(0) } }
     let(:odd_group) { table.where{ (col1 % 2).eq(1) } }
 
-    it 'should yield the groups' do
-      groups = []
-      grouped.each do |group|
-        groups << group
-      end
+    context 'when the block takes an argument' do
+      it 'should not evaluate in the context of the group' do
+        rspec_context = self
 
-      expect(groups).to match_array [even_group, odd_group]
+        grouped.each do |group|
+          receiver = eval('self', binding)
+          expect(receiver).to_not be_a ObjectTable::Group
+          expect(receiver).to be rspec_context
+        end
+      end
+    end
+
+    context 'when the block takes no arguments' do
+      it 'should call the block in the context of the group' do
+        _ = self
+        grouped.each do
+          receiver = eval('self', binding)
+          _.expect(receiver).to _.be_a ObjectTable::Group
+        end
+      end
+    end
+
+    it 'should yield the groups' do
+      groups = [even_group, odd_group]
+      grouped.each do |group|
+        expect(groups).to include group
+        groups -= [group]
+      end
     end
 
     it 'should give access to the keys' do
       keys = []
-      grouped.each do |group|
+      grouped.each do
         keys << @K
       end
 
@@ -56,7 +77,7 @@ describe ObjectTable::Grouped do
     it 'should give access to the correct key' do
       keys = []
       correct_keys = []
-      grouped.each do |group|
+      grouped.each do
         keys << [@K[:parity]]
         correct_keys << (self.col1 % 2).uniq.to_a
       end
@@ -95,7 +116,7 @@ describe ObjectTable::Grouped do
     end
 
     context 'with results that are grids' do
-      subject{ grouped.apply{|g| @R[sum: g.col1.sum, mean: g.col2.mean]} }
+      subject{ grouped.apply{ @R[sum: col1.sum, mean: col2.mean] } }
 
       it 'should return a table with the group keys' do
         expect(subject).to be_a ObjectTable
@@ -108,6 +129,30 @@ describe ObjectTable::Grouped do
           sum:    [even_group.col1.sum, odd_group.col1.sum],
           mean:   [even_group.col2.mean, odd_group.col2.mean],
         )
+      end
+    end
+
+    context 'when the block takes an argument' do
+      it 'should not evaluate in the context of the group' do
+        rspec_context = self
+
+        grouped.apply do |group|
+          receiver = eval('self', binding)
+          expect(receiver).to_not be_a ObjectTable::Group
+          expect(receiver).to be rspec_context
+          nil
+        end
+      end
+    end
+
+    context 'when the block takes no arguments' do
+      it 'should call the block in the context of the group' do
+        _ = self
+        grouped.apply do
+          receiver = eval('self', binding)
+          _.expect(receiver).to _.be_a ObjectTable::Group
+          nil
+        end
       end
     end
   end

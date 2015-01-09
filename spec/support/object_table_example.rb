@@ -240,24 +240,52 @@ EOS
   describe '#apply' do
     let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: 5) }
 
-    it 'should evaluate in the context of the table' do
+    it 'should return the results of the block' do
       expect(subject.apply{ col1 }).to eql subject.col1
-      expect(subject.apply{ col2.sum }).to eql subject.col2.sum
     end
 
     context 'with a block returning a grid' do
-      subject{ table.apply{ ObjectTable::BasicGrid[col1: [4, 5, 6]] } }
+      let(:result)  { subject.apply{ ObjectTable::BasicGrid[col1: [4, 5, 6]] } }
 
       it 'should coerce to a table' do
-        expect(subject).to be_a ObjectTable
+        expect(result).to be_a ObjectTable
       end
     end
 
     it 'should have access to a BasicGrid shortcut' do
-      result = table.apply{ @R[value: col1 + 5] }
+      result = subject.apply{ @R[value: col1 + 5] }
       expect(result).to be_a ObjectTable
-      expect(result.value).to eql (table.col1 + 5)
+      expect(result.value).to eql (subject.col1 + 5)
     end
+
+    context 'when the block takes an argument' do
+      it 'should not evaluate in the context of the table' do
+        rspec_context = self
+
+        subject.apply do |tbl|
+          receiver = eval('self', binding)
+          expect(receiver).to_not be subject
+          expect(receiver).to be rspec_context
+        end
+      end
+
+      it 'should pass the table into the block' do
+        subject.apply do |tbl|
+          expect(tbl).to eq subject
+        end
+      end
+    end
+
+    context 'when the block takes no arguments' do
+      it 'should call the block in the context of the table' do
+        _ = self
+        subject.apply do
+          receiver = eval('self', binding)
+          _.expect(receiver).to _.eq _.subject
+        end
+      end
+    end
+
   end
 
   describe '#where' do
