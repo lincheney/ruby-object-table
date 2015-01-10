@@ -39,7 +39,11 @@ class ObjectTable::Column < NArray
   end
 
   def to_object
-    self.class.cast(self, 'object')
+    to_type('object')
+  end
+
+  def to_bool
+    map{|i| i ? 1 : 0}.to_type('byte')
   end
 
   def uniq

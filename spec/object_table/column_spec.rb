@@ -102,6 +102,16 @@ describe ObjectTable::Column do
     end
   end
 
+  describe '#to_bool' do
+    let(:column){ ObjectTable::Column.cast([true, false, nil, 'abcd', 1234], 'object') }
+
+    it 'should coerce the column into objects' do
+      expect(column.typecode).to eql NArray.object(0).typecode
+      expect(column.to_bool.typecode).to eql NArray.byte(0).typecode
+      expect(column.to_bool).to eq column.map{|i| i ? 1 : 0}
+    end
+  end
+
   describe '#uniq' do
     subject{ ObjectTable::Column.make([1, 1, 2, 2, 3, 1]) }
 
