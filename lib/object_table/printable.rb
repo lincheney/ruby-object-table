@@ -1,6 +1,6 @@
 module ObjectTable::Printable
 
-  def _get_printable_column(name, column)
+  def self.get_printable_column(name, column)
     padding = [nil] * (column.rank - 1)
     rows = column.shape[-1].times.map do |i|
       row = column[*padding, i]
@@ -12,7 +12,7 @@ module ObjectTable::Printable
     [[name]] + rows + [[name]]
   end
 
-  def _get_printable_line_numbers(numbers)
+  def self.get_printable_line_numbers(numbers)
     rows = numbers.map do |i|
       ["#{i}: "]
     end
@@ -28,18 +28,18 @@ module ObjectTable::Printable
       head = (0...max_section)
       tail = ((nrows - max_section)...nrows)
 
-      printed_columns.push _get_printable_line_numbers(head.to_a + tail.to_a)
+      printed_columns.push ObjectTable::Printable.get_printable_line_numbers(head.to_a + tail.to_a)
 
       printed_columns += columns.map do |name, c|
         padding = [nil] * (c.rank - 1)
         c = c.slice(*padding, [head, tail])
-        _get_printable_column(name, c)
+        ObjectTable::Printable.get_printable_column(name, c)
       end
     else
       max_section = -1
-      printed_columns.push _get_printable_line_numbers(0...nrows)
+      printed_columns.push ObjectTable::Printable.get_printable_line_numbers(0...nrows)
       printed_columns += columns.map do |name, c|
-        _get_printable_column(name, c)
+        ObjectTable::Printable.get_printable_column(name, c)
       end
     end
 
@@ -60,6 +60,7 @@ module ObjectTable::Printable
       end
       row
     end.join("\n")
+
   rescue NoMethodError => e
     raise Exception.new(e)
   end
