@@ -38,14 +38,6 @@ class ObjectTable::Column < NArray
     super
   end
 
-  def get_rows(rows, slice=false)
-    if slice
-      slice(*([nil] * (rank - 1)), rows)
-    else
-      self[*([nil] * (rank - 1)), rows]
-    end
-  end
-
   def to_object
     self.class.cast(self, 'object')
   end
