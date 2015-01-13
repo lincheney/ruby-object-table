@@ -32,7 +32,7 @@ class ObjectTable
   end
 
   def stack!(*others)
-    new_values = Hash.new{ [] }
+    new_values = Hash[colnames.zip(ncols.times.map{[]})]
 
     others.each do |x|
       case x
@@ -47,15 +47,27 @@ class ObjectTable
       raise 'Mismatch in column names' unless (colnames | x.keys) == (colnames & x.keys)
 
       x.each do |k, v|
-        v = v.to_a if v.is_a? NArray
-        new_values[k] += v
+        new_values[k].push NArray.to_na(v)
       end
     end
 
     return self if new_values.empty?
+    new_rows = new_values.values.first.map{|x| x.shape[-1]}.reduce(:+)
+    return self unless (new_rows and new_rows != 0)
+    new_rows += nrows
 
     new_values.each do |k, v|
-      @columns[k] = ObjectTable::Column.make(@columns[k].to_a + v)
+      old_col = @columns[k]
+      new_col = ObjectTable::Column.new(old_col.typecode, *old_col.shape[0...-1], new_rows)
+      padding = [nil] * (old_col.rank - 1)
+      new_col[*padding, 0 ... old_col.shape[-1]] = old_col
+
+      row = old_col.shape[-1]
+      v.each do |x|
+        new_col[*padding, row ... (row + x.shape[-1])] = x
+        row += x.shape[-1]
+      end
+      @columns[k] = new_col
     end
     self
   end

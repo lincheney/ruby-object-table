@@ -244,6 +244,14 @@ describe ObjectTable do
       end
     end
 
+    context 'with tables with empty rows' do
+      let(:others) { [ ObjectTable.new(col1: [1, 2, 3], col2: 5), ObjectTable.new(col1: [], col2: []) ] }
+
+      it 'should ignore empty tables' do
+        expect(subject).to eql others[0]
+      end
+    end
+
     context 'with empty grids' do
       let(:others) { [ ObjectTable.new(col1: [1, 2, 3], col2: 5), ObjectTable::BasicGrid.new ] }
 
