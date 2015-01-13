@@ -5,26 +5,54 @@ class ObjectTable::Grouped
   DEFAULT_VALUE_PREFIX = 'v_'
   include ObjectTable::TableChild
 
-  def initialize(parent, names, groups)
+  def initialize(parent, *names, &grouper)
     @parent = parent
+    @grouper = grouper
     @names = names
-    @groups = groups
   end
 
+
+  def _groups
+    names, keys = _keys()
+    groups = (0...@parent.nrows).zip(keys).group_by{|row, key| key}
+    groups.each do |k, v|
+      groups[k] = NArray.to_na(v.map(&:first))
+    end
+    [names, groups]
+  end
+
+  def _keys
+    if @names.empty?
+      keys = @parent.apply(&@grouper)
+      raise 'Group keys must be hashes' unless keys.is_a?(Hash)
+      keys = ObjectTable::BasicGrid.new.replace keys
+    else
+      keys = ObjectTable::BasicGrid[@names.map{|n| [n, @parent.get_column(n)]}]
+    end
+
+    keys._ensure_uniform_columns!(@parent.nrows)
+    names = keys.keys
+    keys = keys.values.map(&:to_a).transpose
+    [names, keys]
+  end
+
+
   def each(&block)
-    @groups.each do |k, v|
-      names = @names.zip(k)
-      __group_cls__.new(@parent, Hash[names], v).apply &block
+    names, groups = _groups()
+    groups.each do |k, v|
+      keys = names.zip(k)
+      __group_cls__.new(@parent, Hash[keys], v).apply &block
     end
     @parent
   end
 
   def apply(&block)
-    value_key = self.class._generate_name(DEFAULT_VALUE_PREFIX, @names).to_sym
+    names, groups = _groups()
+    value_key = self.class._generate_name(DEFAULT_VALUE_PREFIX, names).to_sym
 
-    data = @groups.map do |k, v|
-      names = @names.zip(k)
-      value = __group_cls__.new(@parent, Hash[names], v).apply &block
+    data = groups.map do |k, v|
+      keys = names.zip(k)
+      value = __group_cls__.new(@parent, Hash[keys], v).apply &block
 
       if value.is_a?(ObjectTable::TableMethods)
         value = value.columns
@@ -32,9 +60,9 @@ class ObjectTable::Grouped
 
       grid = case value
       when ObjectTable::BasicGrid
-        ObjectTable::BasicGrid[names].merge!(value)
+        ObjectTable::BasicGrid[keys].merge!(value)
       else
-        ObjectTable::BasicGrid[names + [[value_key, value]]]
+        ObjectTable::BasicGrid[keys + [[value_key, value]]]
       end
       grid._ensure_uniform_columns!
     end

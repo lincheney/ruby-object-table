@@ -339,7 +339,7 @@ EOS
     let(:grouped){ subject.group_by &block }
 
     it 'should return groups' do
-      expect(grouped).to be_a ObjectTable::TempGrouped
+      expect(grouped).to be_a ObjectTable::Grouped
       expect(grouped.instance_eval('@grouper')).to eql block
     end
   end

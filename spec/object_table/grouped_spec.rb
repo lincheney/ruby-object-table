@@ -4,9 +4,10 @@ require 'object_table/grouped'
 describe ObjectTable::Grouped do
   let(:table){ ObjectTable.new(col1: [1, 2, 3, 4], col2: [5, 6, 7, 8] ) }
 #     group based on parity (even vs odd)
-  let(:names){ [:parity] }
-  let(:groups){ {[0] => even, [1] => odd} }
-  let(:grouped){ ObjectTable::Grouped.new(table, names, groups) }
+  let(:grouped){ ObjectTable::Grouped.new(table){ {parity: col1 % 2} } }
+
+  let(:even){ (table.col1 % 2).eq(0).where }
+  let(:odd) { (table.col1 % 2).eq(1).where }
 
   let(:even){ (table.col1 % 2).eq(0).where }
   let(:odd) { (table.col1 % 2).eq(1).where }
@@ -29,6 +30,85 @@ describe ObjectTable::Grouped do
       end
     end
 
+  end
+
+  describe '#initialize' do
+
+    context 'when the block takes an argument' do
+      it 'should not evaluate in the context of the table' do
+        rspec_context = self
+
+        grouped = ObjectTable::TempGrouped.new(table) do |tbl|
+          receiver = eval('self', binding)
+          expect(receiver).to_not be table
+          expect(receiver).to be rspec_context
+          {}
+        end
+        grouped._groups # call _groups to make it call the block
+      end
+
+      it 'should pass the table into the block' do
+        grouped = ObjectTable::TempGrouped.new(table) do |tbl|
+          expect(tbl).to be table
+          {}
+        end
+        grouped._groups # call _groups to make it call the block
+      end
+    end
+
+    context 'when the block takes no arguments' do
+      it 'should call the block in the context of the table' do
+        _ = self
+        grouped = ObjectTable::TempGrouped.new(table) do
+          receiver = eval('self', binding)
+          _.expect(receiver).to _.be _.table
+          {}
+        end
+        grouped._groups # call _groups to make it call the block
+      end
+    end
+
+  end
+
+  context 'with changes to the parent' do
+    subject{ grouped }
+
+    it 'should mirror changes to the parent' do
+      expect(subject._groups[1]).to eql ({[0] => NArray[1, 3], [1] => NArray[0, 2]})
+      table[:col1] = [2, 3, 4, 5]
+      expect(subject._groups[1]).to eql ({[0] => NArray[0, 2], [1] => NArray[1, 3]})
+    end
+  end
+
+  describe '#_groups' do
+    subject{ grouped._groups }
+
+    it 'should return the names' do
+      expect(subject[0]).to eql [:parity]
+    end
+
+    it 'should return the group key => row mapping' do
+      groups = subject[1]
+      expect(groups[[0]]).to eql even
+      expect(groups[[1]]).to eql odd
+    end
+
+    context 'when grouping by columns' do
+      let(:table){ ObjectTable.new(key1: [0]*4 + [1]*4, key2: [0, 0, 1, 1]*2, data: 1..8 ) }
+      let(:grouped){ ObjectTable::TempGrouped.new(table, :key1, :key2) }
+
+      it 'should use the columns as group names' do
+        expect(subject[0]).to eql [:key1, :key2]
+      end
+
+      it 'should use the columns as groups' do
+        groups = subject[1]
+        expect(groups[[0, 0]]).to eql (table.key1.eq(0) & table.key2.eq(0)).where
+        expect(groups[[0, 1]]).to eql (table.key1.eq(0) & table.key2.eq(1)).where
+        expect(groups[[1, 0]]).to eql (table.key1.eq(1) & table.key2.eq(0)).where
+        expect(groups[[1, 1]]).to eql (table.key1.eq(1) & table.key2.eq(1)).where
+      end
+    end
   end
 
   describe '#each' do
@@ -103,14 +183,16 @@ describe ObjectTable::Grouped do
 
     describe 'value column auto naming' do
       it 'should auto name the value column' do
-        grouped = ObjectTable::Grouped.new(table, names, {[123] => NArray[0, 1, 2, 3]})
+        grouped = ObjectTable::Grouped.new(table){{parity: 1}}
         result = grouped.apply{|group| group.col1.sum}
+        expect(result).to have_column :v_0
         expect(result.v_0.to_a).to eql [table.col1.sum]
       end
 
       it 'should auto name the value column' do
-        grouped = ObjectTable::Grouped.new(table, [:v_0], {[123] => NArray[0, 1, 2, 3]})
+        grouped = ObjectTable::Grouped.new(table){{v_0: 1}}
         result = grouped.apply{|group| group.col1.sum}
+        expect(result).to have_column :v_1
         expect(result.v_1.to_a).to eql [table.col1.sum]
       end
     end
