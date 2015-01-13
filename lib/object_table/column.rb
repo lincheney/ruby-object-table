@@ -1,6 +1,12 @@
 require 'narray'
 
 class ObjectTable::Column < NArray
+  NARRAY_ENUMERATORS = [:to_a, :collect, :map, :sort, :all?, :any?, :max, :min, :none?]
+
+  NARRAY_ENUMERATORS.each{|method| alias_method "narray_#{method}", method}
+  include Enumerable
+  NARRAY_ENUMERATORS.each{|method| alias_method method, "narray_#{method}"}
+
   def self.make(value)
     value = case value
     when self
