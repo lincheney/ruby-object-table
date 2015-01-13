@@ -22,6 +22,10 @@ module ObjectTable::Printable
 
   def inspect(max_section = 5, col_padding = 2)
     header = "#{self.class}(#{nrows}, #{ncols})\n"
+
+    return (header + "(empty table)") if ncols == 0
+    return (header + "(empty table with columns: #{colnames.join(", ")})") if nrows == 0
+
     printed_columns = []
 
     if nrows > max_section * 2

@@ -49,6 +49,24 @@ describe ObjectTable do
 
   end
 
+  describe '#inspect' do
+    context 'with an empty table' do
+      subject{ ObjectTable.new }
+      it 'should say it is empty' do
+        text = subject.inspect.split("\n")[1..-1].map(&:rstrip).join("\n")
+        expect(text).to eql "(empty table)"
+      end
+    end
+
+    context 'with table with no rows' do
+      subject{ ObjectTable.new(col1: [], col2: []) }
+      it 'should give the columns' do
+        text = subject.inspect.split("\n")[1..-1].map(&:rstrip).join("\n")
+        expect(text).to eql "(empty table with columns: col1, col2)"
+      end
+    end
+  end
+
   context '#set_column' do
     let(:value){ [4, 5, 6] }
     let(:args) { [] }

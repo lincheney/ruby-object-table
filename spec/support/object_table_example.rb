@@ -179,6 +179,7 @@ EOS
         end
       end
     end
+
   end
 
   describe '#nrows' do

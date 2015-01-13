@@ -170,4 +170,28 @@ RSpec.shared_examples 'a table view' do |cls|
     end
   end
 
+  describe '#inspect' do
+    context 'with an empty table' do
+      let(:table){ ObjectTable.new }
+      let(:block){ Proc.new{nil} }
+
+      subject{ table.where{ nil } }
+
+      it 'should say it is empty' do
+        text = subject.inspect.split("\n")[1..-1].map(&:rstrip).join("\n")
+        expect(text).to eql "(empty table)"
+      end
+    end
+
+    context 'with table with no rows' do
+      subject{ ObjectTable.new(col1: [], col2: []) }
+      let(:block){ Proc.new{nil} }
+
+      it 'should give the columns' do
+        text = subject.inspect.split("\n")[1..-1].map(&:rstrip).join("\n")
+        expect(text).to eql "(empty table with columns: col1, col2)"
+      end
+    end
+  end
+
 end
