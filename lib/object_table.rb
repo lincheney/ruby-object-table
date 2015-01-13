@@ -57,17 +57,7 @@ class ObjectTable
     new_rows += nrows
 
     new_values.each do |k, v|
-      old_col = @columns[k]
-      new_col = ObjectTable::Column.new(old_col.typecode, *old_col.shape[0...-1], new_rows)
-      padding = [nil] * (old_col.rank - 1)
-      new_col[*padding, 0 ... old_col.shape[-1]] = old_col
-
-      row = old_col.shape[-1]
-      v.each do |x|
-        new_col[*padding, row ... (row + x.shape[-1])] = x
-        row += x.shape[-1]
-      end
-      @columns[k] = new_col
+      @columns[k] = @columns[k].stack(*v)
     end
     self
   end
