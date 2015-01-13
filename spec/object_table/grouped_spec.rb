@@ -38,7 +38,7 @@ describe ObjectTable::Grouped do
       it 'should not evaluate in the context of the table' do
         rspec_context = self
 
-        grouped = ObjectTable::TempGrouped.new(table) do |tbl|
+        grouped = ObjectTable::Grouped.new(table) do |tbl|
           receiver = eval('self', binding)
           expect(receiver).to_not be table
           expect(receiver).to be rspec_context
@@ -48,7 +48,7 @@ describe ObjectTable::Grouped do
       end
 
       it 'should pass the table into the block' do
-        grouped = ObjectTable::TempGrouped.new(table) do |tbl|
+        grouped = ObjectTable::Grouped.new(table) do |tbl|
           expect(tbl).to be table
           {}
         end
@@ -59,7 +59,7 @@ describe ObjectTable::Grouped do
     context 'when the block takes no arguments' do
       it 'should call the block in the context of the table' do
         _ = self
-        grouped = ObjectTable::TempGrouped.new(table) do
+        grouped = ObjectTable::Grouped.new(table) do
           receiver = eval('self', binding)
           _.expect(receiver).to _.be _.table
           {}
@@ -95,7 +95,7 @@ describe ObjectTable::Grouped do
 
     context 'when grouping by columns' do
       let(:table){ ObjectTable.new(key1: [0]*4 + [1]*4, key2: [0, 0, 1, 1]*2, data: 1..8 ) }
-      let(:grouped){ ObjectTable::TempGrouped.new(table, :key1, :key2) }
+      let(:grouped){ ObjectTable::Grouped.new(table, :key1, :key2) }
 
       it 'should use the columns as group names' do
         expect(subject[0]).to eql [:key1, :key2]
