@@ -36,6 +36,15 @@ class ObjectTable::Grouped
     [names, keys]
   end
 
+  %w{ all? any? collect collect_concat count flat_map map none? one? }.each do |method|
+    define_method(method) do |*args, &block|
+      names, groups = _groups()
+      groups.send(method, *args) do |k, v|
+        keys = names.zip(k)
+        __group_cls__.new(@parent, Hash[keys], v).apply &block
+      end
+    end
+  end
 
   def each(&block)
     names, groups = _groups()
