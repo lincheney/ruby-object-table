@@ -85,4 +85,20 @@ class ObjectTable::Column < NArray
 # #     end
 #   end
 
+  def stack(*others)
+    columns = [self] + others
+    new_rows = columns.map{|x| x.shape[-1]}.reduce(:+)
+    new_col = self.class.new(typecode, *shape[0...-1], new_rows)
+
+    padding = [nil] * (rank - 1)
+
+    row = 0
+    columns.each do |col|
+      new_col[*padding, row ... (row + col.shape[-1])] = col
+      row += col.shape[-1]
+    end
+
+    new_col
+  end
+
 end

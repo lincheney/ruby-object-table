@@ -227,4 +227,32 @@ describe ObjectTable::Column do
     end
   end
 
+  describe '#stack' do
+    let(:columns) do
+      [
+        ObjectTable::Column.float(10, 10).random!,
+        NArray.float(10, 30).random!,
+        ObjectTable::Column.to_na([[100] * 10] * 5),
+      ]
+    end
+
+    subject{ columns[0].stack(*columns[1..-1]) }
+
+    it 'should return a column in the correct format' do
+      expect(subject).to be_a ObjectTable::Column
+      expect(subject.typecode).to eql columns[0].typecode
+    end
+
+    it 'should return a column with the correct size' do
+      expect(subject.shape[0...-1]).to eql columns[0].shape[0...-1]
+      expect(subject.shape[-1]).to eql (10 + 30 + 5)
+    end
+
+    it 'should stack the columns' do
+      expect(subject[nil, 0...10]).to eq columns[0]
+      expect(subject[nil, 10...40]).to eq columns[1]
+      expect(subject[nil, 40...45]).to eq columns[2]
+    end
+  end
+
 end
