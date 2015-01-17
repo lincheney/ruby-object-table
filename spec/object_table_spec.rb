@@ -218,7 +218,7 @@ describe ObjectTable do
         ObjectTable.new(col1: [1, 2, 3], col2: 5),
         ObjectTable.new(col1: 10, col2: 50),
         ObjectTable.new(col2: [10, 30], col1: 15).where{col2.eq 10},
-        ObjectTable::BasicGrid[col2: [1, 2], col1: [3, 4]],
+        ObjectTable::BasicGrid[col2: [1, 2], col1: 3..4],
       ]
     end
 
