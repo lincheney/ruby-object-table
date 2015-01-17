@@ -27,8 +27,7 @@ class ObjectTable::View
   end
 
   def clone
-    cols = ObjectTable::BasicGrid[@parent.columns.map{|k, v| [k, v[indices]]}]
-    __table_cls__.new(cols)
+    __table_cls__.new(columns)
   end
 
   def inspect(*args)

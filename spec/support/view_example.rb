@@ -110,7 +110,7 @@ RSpec.shared_examples 'a table view' do |cls|
       end
 
       context 'with an NArray' do
-        let(:value){ NArray.int(3, 4, view.nrows).random! }
+        let(:value){ NArray.float(3, 4, view.nrows).random! }
 
         it 'should use the narray parameters' do
           subject

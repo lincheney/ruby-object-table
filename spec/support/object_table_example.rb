@@ -345,7 +345,7 @@ EOS
     end
   end
 
-  describe '.clone' do
+  describe '#clone' do
     let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: 5) }
     let(:clone){ subject.clone }
 
@@ -360,8 +360,16 @@ EOS
 
     it 'should have cloned columns' do
       subject.columns.each do |k, v|
-        expect(clone.columns[k].to_a).to eql v.to_a
+        expect(clone.columns[k]).to eq v
         expect(clone.columns[k]).to_not be v
+      end
+    end
+
+    context 'with matrixy columns' do
+      let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: NArray.float(10, 3).random!) }
+
+      it 'should be equivalent to the original table' do
+        expect(clone).to eql subject
       end
     end
   end
