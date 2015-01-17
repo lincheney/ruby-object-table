@@ -161,6 +161,21 @@ describe ObjectTable::Grouped do
 
       expect(keys).to match_array(correct_keys)
     end
+
+    context 'with no block' do
+      it 'should return an enumerator' do
+        expect(grouped.each).to be_a Enumerator
+      end
+
+      it 'should enumerate the groups' do
+        groups = [even_group, odd_group]
+        grouped.each.each do |group|
+          expect(groups).to include group
+          groups -= [group]
+        end
+      end
+
+    end
   end
 
   describe '#apply' do
@@ -234,56 +249,6 @@ describe ObjectTable::Grouped do
         end
       end
     end
-  end
-
-  describe 'enumerators' do
-    shared_examples 'enumerator method' do |method, *args, block, _expected|
-      let(:expected){ _expected }
-
-      describe "##{method}" do
-
-        it 'should work with a block without args' do
-          result = grouped.send(method, *args){ block.call(self) }
-          if result.is_a? Array
-            expect(result).to match_array expected
-          else
-            expect(result).to eql expected
-          end
-        end
-
-        it 'should work with a block with args' do
-          result = grouped.send(method, *args, &block)
-          if result.is_a? Array
-            expect(result).to match_array expected
-          else
-            expect(result).to eql expected
-          end
-        end
-
-      end
-
-    end
-
-    it_behaves_like 'enumerator method', 'all?', lambda{|grp| grp.col1[0] == 1}, false
-    it_behaves_like 'enumerator method', 'any?', lambda{|grp| grp.col1[0] == 1}, true
-
-    it_behaves_like 'enumerator method', 'collect', lambda{|grp| grp.nrows} do
-      let(:expected){ [even.length, odd.length] }
-    end
-    it_behaves_like 'enumerator method', 'map', lambda{|grp| grp.nrows} do
-      let(:expected){ [even.length, odd.length] }
-    end
-
-    it_behaves_like 'enumerator method', 'collect_concat', lambda{|grp| grp.col1.to_a} do
-      let(:expected){ table.col1 }
-    end
-    it_behaves_like 'enumerator method', 'flat_map', lambda{|grp| grp.col1.to_a} do
-      let(:expected){ table.col1 }
-    end
-
-    it_behaves_like 'enumerator method', 'count', lambda{|grp| grp.col1[0] == 1}, 1
-    it_behaves_like 'enumerator method', 'none?', lambda{|grp| grp.col1[0] > 100}, true
-    it_behaves_like 'enumerator method', 'one?', lambda{|grp| grp.col1[0] < 100}, false
   end
 
 end

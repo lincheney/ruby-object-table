@@ -14,9 +14,9 @@ class ObjectTable::Grouped
 
   def _groups
     names, keys = _keys()
-    groups = (0...@parent.nrows).zip(keys).group_by{|row, key| key}
+    groups = keys.each_with_index.group_by(&:first)
     groups.each do |k, v|
-      groups[k] = NArray.to_na(v.map(&:first))
+      groups[k] = NArray.to_na(v.transpose[-1])
     end
     [names, groups]
   end
@@ -36,23 +36,24 @@ class ObjectTable::Grouped
     [names, keys]
   end
 
-  %w{ all? any? collect collect_concat count flat_map map none? one? }.each do |method|
-    define_method(method) do |*args, &block|
-      names, groups = _groups()
-      groups.send(method, *args) do |k, v|
+  def each(&block)
+    names, groups = _groups()
+    if block
+      groups.each do |k, v|
         keys = names.zip(k)
         __group_cls__.new(@parent, Hash[keys], v).apply &block
       end
+      return @parent
     end
-  end
 
-  def each(&block)
-    names, groups = _groups()
-    groups.each do |k, v|
-      keys = names.zip(k)
-      __group_cls__.new(@parent, Hash[keys], v).apply &block
+    Enumerator.new(groups.length) do |y|
+      groups.each do |k, v|
+        keys = names.zip(k)
+        y.yield __group_cls__.new(@parent, Hash[keys], v)
+      end
+      @parent
     end
-    @parent
+
   end
 
   def apply(&block)
