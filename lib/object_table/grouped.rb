@@ -46,7 +46,7 @@ class ObjectTable::Grouped
       return @parent
     end
 
-    Enumerator.new(groups.length) do |y|
+    Enumerator.new do |y|
       groups.each do |k, v|
         keys = names.zip(k)
         y.yield __group_cls__.new(@parent, Hash[keys], v)
