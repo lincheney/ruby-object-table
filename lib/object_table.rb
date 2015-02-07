@@ -46,7 +46,6 @@ class ObjectTable
       raise 'Mismatch in column names' unless (colnames | x.keys) == (colnames & x.keys)
 
       x.each do |k, v|
-        v = v.to_a if v.is_a?(Range)
         new_values[k].push NArray.to_na(v)
       end
     end
