@@ -38,15 +38,8 @@ class ObjectTable::Grouped
 
   def each(&block)
     names, groups = _groups()
-    if block
-      groups.each do |k, v|
-        keys = names.zip(k)
-        __group_cls__.new(@parent, Hash[keys], v)._apply_block &block
-      end
-      return @parent
-    end
 
-    Enumerator.new do |y|
+    enumerator = Enumerator.new do |y|
       groups.each do |k, v|
         keys = names.zip(k)
         y.yield __group_cls__.new(@parent, Hash[keys], v)
@@ -54,6 +47,8 @@ class ObjectTable::Grouped
       @parent
     end
 
+    return enumerator unless block
+    enumerator.each{|grp| grp._apply_block(&block)}
   end
 
   def apply(&block)
