@@ -14,9 +14,9 @@ class ObjectTable::Grouped
 
   def _groups
     names, keys = _keys()
-    groups = keys.each_with_index.group_by(&:first)
+    groups = keys.length.times.group_by{|i| keys[i]}
     groups.each do |k, v|
-      groups[k] = NArray.to_na(v.transpose[-1])
+      groups[k] = v
     end
     [names, groups]
   end
@@ -57,7 +57,7 @@ class ObjectTable::Grouped
 
     data = groups.map do |k, v|
       keys = names.zip(k)
-      value = __group_cls__.new(@parent, Hash[keys], v).apply &block
+      value = __group_cls__.new(@parent, Hash[keys], v)._apply_block &block
 
       if value.is_a?(ObjectTable::TableMethods)
         value = value.columns

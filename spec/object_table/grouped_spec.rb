@@ -71,9 +71,9 @@ describe ObjectTable::Grouped do
     subject{ grouped }
 
     it 'should mirror changes to the parent' do
-      expect(subject._groups[1]).to eql ({[0] => NArray[1, 3], [1] => NArray[0, 2]})
+      expect(subject._groups[1]).to eql ({[0] => [1, 3], [1] => [0, 2]})
       table[:col1] = [2, 3, 4, 5]
-      expect(subject._groups[1]).to eql ({[0] => NArray[0, 2], [1] => NArray[1, 3]})
+      expect(subject._groups[1]).to eql ({[0] => [0, 2], [1] => [1, 3]})
     end
   end
 
@@ -86,8 +86,8 @@ describe ObjectTable::Grouped do
 
     it 'should return the group key => row mapping' do
       groups = subject[1]
-      expect(groups[[0]]).to eql even
-      expect(groups[[1]]).to eql odd
+      expect(groups[[0]]).to eql even.to_a
+      expect(groups[[1]]).to eql odd.to_a
     end
 
     context 'when grouping by columns' do
@@ -100,10 +100,10 @@ describe ObjectTable::Grouped do
 
       it 'should use the columns as groups' do
         groups = subject[1]
-        expect(groups[[0, 0]]).to eql (table.key1.eq(0) & table.key2.eq(0)).where
-        expect(groups[[0, 1]]).to eql (table.key1.eq(0) & table.key2.eq(1)).where
-        expect(groups[[1, 0]]).to eql (table.key1.eq(1) & table.key2.eq(0)).where
-        expect(groups[[1, 1]]).to eql (table.key1.eq(1) & table.key2.eq(1)).where
+        expect(groups[[0, 0]]).to eql (table.key1.eq(0) & table.key2.eq(0)).where.to_a
+        expect(groups[[0, 1]]).to eql (table.key1.eq(0) & table.key2.eq(1)).where.to_a
+        expect(groups[[1, 0]]).to eql (table.key1.eq(1) & table.key2.eq(0)).where.to_a
+        expect(groups[[1, 1]]).to eql (table.key1.eq(1) & table.key2.eq(1)).where.to_a
       end
     end
   end
