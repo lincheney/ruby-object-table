@@ -1,6 +1,6 @@
 require_relative 'column'
 
-class ObjectTable::MaskedColumn < ObjectTable::Column
+class ObjectTable::MaskedColumn < NArray
   attr_accessor :indices, :parent, :padded_dims
 
   def self.mask(parent, indices)
@@ -48,7 +48,7 @@ class ObjectTable::MaskedColumn < ObjectTable::Column
   end
 
   def clone
-    ObjectTable::Column.cast(self).clone
+    NArray.cast(self).clone
   end
 
 end

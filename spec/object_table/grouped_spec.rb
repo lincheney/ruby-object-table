@@ -156,7 +156,7 @@ describe ObjectTable::Grouped do
       correct_keys = []
       grouped.each do
         keys << [@K[:parity]]
-        correct_keys << (self.col1 % 2).uniq.to_a
+        correct_keys << (self.col1 % 2).to_a.uniq
       end
 
       expect(keys).to match_array(correct_keys)

@@ -9,9 +9,9 @@ describe ObjectTable do
     let(:columns){ {col1: [1, 2, 3], col2: NArray[4, 5, 6], col3: 7..9, col4: 10} }
     subject{ ObjectTable.new columns }
 
-    it 'should convert all columns into ObjectTable::Columns' do
+    it 'should convert all columns into NArrays' do
       subject.columns.values.each do |v|
-        expect(v).to be_a ObjectTable::Column
+        expect(v).to be_a NArray
       end
     end
 
@@ -25,11 +25,11 @@ describe ObjectTable do
     end
 
     context 'with multi dimensional columns' do
-      let(:columns){ {col1: [1, 2, 3], col2: NArray[[4, 4], [5, 5], [6, 6]]} }
+      let(:columns){ {col1: [1, 2, 3], col2: [[4, 4], [5, 5], [6, 6]]} }
 
-      it 'should convert all columns into ObjectTable::Columns' do
+      it 'should convert all columns into NArrays' do
         subject.columns.values.each do |v|
-          expect(v).to be_a ObjectTable::Column
+          expect(v).to be_a NArray
         end
       end
 
@@ -43,7 +43,7 @@ describe ObjectTable do
       end
 
       it 'should preserve the dimensions' do
-        expect(subject[:col2].shape).to eql columns[:col2].shape
+        expect(subject[:col2].shape).to eql NArray.to_na(columns[:col2]).shape
       end
     end
 
@@ -81,9 +81,9 @@ describe ObjectTable do
       expect(table.columns[column].to_a).to eql value
     end
 
-    it 'should coerce the value to a column' do
+    it 'should coerce the value to a narray' do
       subject
-      expect(table.columns[column]).to be_a ObjectTable::Column
+      expect(table.columns[column]).to be_a NArray
     end
 
     context 'with the wrong length' do

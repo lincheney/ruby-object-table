@@ -38,6 +38,7 @@ module ObjectTable::TableMethods
     value = value.to_a if value.is_a?(Range)
 
     if column
+      return value if column.empty? and value.empty?
       return (column[] = value)
     end
 

@@ -21,12 +21,12 @@ class ObjectTable
     @columns = columns
 
     @columns.each do |k, v|
-      @columns[k] = ObjectTable::Column.make(v)
+      @columns[k] = NArray.to_na(v)
     end
   end
 
   def add_column(name, typecode='object', *args)
-    col = ObjectTable::Column.new(typecode, *args, nrows)
+    col = NArray.new(typecode, *args, nrows)
     columns[name] = col
   end
 
@@ -55,7 +55,7 @@ class ObjectTable
     return self if new_values.values.first.empty?
 
     new_values.each do |k, v|
-      @columns[k] = @columns[k].stack(*v)
+      @columns[k] = ObjectTable::Column.stack(@columns[k], *v)
     end
     self
   end

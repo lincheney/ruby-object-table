@@ -2,7 +2,7 @@ require 'object_table/masked_column'
 
 describe ObjectTable::MaskedColumn do
 
-  let(:parent)    { ObjectTable::Column.float(10).random! }
+  let(:parent)    { NArray.float(10).random! }
   let(:indices)   { NArray[1, 3, 4, 6] }
   let(:other_indices) { NArray.to_na((0...parent.length).to_a - indices.to_a) }
   let(:masked)    { ObjectTable::MaskedColumn.mask(parent, indices) }
@@ -118,7 +118,7 @@ describe ObjectTable::MaskedColumn do
   end
 
   context 'with complex numbers' do
-    let(:parent)    { ObjectTable::Column.complex(10).indgen! }
+    let(:parent)    { NArray.complex(10).indgen! }
 
     include_examples 'destructive methods', 'imag=', 56
     include_examples 'destructive methods', 'conj!'
@@ -127,8 +127,8 @@ describe ObjectTable::MaskedColumn do
   describe '#clone' do
     let(:clone){ subject.clone }
 
-    it 'returns a Column' do
-      expect(clone).to be_an_instance_of ObjectTable::Column
+    it 'returns a NArray' do
+      expect(clone).to be_an_instance_of NArray
       expect(clone).to_not be_an_instance_of ObjectTable::MaskedColumn
     end
 
