@@ -46,13 +46,13 @@ class ObjectTable
       raise 'Mismatch in column names' unless (colnames - x.keys).empty?
 
       x.each do |k, v|
-        new_values[k].push NArray.to_na(v)
+        unless new_values.include?(k) and v.empty?
+          new_values[k].push(NArray.to_na(v))
+        end
       end
     end
 
-    return self if new_values.empty?
-    new_rows = new_values.values.first.map{|x| x.shape[-1]}.reduce(:+)
-    return self unless (new_rows and new_rows != 0)
+    return self if new_values.values.first.empty?
 
     new_values.each do |k, v|
       @columns[k] = @columns[k].stack(*v)
