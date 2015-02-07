@@ -246,8 +246,16 @@ describe ObjectTable do
       end
     end
 
-    context 'with differing column names' do
-      let(:others){ [ObjectTable.new(col1: 10, col2: 50), ObjectTable.new(col1: 10, col3: 50)] }
+    context 'with extra column names' do
+      let(:others){ [ObjectTable.new(col1: 10, col2: 50), ObjectTable.new(col1: 10, col2: 30, col3: 50)] }
+
+      it 'should fail' do
+        expect{subject}.to raise_error
+      end
+    end
+
+    context 'with missing column names' do
+      let(:others){ [ObjectTable.new(col1: 10, col2: 50), ObjectTable.new(col1: 10)] }
 
       it 'should fail' do
         expect{subject}.to raise_error

@@ -43,7 +43,7 @@ class ObjectTable
 
       raise "Don't know how to append a #{x.class}" unless x.is_a?(ObjectTable::BasicGrid)
       next if x.empty?
-      raise 'Mismatch in column names' unless (colnames | x.keys) == (colnames & x.keys)
+      raise 'Mismatch in column names' unless (colnames - x.keys).empty?
 
       x.each do |k, v|
         new_values[k].push NArray.to_na(v)
