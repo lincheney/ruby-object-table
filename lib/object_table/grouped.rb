@@ -65,11 +65,10 @@ class ObjectTable::Grouped
 
       grid = case value
       when ObjectTable::BasicGrid
-        ObjectTable::BasicGrid[keys].merge!(value)
+        ObjectTable::BasicGrid[keys].merge!(value)._ensure_uniform_columns!
       else
         ObjectTable::BasicGrid[keys + [[value_key, value]]]
       end
-      grid._ensure_uniform_columns!
     end
 
     __table_cls__.stack(*data)
