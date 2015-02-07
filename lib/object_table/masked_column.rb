@@ -3,6 +3,8 @@ require_relative 'column'
 class ObjectTable::MaskedColumn < NArray
   attr_accessor :indices, :parent, :padded_dims
 
+  EMPTY = NArray[]
+
   def self.mask(parent, indices)
     if parent.rank > 1
       padded_dims = [nil] * (parent.rank - 1)
@@ -49,6 +51,11 @@ class ObjectTable::MaskedColumn < NArray
 
   def clone
     NArray.cast(self).clone
+  end
+
+  def coerce_rev(other, operator)
+    return other.send(operator, EMPTY) if empty?
+    other.send(operator, NArray.cast(self))
   end
 
 end

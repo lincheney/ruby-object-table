@@ -1,5 +1,39 @@
 require 'object_table/masked_column'
 
+shared_examples 'a NArray' do |operator, options={}|
+  unary = options[:unary]
+
+  let(:indices) { NArray[1, 3, 4, 6] }
+
+  let(:x){ ObjectTable::MaskedColumn.mask(x_na, indices) }
+  let(:y){ ObjectTable::MaskedColumn.mask(y_na, indices) }
+
+  let(:x_na){ NArray.to_na((0..10).to_a) }
+  let(:y_na){ NArray.to_na((5..15).to_a) }
+
+  if unary
+    subject{ x.send(operator) }
+    let(:expected_result){ x_na[indices].send(operator) }
+  else
+    subject{ x.send(operator, y) }
+    let(:expected_result){ x_na.send(operator, y_na)[indices] }
+  end
+
+  describe "#{operator}" do
+    it "should give the correct result" do
+      expect(subject).to eq expected_result
+    end
+
+    context 'with empty indices' do
+      let(:indices) { [] }
+
+      it "should give the correct result" do
+        expect(subject).to eq expected_result
+      end
+    end
+  end
+end
+
 describe ObjectTable::MaskedColumn do
 
   let(:parent)    { NArray.float(10).random! }
@@ -136,5 +170,37 @@ describe ObjectTable::MaskedColumn do
       expect(clone.to_a).to eql subject.to_a
     end
   end
+
+  describe 'operations' do
+    it_behaves_like 'a NArray', '*'
+    it_behaves_like 'a NArray', '+'
+    it_behaves_like 'a NArray', '/'
+    it_behaves_like 'a NArray', '-'
+    it_behaves_like 'a NArray', '%'
+    it_behaves_like 'a NArray', '**'
+    it_behaves_like 'a NArray', '&'
+    it_behaves_like 'a NArray', '|'
+    it_behaves_like 'a NArray', '^'
+    it_behaves_like 'a NArray', 'eq'
+    it_behaves_like 'a NArray', 'ne'
+    it_behaves_like 'a NArray', 'gt'
+    it_behaves_like 'a NArray', '>'
+    it_behaves_like 'a NArray', 'ge'
+    it_behaves_like 'a NArray', '>='
+    it_behaves_like 'a NArray', 'lt'
+    it_behaves_like 'a NArray', '<'
+    it_behaves_like 'a NArray', 'le'
+    it_behaves_like 'a NArray', '<='
+    it_behaves_like 'a NArray', 'and'
+    it_behaves_like 'a NArray', 'or'
+    it_behaves_like 'a NArray', 'xor'
+    it_behaves_like 'a NArray', 'to_type'
+
+    it_behaves_like 'a NArray', '~', unary: true
+    it_behaves_like 'a NArray', '-@', unary: true
+    it_behaves_like 'a NArray', 'abs', unary: true
+    it_behaves_like 'a NArray', 'not', unary: true
+  end
+
 
 end
