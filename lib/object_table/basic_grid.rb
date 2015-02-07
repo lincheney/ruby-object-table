@@ -1,30 +1,32 @@
 require 'narray'
 
 class ObjectTable::BasicGrid < Hash
-  ARRAY_LIKE = [Array, Range]
-
 #   def self.[](*args)
 #     grid = super
 #     grid._ensure_uniform_columns!
 #   end
 
+  def _get_number_rows!
+    each{|k, v| self[k] = v.to_a if v.is_a?(Range)}
+    rows = map do |k, v|
+      case v
+      when Array
+        v.length
+      when NArray
+        v.shape.last or 0
+      end
+    end.compact.uniq
+  end
+
   def _ensure_uniform_columns!(rows = nil)
-    arrays, scalars = partition{|k, v| ARRAY_LIKE.any?{|cls| v.is_a?(cls)} }
-    narrays, scalars = scalars.partition{|k, v| v.is_a?(NArray) }
+    unique_rows = _get_number_rows!
+    unique_rows |= [rows] if rows
 
-    unique_rows = arrays.map{|k, v| v.count}
-    unique_rows += narrays.map{|k, v| v.shape.last or 0}
-    unique_rows = unique_rows.uniq
+    raise "Differing number of rows: #{unique_rows}" if unique_rows.length > 1
+    rows = (unique_rows[0] or 1)
 
-    if rows
-      raise "Differing number of rows: #{unique_rows}" unless unique_rows.empty? or unique_rows == [rows]
-    else
-      raise "Differing number of rows: #{unique_rows}" if unique_rows.length > 1
-      rows = (unique_rows[0] or 1)
-    end
-
-    scalars.each do |k, v|
-      self[k] = [v] * rows
+    each do |k, v|
+      self[k] = [v] * rows unless (v.is_a?(Array) || v.is_a?(NArray))
     end
 
     self
