@@ -16,12 +16,6 @@ class ObjectTable::View
 
   def_delegators :@parent, :has_column?
 
-  def get_column(name)
-    col = @parent.get_column(name)
-    ObjectTable::MaskedColumn.mask(col, indices) if col
-  end
-  alias_method :[], :get_column
-
   def make_view
     __static_view_cls__.new @parent, indices
   end

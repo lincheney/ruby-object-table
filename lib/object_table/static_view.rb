@@ -10,11 +10,23 @@ class ObjectTable::StaticView
     super()
     @parent = parent
     @indices = indices
-    columns
+    @columns = ObjectTable::BasicGrid.new
+    @fully_cached = false
   end
 
   def columns
-    @columns ||= super
+    unless @fully_cached
+      @parent.columns.map{|k, v| get_column(k)}
+      @fully_cached = true
+    end
+    @columns
+  end
+
+  def get_column(name)
+    @columns.fetch(name) do
+      col = super
+      @columns[name] = col if col
+    end
   end
 
   def add_column(name, *args)
