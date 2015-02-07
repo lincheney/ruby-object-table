@@ -7,6 +7,10 @@ module ObjectTable::ViewMethods
   include ObjectTable::TableMethods
   include ObjectTable::TableChild
 
+  def nrows
+    indices.length
+  end
+
   def columns
     ObjectTable::BasicGrid[@parent.columns.map{|k, v| [k, ObjectTable::MaskedColumn.mask(v, indices)]}]
   end
