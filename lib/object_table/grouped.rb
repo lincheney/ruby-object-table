@@ -41,7 +41,7 @@ class ObjectTable::Grouped
     if block
       groups.each do |k, v|
         keys = names.zip(k)
-        __group_cls__.new(@parent, Hash[keys], v).apply &block
+        __group_cls__.new(@parent, Hash[keys], v)._apply_block &block
       end
       return @parent
     end

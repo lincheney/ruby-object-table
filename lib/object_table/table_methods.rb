@@ -67,16 +67,18 @@ module ObjectTable::TableMethods
   end
 
   def apply(&block)
+    result = _apply_block(&block)
+
+    return result unless result.is_a? ObjectTable::BasicGrid
+    __table_cls__.new(result)
+  end
+
+  def _apply_block(&block)
     if block.arity == 0
       result = instance_eval &block
     else
       result = block.call(self)
     end
-
-    if result.is_a? ObjectTable::BasicGrid
-      result = __table_cls__.new(result)
-    end
-    result
   end
 
   def where(&block)

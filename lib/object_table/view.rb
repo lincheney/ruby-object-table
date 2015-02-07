@@ -31,7 +31,7 @@ class ObjectTable::View
   end
 
   def indices
-    @indices or NArray.int(@parent.nrows).indgen![@parent.apply &@filter]
+    @indices or NArray.int(@parent.nrows).indgen![@parent._apply_block &@filter]
   end
 
   def cache_indices(&block)
