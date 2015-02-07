@@ -79,12 +79,12 @@ You can get a column by using `#[]` or using the column name as a method.
 
 # using a method
 >>> data.a
- => ObjectTable::Column.int(3): 
+ => NArray.int(3): 
 [ 1, 2, 3 ] 
 
 # ... or using []
 >>> data[:a]
- => ObjectTable::Column.int(3): 
+ => NArray.int(3): 
 [ 1, 2, 3 ] 
 ```
 
@@ -140,24 +140,24 @@ IndexError: dst.shape[0]=3 != src.shape[0]=4
 >>> data = ObjectTable.new(col0: [0]*3)
 >>> data[:col1] = [1, 2, 3]
 >>> data.col1
- => ObjectTable::Column.int(3): 
+ => NArray.int(3): 
 [ 1, 2, 3 ] 
 
 # this time, let's make it a float instead
 >>> data.set_column(:col2, [1, 2, 3], 'float')
 >>> data.col2
- => ObjectTable::Column.float(3): 
+ => NArray.float(3): 
 [ 1.0, 2.0, 3.0 ] 
 
 >>> data[:col3] = 4
 >>> data.col3
- => ObjectTable::Column.object(3): 
+ => NArray.object(3): 
 [ 4, 4, 4 ] 
 
 # this time, let's make it multi dimensional
 >>> data.set_column(:col4, 4, 'int', 5)
 >>> data.col4
- => ObjectTable::Column.int(5,3): 
+ => NArray.int(5,3): 
 [ [ 4, 4, 4, 4, 4 ], 
   [ 4, 4, 4, 4, 4 ], 
   [ 4, 4, 4, 4, 4 ] ] 
@@ -171,7 +171,7 @@ Missing methods are vectorised over the column. (NOTE: this feature has been rem
 ```ruby
 >>> data = ObjectTable.new(column: ['abc', 'bcd', 'cde'])
 >>> data.column.match(/bc/)
- => ObjectTable::Column.object(3): 
+ => NArray.object(3): 
 [ #<MatchData "bc">, #<MatchData "bc">, nil ] 
 ```
 
@@ -184,7 +184,7 @@ This is just a convenience method.
 
 # this is exactly the same as (data.a + data.b)
 >>> data.apply{ a + b }
- => ObjectTable::Column.int(3): 
+ => NArray.int(3): 
 [ 5, 7, 9 ] 
 
 # you can use self to set/add columns
@@ -199,7 +199,7 @@ This is just a convenience method.
 
 # if you don't want it to steal the binding (self), make the block take an argument
 >>> data.apply{|tbl| tbl.a + tbl.c }
- => ObjectTable::Column.int(3): 
+ => NArray.int(3): 
 [ 5, 12, 21 ] 
 ```
 
@@ -468,7 +468,7 @@ The act of subclassing itself is easy, but any methods you add won't be availabl
 
 >>> data = BrokenTable.new(a: 1..3, b: 4..6)
 >>> data.a_plus_b
- => ObjectTable::Column.int(3): 
+ => NArray.int(3): 
 [ 5, 7, 9 ] 
 
 # this won't work!
@@ -498,12 +498,12 @@ The easiest way is just to include a module with your common methods.
 
 >>> data = WorkingTable.new(a: 1..3, b: 4..6)
 >>> data.a_plus_b
- => ObjectTable::Column.int(3): 
+ => NArray.int(3): 
 [ 5, 7, 9 ] 
 
 # hurrah!
 >>> data.where{ a > 1 }.a_plus_b
- => ObjectTable::Column.int(2): 
+ => NArray.int(2): 
 [ 7, 9 ] 
 
 # also works in groups!
