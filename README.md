@@ -166,7 +166,7 @@ IndexError: dst.shape[0]=3 != src.shape[0]=4
 ### Operating on columns
 
 All standard NArray operations apply (addition, subtraction etc.)
-Missing methods are vectorised over the column
+Missing methods are vectorised over the column. (NOTE: this feature has been removed in v0.3.0)
 
 ```ruby
 >>> data = ObjectTable.new(column: ['abc', 'bcd', 'cde'])
