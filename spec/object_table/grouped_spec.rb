@@ -249,6 +249,40 @@ describe ObjectTable::Grouped do
         end
       end
     end
+
+    context 'with a matrix key' do
+      let(:ngroups) { 10 }
+      let(:table) do
+        ObjectTable.new(
+          key1: 10.times.map{[rand, 'abc']} * ngroups,
+          key2: 10.times.map{[rand, 'def', 'ghi']} * ngroups,
+          value: (ngroups*10).times.map{rand},
+        )
+      end
+
+      let(:grouped) { ObjectTable::Grouped.new(table, :key1, :key2) }
+      subject{ grouped.apply{|group| group.value.sum} }
+
+      it 'should return a table with the group keys' do
+        expect(subject).to be_a ObjectTable
+        expect(subject.colnames).to include :key1
+        expect(subject.colnames).to include :key2
+      end
+
+      it 'should preserve the dimensions of the keys' do
+        expect(subject.key1.shape[0...-1]).to eql table.key1.shape[0...-1]
+        expect(subject.key2.shape[0...-1]).to eql table.key2.shape[0...-1]
+      end
+
+      context 'with vector values' do
+        subject{ grouped.apply{|group| group.value[0...10]} }
+
+        it 'should work' do
+          expect{subject}.to_not raise_error
+        end
+      end
+    end
+
   end
 
 end

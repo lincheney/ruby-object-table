@@ -11,7 +11,6 @@ class ObjectTable::Grouped
     @names = names
   end
 
-
   def _groups
     names, keys = _keys()
     groups = keys.length.times.group_by{|i| keys[i]}
@@ -26,11 +25,11 @@ class ObjectTable::Grouped
       keys = @parent.apply(&@grouper)
       raise 'Group keys must be hashes' unless keys.is_a?(Hash)
       keys = ObjectTable::BasicGrid.new.replace keys
+      keys._ensure_uniform_columns!(@parent.nrows)
     else
       keys = ObjectTable::BasicGrid[@names.map{|n| [n, @parent.get_column(n)]}]
     end
 
-    keys._ensure_uniform_columns!(@parent.nrows)
     names = keys.keys
     keys = keys.values.map(&:to_a).transpose
     [names, keys]
@@ -59,13 +58,26 @@ class ObjectTable::Grouped
       keys = names.zip(k)
       value = __group_cls__.new(@parent, Hash[keys], v)._apply_block &block
 
-      if value.is_a?(ObjectTable::TableMethods)
+      case value
+      when ObjectTable::TableMethods
+        nrows = value.nrows
         value = value.columns
+      when ObjectTable::BasicGrid
+        value._ensure_uniform_columns!
+        nrows = NArray.to_na(value.values.first).shape[-1]
+      when Array
+        nrows = value.length
+      when NArray
+        nrows = value.shape.last
+      else
+        nrows = 1
       end
+
+      keys = names.zip(k.map{|x| [x] * nrows})
 
       grid = case value
       when ObjectTable::BasicGrid
-        ObjectTable::BasicGrid[keys].merge!(value)._ensure_uniform_columns!
+        ObjectTable::BasicGrid[keys].merge!(value)
       else
         ObjectTable::BasicGrid[keys + [[value_key, value]]]
       end
