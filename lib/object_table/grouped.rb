@@ -77,7 +77,7 @@ class ObjectTable::Grouped
       value
     end
 
-    keys = groups.keys.transpose.zip(nrows).map{|keys, rows| keys * rows}
+    keys = groups.keys.transpose.map{|col| col.zip(nrows).flat_map{|key, rows| [key] * rows}}
     keys = ObjectTable::BasicGrid[names.zip(keys)]
 
     result = __table_cls__.stack(*data)

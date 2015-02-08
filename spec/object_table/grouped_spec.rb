@@ -226,6 +226,51 @@ describe ObjectTable::Grouped do
       end
     end
 
+    context 'with results that are tables' do
+      subject{ grouped.apply{ ObjectTable.new(sum: col1.sum, mean: col2.mean) } }
+
+      it 'should return a table with the group keys' do
+        expect(subject).to be_a ObjectTable
+        expect(subject.colnames).to include :parity
+      end
+
+      it 'should stack the grids' do
+        expect(subject.sort_by(subject.parity)).to eql ObjectTable.new(
+          parity: [0, 1],
+          sum:    [even_group.col1.sum, odd_group.col1.sum],
+          mean:   [even_group.col2.mean, odd_group.col2.mean],
+        )
+      end
+    end
+
+    context 'with results that are arrays' do
+      subject{ grouped.apply{ [col1[0], col1[-1]] } }
+
+      it 'should return a table with the group keys' do
+        expect(subject).to be_a ObjectTable
+        expect(subject.colnames).to include :parity
+      end
+
+      it 'should stack the grids' do
+        expect(subject.where{parity.eq 0}.v_0).to eq even_group.col1[[0, -1]]
+        expect(subject.where{parity.eq 1}.v_0).to eq odd_group.col1[[0, -1]]
+      end
+    end
+
+    context 'with results that are narrays' do
+      subject{ grouped.apply{ col1 < 2 } }
+
+      it 'should return a table with the group keys' do
+        expect(subject).to be_a ObjectTable
+        expect(subject.colnames).to include :parity
+      end
+
+      it 'should stack the grids' do
+        expect(subject.where{parity.eq 0}.v_0).to eq (even_group.col1 < 2)
+        expect(subject.where{parity.eq 1}.v_0).to eq (odd_group.col1 < 2)
+      end
+    end
+
     context 'when the block takes an argument' do
       it 'should not evaluate in the context of the group' do
         rspec_context = self
