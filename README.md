@@ -1,6 +1,21 @@
 ruby-object-table
 =================
 
+[![Gem Version][GV img]][Gem Version]
+[![Build Status][BS img]][Build Status]
+[![Code Climate][CC img]][Code Climate]
+[![Coverage Status][CS img]][Coverage Status]
+
+[Gem Version]: https://rubygems.org/gems/object_table
+[Build Status]: https://travis-ci.org/lincheney/ruby-object-table
+[Code Climate]: https://codeclimate.com/github/lincheney/ruby-object-table
+[Coverage Status]: https://coveralls.io/r/lincheney/ruby-object-table
+
+[GV img]: https://badge.fury.io/rb/object_table.png
+[BS img]: https://travis-ci.org/lincheney/ruby-object-table.png
+[CC img]: https://codeclimate.com/github/lincheney/ruby-object-table.png
+[CS img]: https://coveralls.io/repos/lincheney/ruby-object-table/badge.png?branch=master
+
 Simple data table/frame implementation in ruby
 Probably slow and extremely inefficient, but it works and that's all that matters.
 Uses NArrays (https://github.com/masa16/narray) for storing data.
