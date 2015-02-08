@@ -1,9 +1,8 @@
 module ObjectTable::Printable
 
   def self.get_printable_column(name, column)
-    padding = [nil] * (column.rank - 1)
     rows = column.shape[-1].times.map do |i|
-      row = column[*padding, i]
+      row = column[false, i]
       str = row.is_a?(NArray) ? row.inspect.partition("\n")[-1].strip : row.inspect
       str.split("\n")
     end
@@ -35,8 +34,7 @@ module ObjectTable::Printable
       printed_columns.push ObjectTable::Printable.get_printable_line_numbers(head.to_a + tail.to_a)
 
       printed_columns += columns.map do |name, c|
-        padding = [nil] * (c.rank - 1)
-        c = c.slice(*padding, [head, tail])
+        c = c.slice(false, [head, tail])
         ObjectTable::Printable.get_printable_column(name, c)
       end
     else

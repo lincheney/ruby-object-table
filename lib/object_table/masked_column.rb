@@ -1,28 +1,25 @@
 require_relative 'column'
 
 class ObjectTable::MaskedColumn < NArray
-  attr_accessor :indices, :parent, :padded_dims
+  attr_accessor :indices, :parent
 
   EMPTY = NArray[]
 
   def self.mask(parent, indices)
-    if parent.rank > 1
-      padded_dims = [nil] * (parent.rank - 1)
+    if parent.empty?
+      masked = parent.slice(indices)
     else
-      padded_dims = []
+      masked = parent.slice(false, indices)
     end
-    masked = parent.slice(*padded_dims, indices)
 
     if masked.rank <= 0
       column = self.new(masked.typecode, 0)
     else
-      column = self.new(masked.typecode, *masked.shape)
-      column.super_slice_assign(masked)
+      column = self.cast(masked)
     end
 
     column.parent = parent
     column.indices = indices
-    column.padded_dims = padded_dims
     column
   end
 
@@ -31,11 +28,9 @@ class ObjectTable::MaskedColumn < NArray
     ObjectTable::Column.make(*args)
   end
 
-  alias_method :super_slice_assign, :[]=
-
   def []=(*keys, value)
     unless parent.nil? or ((value.is_a?(Array) or value.is_a?(NArray)) and value.empty?)
-      parent[*padded_dims, indices[*keys]] = value
+      parent[false, indices[*keys]] = value
     end
     super
   end
@@ -44,7 +39,7 @@ class ObjectTable::MaskedColumn < NArray
   %w{ fill! indgen! indgen random! map! collect! conj! imag= mod! add! div! sbt! mul! }.each do |op|
     define_method(op) do |*args, &block|
       result = super(*args, &block)
-      parent[*padded_dims, indices] = result if parent
+      parent[false, indices] = result if parent
       result
     end
   end
