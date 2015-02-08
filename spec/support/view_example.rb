@@ -194,4 +194,17 @@ RSpec.shared_examples 'a table view' do |cls|
     end
   end
 
+  describe '#clone' do
+    let(:table) { ObjectTable.new(col1: [1, 2, 3], col2: 5) }
+    let(:block) { Proc.new{col1 > 2} }
+    let(:clone) { subject.clone }
+
+    it 'should no longer have masked columns' do
+      clone.columns.each do |k, v|
+        expect(v).to be_a NArray
+        expect(v).to_not be_a ObjectTable::MaskedColumn
+      end
+    end
+  end
+
 end
