@@ -135,19 +135,19 @@ describe ObjectTable::MaskedColumn do
     end
   end
 
-  include_examples 'destructive methods', 'indgen!'
-  include_examples 'destructive methods', 'indgen'
-  include_examples 'destructive methods', 'fill!', 100
-  include_examples 'destructive methods', 'random!'
-  include_examples 'destructive methods', 'mod!', 2
-  include_examples 'destructive methods', 'add!', 56
-  include_examples 'destructive methods', 'sbt!', 56
-  include_examples 'destructive methods', 'mul!', 56
-  include_examples 'destructive methods', 'div!', 56
-  include_examples 'destructive methods', 'map!' do
+  it_behaves_like 'destructive methods', 'indgen!'
+  it_behaves_like 'destructive methods', 'indgen'
+  it_behaves_like 'destructive methods', 'fill!', 100
+  it_behaves_like 'destructive methods', 'random!'
+  it_behaves_like 'destructive methods', 'mod!', 2
+  it_behaves_like 'destructive methods', 'add!', 56
+  it_behaves_like 'destructive methods', 'sbt!', 56
+  it_behaves_like 'destructive methods', 'mul!', 56
+  it_behaves_like 'destructive methods', 'div!', 56
+  it_behaves_like 'destructive methods', 'map!' do
     let(:block) { proc{|x| x + 1} }
   end
-  include_examples 'destructive methods', 'collect!' do
+  it_behaves_like 'destructive methods', 'collect!' do
     let(:block) { proc{|x| x + 1} }
   end
 

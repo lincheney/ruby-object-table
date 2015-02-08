@@ -270,6 +270,14 @@ describe ObjectTable do
       it 'should fail' do
         expect{subject}.to raise_error
       end
+
+      context 'with only a non-grid/table' do
+        let(:others)  { ['not a table'] }
+
+        it 'should fail' do
+          expect{subject}.to raise_error
+        end
+      end
     end
 
     context 'with extra column names' do
