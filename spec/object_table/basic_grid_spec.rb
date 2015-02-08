@@ -95,6 +95,10 @@ describe ObjectTable::BasicGrid do
         expect(grid[:col1]).to eql columns[:col1]
         expect(grid[:col2]).to eql columns[:col2]
       end
+
+      it 'should return the number of rows' do
+        expect(subject).to eql 3
+      end
     end
 
     context 'with columns of differing length' do
@@ -110,14 +114,22 @@ describe ObjectTable::BasicGrid do
         subject
         expect(grid[:col3]).to eql [6] * 3
       end
+
+      it 'should return the number of rows' do
+        expect(subject).to eql 3
+      end
     end
 
     context 'with scalars only' do
       let(:columns){ {col1: 1, col2: 2} }
-      it 'should assume there is one column' do
+      it 'should assume there is one row' do
         subject
         expect(grid[:col1]).to eql [columns[:col1]]
         expect(grid[:col2]).to eql [columns[:col2]]
+      end
+
+      it 'should return the number of rows' do
+        expect(subject).to eql 1
       end
     end
 
@@ -125,6 +137,10 @@ describe ObjectTable::BasicGrid do
       let(:columns){ {col1: 0...3} }
       it 'should succeed' do
         expect{subject}.to_not raise_error
+      end
+
+      it 'should return the number of rows' do
+        expect(subject).to eql 3
       end
     end
 
@@ -136,6 +152,10 @@ describe ObjectTable::BasicGrid do
           subject
           expect(grid).to eql columns
         end
+
+        it 'should return the number of rows' do
+        expect(subject).to eql 3
+      end
       end
 
       context 'with an incorrect last dimension' do
@@ -154,6 +174,10 @@ describe ObjectTable::BasicGrid do
 
         it 'should succeed' do
           expect{subject}.to_not raise_error
+        end
+
+        it 'should return the number of rows' do
+          expect(subject).to eql 0
         end
       end
 

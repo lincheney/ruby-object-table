@@ -29,7 +29,7 @@ class ObjectTable::BasicGrid < Hash
       self[k] = [v] * rows unless (v.is_a?(Array) || v.is_a?(NArray))
     end
 
-    self
+    rows
   end
 
 end
