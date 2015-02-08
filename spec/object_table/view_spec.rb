@@ -92,4 +92,32 @@ describe ObjectTable::View do
     end
   end
 
+  describe '#cache_indices' do
+    let(:table) { ObjectTable.new(col1: [1, 2, 3], col2: 5) }
+    let(:view)  { ObjectTable::View.new(table){ col1 > 2 } }
+
+    let(:block) { Proc.new{'success!'} }
+
+    subject{ view.cache_indices(&block) }
+
+    it 'should call the block' do
+      expect(block).to receive(:call)
+      subject
+    end
+  end
+
+  describe '#cache_columns' do
+    let(:table) { ObjectTable.new(col1: [1, 2, 3], col2: 5) }
+    let(:view)  { ObjectTable::View.new(table){ col1 > 2 } }
+
+    let(:block) { Proc.new{'success!'} }
+
+    subject{ view.cache_columns(&block) }
+
+    it 'should call the block' do
+      expect(block).to receive(:call)
+      subject
+    end
+  end
+
 end
