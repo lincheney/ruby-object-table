@@ -23,11 +23,6 @@ class ObjectTable::MaskedColumn < NArray
     column
   end
 
-# let ObjectTable::Column do this, since we've overriden []=
-  def self.make(*args)
-    ObjectTable::Column.make(*args)
-  end
-
   def []=(*keys, value)
     unless parent.nil? or ((value.is_a?(Array) or value.is_a?(NArray)) and value.empty?)
       parent[false, indices[*keys]] = value
