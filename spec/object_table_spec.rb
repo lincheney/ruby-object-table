@@ -72,45 +72,69 @@ describe ObjectTable do
     let(:args) { [] }
     let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: 5) }
 
-    let(:column) { table.colnames[0] }
-
     subject{ table.set_column(column, value, *args) }
 
-    it 'should allow assigning columns' do
-      subject
-      expect(table.columns[column].to_a).to eql value
-    end
-
-    it 'should coerce the value to a narray' do
-      subject
-      expect(table.columns[column]).to be_a NArray
-    end
-
-    context 'with the wrong length' do
-      let(:value) { [1, 2] }
-      it 'should fail' do
-        expect{subject}.to raise_error
-      end
-    end
-
-    context 'with a scalar' do
-      let(:value){ 10 }
-      it 'should fill the column with that value' do
+    shared_examples 'a column setter' do
+      it 'should allow assigning columns' do
         subject
-        expect(table.columns[column].to_a).to eql ([value] * table.nrows)
+        expect(table.columns[column].to_a).to eql value
       end
-    end
 
-    context 'with a range' do
-      let(:value){ 0...3 }
-      it 'should assign the range values' do
+      it 'should coerce the value to a narray' do
         subject
-        expect(table.columns[column].to_a).to eql value.to_a
+        expect(table.columns[column]).to be_a NArray
       end
+
+      context 'with the wrong length' do
+        let(:value) { [1, 2] }
+        it 'should fail' do
+          expect{subject}.to raise_error
+        end
+      end
+
+      context 'with a scalar' do
+        let(:value){ 10 }
+        it 'should fill the column with that value' do
+          subject
+          expect(table.columns[column].to_a).to eql ([value] * table.nrows)
+        end
+      end
+
+      context 'with a range' do
+        let(:value){ 0...3 }
+        it 'should assign the range values' do
+          subject
+          expect(table.columns[column].to_a).to eql value.to_a
+        end
+      end
+
+      context 'with an empty table' do
+        let(:table) { ObjectTable.new }
+        let(:value) { 3 }
+
+        context 'adding an empty column' do
+          it 'should add the column' do
+            subject
+            expect(table.columns[column]).to eq NArray[]
+          end
+
+          context 'and setting an empty array to the column' do
+            it 'should work' do
+              subject
+              expect{table[column] = []}.to_not raise_error
+              expect(table[column]).to be_empty
+            end
+          end
+
+        end
+      end
+
     end
 
     context 'for a new column' do
       let(:column) { :col3 }
+
+      it_behaves_like 'a column setter'
 
       it 'should create a new column' do
         subject
@@ -149,14 +173,10 @@ describe ObjectTable do
           expect(table.columns).to_not include column
         end
       end
-    end
 
-    context 'with narray args' do
-      let(:args) { ['int', 3, 4] }
-      let(:value){ NArray.float(3, 4, table.nrows) }
-
-      context 'for a new column' do
-        let(:column) { :col3 }
+      context 'with narray args' do
+        let(:args) { ['int', 3, 4] }
+        let(:value){ NArray.float(3, 4, table.nrows) }
 
         it 'should create a column with the typecode' do
           subject
@@ -172,24 +192,29 @@ describe ObjectTable do
 
     end
 
-    context 'with an empty table' do
-      let(:table) { ObjectTable.new }
-      let(:value) { 3 }
+    context 'on an existing column' do
+      let(:column) { table.colnames[0] }
+      it_behaves_like 'a column setter'
 
-      context 'adding an empty column' do
-        it 'should add the column' do
-          subject
-          expect(table.columns[column]).to eq NArray[]
+      context 'when failed to set column' do
+        let(:value) { 'a' }
+
+        it 'should fail' do
+          expect{subject}.to raise_error
         end
 
-        context 'and setting an empty array to the column' do
-          it 'should work' do
-            subject
-            expect{table[column] = []}.to_not raise_error
-            expect(table[column]).to be_empty
-          end
+        it 'should still have the column' do
+#           the assignment is going to chuck an error
+          subject rescue nil
+          expect(table.columns).to include column
         end
 
+        it 'should make no changes' do
+          original = table.clone
+          subject rescue nil
+#           the assignment is going to chuck an error
+          expect(table).to eql original
+        end
       end
     end
 

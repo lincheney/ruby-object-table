@@ -54,43 +54,54 @@ RSpec.shared_examples 'a table view' do |cls|
     let(:block) { Proc.new{col1 > 0} }
     let(:view)  { _make_relevant_view(table, block) }
 
-    let(:column){ :col1 }
     let(:value) { [10, 20, 30] }
-
     let(:args)  { [] }
 
     subject{ view.set_column(column, value, *args) }
 
-    context 'on an existing column' do
-      it 'should assign values to the column' do
-        subject
-        expect(view.columns[column].to_a).to eql value
+    shared_examples 'a column setter' do
+      context 'with a scalar' do
+        let(:value){ 10 }
+        it 'should fill the column with that value' do
+          subject
+          expect(view.columns[column].to_a).to eql ([value] * view.nrows)
+        end
       end
 
-      it 'should not modify anything outside the view' do
-        subject
-        expect(table.columns[column].to_a).to eql [0] + value
+      context 'with the wrong length' do
+        let(:value) { [1, 2] }
+        it 'should fail' do
+          expect{subject}.to raise_error
+        end
       end
 
-    end
+      context 'with an empty view' do
+        let(:block) { Proc.new{col1 < -1000} }
+        let(:value) { 3 }
 
-    context 'with a scalar' do
-      let(:value){ 10 }
-      it 'should fill the column with that value' do
-        subject
-        expect(view.columns[column].to_a).to eql ([value] * view.nrows)
-      end
-    end
+        context 'adding an empty column' do
+          it 'should add the column' do
+            subject
+            expect(view.columns[column]).to eq NArray[]
+            expect(table).to have_column column
+          end
 
-    context 'with the wrong length' do
-      let(:value) { [1, 2] }
-      it 'should fail' do
-        expect{subject}.to raise_error
+          context 'and setting an empty array to the column' do
+            it 'should work' do
+              subject
+              expect{view[column] = []}.to_not raise_error
+              expect(view[column]).to be_empty
+              expect(table).to have_column column
+            end
+          end
+
+        end
       end
     end
 
     context 'for a new column' do
-      let(:column){ :col3 }
+      let(:column) { :col3 }
+      it_behaves_like 'a column setter'
 
       it 'should create a new column' do
         subject
@@ -133,39 +144,42 @@ RSpec.shared_examples 'a table view' do |cls|
           expect(table.columns).to_not include column
         end
       end
-
-      context 'with an empty table' do
-        let(:block) { Proc.new{col1 < -1000} }
-        let(:value) { 3 }
-
-        context 'adding an empty column' do
-          it 'should add the column' do
-            subject
-            expect(view.columns[column]).to eq NArray[]
-            expect(table).to have_column column
-          end
-
-          context 'and setting an empty array to the column' do
-            it 'should work' do
-              subject
-              expect{view[column] = []}.to_not raise_error
-              expect(view[column]).to be_empty
-              expect(table).to have_column column
-            end
-          end
-
-        end
-      end
     end
 
-    context 'with an empty view' do
-      let(:block) { Proc.new{col1 < 0} }
+    context 'on an existing column' do
+      let(:column) { table.colnames[0] }
+      it_behaves_like 'a column setter'
 
-      context 'adding an empty column' do
-        let(:value) { [] }
-        it 'should add the column' do
-          subject
-          expect(view.columns[column].to_a).to eq value
+      it 'should assign values to the column' do
+        subject
+        expect(view.columns[column].to_a).to eql value
+      end
+
+      it 'should not modify anything outside the view' do
+        subject
+        expect(table.columns[column].to_a).to eql [0] + value
+      end
+
+      context 'when failed to set column' do
+        let(:value) { 'a' }
+
+        it 'should fail' do
+          expect{subject}.to raise_error
+        end
+
+        it 'should still have the column' do
+#           the assignment is going to chuck an error
+          subject rescue nil
+          expect(view.columns).to include column
+          expect(table.columns).to include column
+        end
+
+        it 'should make no changes' do
+          original = table.clone
+#           the assignment is going to chuck an error
+          subject rescue nil
+          expect(view).to eql table.where(&block)
+          expect(table).to eql original
         end
       end
     end

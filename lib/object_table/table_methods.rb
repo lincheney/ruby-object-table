@@ -35,30 +35,30 @@ module ObjectTable::TableMethods
 
   def set_column(name, value, *args)
     column = get_column(name)
+    new_column = column.nil?
+
     value = value.to_a if value.is_a?(Range)
-
-    if column
-      return value if column.empty? and value.empty?
-      return (column[] = value)
-    end
-
     is_vector = (value.is_a?(Array) or value.is_a?(NArray))
-    if is_vector and args.empty?
-      value =  NArray.to_na(value)
-      unless (value.shape[-1] or 0) == nrows
-        raise ArgumentError.new("Expected size of last dimension to be #{nrows}, was #{value.shape[-1].inspect}")
+
+    if new_column
+      if is_vector and args.empty?
+        value =  NArray.to_na(value)
+        unless (value.shape[-1] or 0) == nrows
+          raise ArgumentError.new("Expected size of last dimension to be #{nrows}, was #{value.shape[-1].inspect}")
+        end
+
+        args = [value.typecode] + value.shape[0...-1]
       end
 
-      args = [value.typecode] + value.shape[0...-1]
+      column = add_column(name, *args)
     end
 
-    column = add_column(name, *args)
     return column if column.empty? and (!is_vector or value.empty?)
 
     begin
       column[] = value
     rescue Exception => e
-      pop_column(name)
+      pop_column(name) if new_column
       raise e
     end
   end
