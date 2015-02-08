@@ -101,7 +101,7 @@ module ObjectTable::TableMethods
     get_column(meth) or super
   end
 
-  def respond_to?(meth)
+  def respond_to?(meth, include_all = false)
     super or has_column?(meth)
   end
 
