@@ -53,6 +53,7 @@ class ObjectTable::Grouped
   def apply(&block)
     names, groups = _groups()
     value_key = self.class._generate_name(DEFAULT_VALUE_PREFIX, names).to_sym
+    nrows = []
 
     data = groups.map do |k, v|
       keys = names.zip(k)
@@ -60,30 +61,28 @@ class ObjectTable::Grouped
 
       case value
       when ObjectTable::TableMethods
-        nrows = value.nrows
+        nrows.push value.nrows
         value = value.columns
       when ObjectTable::BasicGrid
         value._ensure_uniform_columns!
-        nrows = NArray.to_na(value.values.first).shape[-1]
+        nrows.push NArray.to_na(value.values.first).shape[-1]
       when Array
-        nrows = value.length
+        nrows.push value.length
       when NArray
-        nrows = value.shape.last
+        nrows.push value.shape.last
       else
-        nrows = 1
+        nrows.push 1
       end
 
-      keys = names.zip(k.map{|x| [x] * nrows})
-
-      grid = case value
-      when ObjectTable::BasicGrid
-        ObjectTable::BasicGrid[keys].merge!(value)
-      else
-        ObjectTable::BasicGrid[keys + [[value_key, value]]]
-      end
+      value = ObjectTable::BasicGrid[value_key, value] unless value.is_a?(ObjectTable::BasicGrid)
+      value
     end
 
-    __table_cls__.stack(*data)
+    keys = groups.keys.transpose.zip(nrows).map{|keys, rows| keys * rows}
+    keys = ObjectTable::BasicGrid[names.zip(keys)]
+
+    result = __table_cls__.stack(*data)
+    __table_cls__.new(keys.merge!(result.columns))
   end
 
   def self._generate_name(prefix, existing_names)
