@@ -136,13 +136,14 @@ describe ObjectTable do
       end
 
       context 'when failed to add column' do
-        let(:value){ NArray[1, 2, 3] }
+        let(:value) { 'a' }
+        let(:args)  { ['int'] }
+
+        it 'should fail' do
+          expect{subject}.to raise_error
+        end
 
         it 'should not have that column' do
-          expect(table).to receive(:add_column).with(column, value.typecode) do
-            table.columns[column] = 12345
-          end
-
 #           the assignment is going to chuck an error
           subject rescue nil
           expect(table.columns).to_not include column
@@ -173,12 +174,12 @@ describe ObjectTable do
 
     context 'with an empty table' do
       let(:table) { ObjectTable.new }
-      let(:value) { [] }
+      let(:value) { 3 }
 
       context 'adding an empty column' do
         it 'should add the column' do
           subject
-          expect(table.columns[column].to_a).to eq value
+          expect(table.columns[column]).to eq NArray[]
         end
 
         context 'and setting an empty array to the column' do

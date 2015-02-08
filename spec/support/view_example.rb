@@ -119,18 +119,41 @@ RSpec.shared_examples 'a table view' do |cls|
       end
 
       context 'when failed to add column' do
-        let(:value){ NArray[1, 2, 3] }
+        let(:value) { 'a' }
+        let(:args)  { ['int'] }
+
+        it 'should fail' do
+          expect{subject}.to raise_error
+        end
 
         it 'should not have that column' do
-          expect(view).to receive(:add_column).with(column, value.typecode) do
-            table.columns[column] = ObjectTable::Column.make([0] * 10)
-            view.columns[column] = ObjectTable::Column.make([0] * 10)
-          end
-
 #           the assignment is going to chuck an error
           subject rescue nil
           expect(view.columns).to_not include column
           expect(table.columns).to_not include column
+        end
+      end
+
+      context 'with an empty table' do
+        let(:block) { Proc.new{col1 < -1000} }
+        let(:value) { 3 }
+
+        context 'adding an empty column' do
+          it 'should add the column' do
+            subject
+            expect(view.columns[column]).to eq NArray[]
+            expect(table).to have_column column
+          end
+
+          context 'and setting an empty array to the column' do
+            it 'should work' do
+              subject
+              expect{view[column] = []}.to_not raise_error
+              expect(view[column]).to be_empty
+              expect(table).to have_column column
+            end
+          end
+
         end
       end
     end

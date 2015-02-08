@@ -42,7 +42,8 @@ module ObjectTable::TableMethods
       return (column[] = value)
     end
 
-    if (value.is_a?(Array) or value.is_a?(NArray)) and args.empty?
+    is_vector = (value.is_a?(Array) or value.is_a?(NArray))
+    if is_vector and args.empty?
       value =  NArray.to_na(value)
       unless (value.shape[-1] or 0) == nrows
         raise ArgumentError.new("Expected size of last dimension to be #{nrows}, was #{value.shape[-1].inspect}")
@@ -52,7 +53,7 @@ module ObjectTable::TableMethods
     end
 
     column = add_column(name, *args)
-    return column if value.is_a?(NArray) and value.empty?
+    return column if column.empty? and (!is_vector or value.empty?)
 
     begin
       column[] = value
