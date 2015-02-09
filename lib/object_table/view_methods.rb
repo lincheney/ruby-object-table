@@ -7,6 +7,8 @@ module ObjectTable::ViewMethods
   include ObjectTable::TableMethods
   include ObjectTable::TableChild
 
+  def_delegators :@parent, :has_column?
+
   def nrows
     indices.length
   end

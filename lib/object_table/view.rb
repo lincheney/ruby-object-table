@@ -14,8 +14,6 @@ class ObjectTable::View
     @filter = block
   end
 
-  def_delegators :@parent, :has_column?
-
   def make_view
     __static_view_cls__.new @parent, indices
   end

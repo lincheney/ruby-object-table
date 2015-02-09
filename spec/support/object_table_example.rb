@@ -182,6 +182,20 @@ EOS
 
   end
 
+  describe '#has_column?' do
+    let(:table) { ObjectTable.new(col1: [1, 2, 3], col2: [5, 5, 5]) }
+
+    it 'should be true for columns in the table' do
+      expect(subject).to have_column :col1
+      expect(subject).to have_column :col2
+    end
+
+    it 'should be false for columns not in the table' do
+      expect(subject).to_not have_column :col3
+      expect(subject).to_not have_column 'something else'
+    end
+  end
+
   describe '#nrows' do
     let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: [5, 5, 5]) }
 
