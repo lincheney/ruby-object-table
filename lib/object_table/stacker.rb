@@ -1,32 +1,25 @@
 module ObjectTable::Stacker
 
   def stack!(*others)
-    new_values = Hash[colnames.zip(ncols.times.map{[]})]
-
-    others.each do |x|
-      case x
+    others = others.map do |grid|
+      case grid
       when ObjectTable::TableMethods
-        x = x.columns
+        grid = grid.columns
       when ObjectTable::BasicGrid
-        x._ensure_uniform_columns!
+        grid._ensure_uniform_columns!
       end
 
-      raise "Don't know how to append a #{x.class}" unless x.is_a?(ObjectTable::BasicGrid)
-      next if x.empty?
-      raise 'Mismatch in column names' unless (colnames - x.keys).empty?
+      raise "Don't know how to append a #{grid.class}" unless grid.is_a?(ObjectTable::BasicGrid)
+      next if grid.empty?
+      raise 'Mismatch in column names' unless (colnames - grid.keys).empty? and (grid.keys - colnames).empty?
+      grid
+    end.compact
 
-      x.each do |k, v|
-        unless new_values.include?(k) and v.empty?
-          new_values[k].push(NArray.to_na(v))
-#           new_values[k].push(v)
-        end
-      end
-    end
+    return self if others.empty?
 
-    return self if new_values.values.first.empty?
-
-    new_values.each do |k, v|
-      @columns[k] = ObjectTable::Column.stack(@columns[k], *v)
+    @columns.each do |k, v|
+      grids = others.map{|grid| NArray.to_na(grid[k])}
+      @columns[k] = ObjectTable::Column.stack(v, *grids)
     end
     self
   end
