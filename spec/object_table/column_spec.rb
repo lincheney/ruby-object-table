@@ -2,6 +2,24 @@ require 'object_table/column'
 
 describe ObjectTable::Column do
 
+  describe '.length_of' do
+    it 'should return the length of narrays' do
+      expect(described_class.length_of NArray.float(10, 20, 30)).to eql 30
+    end
+
+    it 'should return the length of arrays' do
+      expect(described_class.length_of [ [0] * 20 ] * 30).to eql 30
+    end
+
+    it 'should return the length of empty narrays' do
+      expect(described_class.length_of NArray.float(0)).to eql 0
+    end
+
+    it 'should fail on other inputs' do
+      expect{described_class.length_of 123456}.to raise_error
+    end
+  end
+
   describe '.stack' do
     let(:columns) do
       [

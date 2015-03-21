@@ -8,14 +8,7 @@ class ObjectTable::BasicGrid < Hash
 
   def _get_number_rows!
     each{|k, v| self[k] = v.to_a if v.is_a?(Range)}
-    rows = map do |k, v|
-      case v
-      when Array
-        v.length
-      when NArray
-        v.shape.last or 0
-      end
-    end.compact.uniq
+    rows = map{|k, v| ObjectTable::Column.length_of(v) rescue nil}.compact.uniq
   end
 
   def _ensure_uniform_columns!(rows = nil)

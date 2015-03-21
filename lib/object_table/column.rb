@@ -2,6 +2,17 @@ require 'narray'
 
 module ObjectTable::Column
 
+  def self.length_of(array)
+    case array
+    when Array
+      array.length
+    when NArray
+      array.shape.last or 0
+    else
+      raise "Expected Array or NArray, got #{array}"
+    end
+  end
+
   def self.stack(*columns)
     columns = columns.reject(&:empty?)
     return NArray[] if columns.empty?

@@ -56,12 +56,8 @@ class ObjectTable::Grouped
         value = value.columns
       when ObjectTable::BasicGrid
         nrows.push(value._ensure_uniform_columns!)
-      when Array
-        nrows.push(value.length)
-      when NArray
-        nrows.push(value.shape.last)
       else
-        nrows.push(1)
+        nrows.push( (ObjectTable::Column.length_of(value) rescue 1) )
       end
 
       value = ObjectTable::BasicGrid[value_key, value] unless value.is_a?(ObjectTable::BasicGrid)
