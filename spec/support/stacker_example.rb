@@ -11,6 +11,8 @@ RSpec.shared_examples 'a table stacker' do
     ]
   end
 
+  let(:segment)     { NArray.float(10, 10, 10).indgen }
+
   let!(:grids_copy) { grids.map(&:clone) }
 
   shared_examples 'a stacking operation' do
@@ -87,6 +89,22 @@ RSpec.shared_examples 'a table stacker' do
       end
     end
 
+    context 'with only narray segments' do
+      let(:grids) { [ObjectTable.new(col1: segment)] * 3  }
+
+      it 'should work' do
+        expect(subject.col1).to eql NArray.to_na(segment.to_a * 3)
+      end
+    end
+
+    context 'with a mixture of segment types' do
+      let(:grids) { [ObjectTable.new(col1: segment)] * 2 + [ObjectTable::BasicGrid[col1: segment.to_a]] * 3 }
+
+      it 'should work' do
+        expect(subject.col1).to eql NArray.to_na(segment.to_a * 5)
+      end
+    end
+
   end
 
 
@@ -114,6 +132,14 @@ RSpec.shared_examples 'a table stacker' do
 
       it 'should return an empty table' do
         expect(subject).to eql described_class.new
+      end
+    end
+
+    context 'with only array segments' do
+      let(:grids) { [ObjectTable::BasicGrid[col1: segment.to_a]] * 3  }
+
+      it 'should work' do
+        expect(subject.col1).to eql NArray.to_na(segment.to_a * 3)
       end
     end
   end
