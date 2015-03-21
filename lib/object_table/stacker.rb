@@ -1,7 +1,7 @@
 module ObjectTable::Stacker
 
   def stack!(*others)
-    @columns.replace( ObjectTable::Stacker::ClassMethods.stack(self, *others).columns )
+    @columns.replace( self.class.stack(self, *others).columns )
     self
   end
 
