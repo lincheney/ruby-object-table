@@ -36,6 +36,22 @@ describe ObjectTable::Column do
         expect(subject).to eq NArray[]
       end
     end
+
+    context 'with empty narrays' do
+      let(:columns) do
+        [
+          NArray.float(10, 10).random!,
+          NArray.float(10, 30).random!,
+          NArray[],
+          NArray.to_na([[100] * 10] * 5),
+        ]
+      end
+
+      it 'should skip empty narrays' do
+        expect(subject).to eq ObjectTable::Column.stack(columns[0], columns[1], columns[3])
+      end
+    end
+
   end
 
 end

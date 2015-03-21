@@ -3,6 +3,7 @@ require 'narray'
 module ObjectTable::Column
 
   def self.stack(*columns)
+    columns = columns.reject(&:empty?)
     return NArray[] if columns.empty?
     return columns[0].clone if columns.length == 1
 
