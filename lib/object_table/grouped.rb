@@ -38,10 +38,11 @@ class ObjectTable::Grouped
   def each(&block)
     names, groups = _groups()
 
+    key_struct = Struct.new(*names.map(&:to_sym))
     enumerator = Enumerator.new do |y|
       groups.each do |k, v|
         keys = names.zip(k)
-        y.yield __group_cls__.new(@parent, Hash[keys], v)
+        y.yield __group_cls__.new(@parent, key_struct.new(*k), v)
       end
       @parent
     end
@@ -55,9 +56,9 @@ class ObjectTable::Grouped
     value_key = self.class._generate_name(DEFAULT_VALUE_PREFIX, names).to_sym
     nrows = []
 
+    key_struct = Struct.new(*names.map(&:to_sym))
     data = groups.map do |k, v|
-      keys = names.zip(k)
-      value = __group_cls__.new(@parent, Hash[keys], v)._apply_block &block
+      value = __group_cls__.new(@parent, key_struct.new(*k), v)._apply_block &block
 
       case value
       when ObjectTable::TableMethods

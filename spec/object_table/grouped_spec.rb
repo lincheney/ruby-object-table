@@ -144,10 +144,7 @@ describe ObjectTable::Grouped do
 
     it 'should give access to the keys' do
       keys = []
-      grouped.each do
-        keys << @K
-      end
-
+      grouped.each{ keys << Hash[@K.each_pair.to_a] }
       expect(keys).to match_array [{parity: 0}, {parity: 1}]
     end
 
@@ -156,6 +153,17 @@ describe ObjectTable::Grouped do
       correct_keys = []
       grouped.each do
         keys << [@K[:parity]]
+        correct_keys << (self.col1 % 2).to_a.uniq
+      end
+
+      expect(keys).to match_array(correct_keys)
+    end
+
+    it 'should give access to the correct key' do
+      keys = []
+      correct_keys = []
+      grouped.each do
+        keys << [@K.parity]
         correct_keys << (self.col1 % 2).to_a.uniq
       end
 
