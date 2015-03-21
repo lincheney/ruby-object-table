@@ -70,6 +70,24 @@ describe ObjectTable::Column do
       end
     end
 
+    context 'when arguments all have the same dimensions' do
+      let(:columns) do
+        [
+          NArray.float(10, 20, 30).random!,
+          NArray.float(10, 20, 30).random!,
+          NArray.float(10, 20, 30).random!,
+          NArray.float(10, 20, 30).random!,
+        ]
+      end
+
+      it 'should stack them' do
+        expect(subject[false, 0...30]).to eq columns[0]
+        expect(subject[false, 30...60]).to eq columns[1]
+        expect(subject[false, 60...90]).to eq columns[2]
+        expect(subject[false, 90...120]).to eq columns[3]
+      end
+    end
+
   end
 
 end

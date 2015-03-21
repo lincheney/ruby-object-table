@@ -13,10 +13,17 @@ module ObjectTable::Column
     end
   end
 
+
   def self.stack(*columns)
     columns = columns.reject(&:empty?)
     return NArray[] if columns.empty?
     return columns[0].clone if columns.length == 1
+
+    if columns.map{|x| x.shape}.uniq.length == 1
+      new_col = NArray.to_na(columns)
+      new_col = new_col.reshape(*new_col.shape[0...-2], new_col.shape[-2] * new_col.shape[-1])
+      return new_col
+    end
 
     new_rows = columns.map{|x| x.shape[-1]}.reduce(:+)
     first_col = columns.first

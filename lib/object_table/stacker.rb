@@ -28,10 +28,6 @@ module ObjectTable::Stacker
       if segments.all?{|seg| seg.is_a? Array}
         column = NArray.to_na(segments.flatten(1))
 
-      elsif segments.all?{|seg| seg.is_a? NArray} and segments.map{|seg| seg.shape}.uniq.length == 1
-        column = NArray.to_na(segments)
-        column = column.reshape(*column.shape[0...-2], column.shape[-2] * column.shape[-1])
-
       else
         segments.map!{|seg| NArray.to_na seg}
         column = ObjectTable::Column.stack(*segments)
