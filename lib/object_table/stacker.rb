@@ -14,12 +14,18 @@ module ObjectTable::Stacker
         keys ||= grid.keys if grid
         grid
       end.compact
-
       return self.new if grids.empty?
 
       result = keys.map do |k|
-        segments = grids.map{|grid| NArray.to_na grid[k]}
-        column = ObjectTable::Column.stack(*segments)
+        segments = grids.map{|grid| grid[k]}
+
+        if segments.all?{|seg| seg.is_a? Array}
+          column = NArray.to_na(segments.flatten(1))
+        else
+          segments.map!{|seg| NArray.to_na seg}
+          column = ObjectTable::Column.stack(*segments)
+        end
+
         [k, column]
       end
 
