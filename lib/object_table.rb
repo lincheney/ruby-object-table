@@ -32,16 +32,6 @@ class ObjectTable
     columns[name] = col
   end
 
-
-
-
-
-
-
-
-    else
-    end
-
   def sort_by!(*keys)
     sort_index = _get_sort_index(keys)
 
@@ -50,7 +40,6 @@ class ObjectTable
     end
     self
   end
-
 
   def __static_view_cls__
     self.class::StaticView

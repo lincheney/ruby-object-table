@@ -240,35 +240,6 @@ describe ObjectTable do
     end
   end
 
-    end
-
-
-        )
-    end
-
-    end
-
-
-      end
-
-      end
-    end
-
-
-      end
-
-      end
-    end
-
-
-      end
-
-      end
-    end
-
-
-      end
-
   describe '#sort_by!' do
     let(:table){ ObjectTable.new(col1: [2, 2, 1, 1], col2: [0, 1, 0, 1], col3: [5, 6, 7, 8]) }
     subject{ table.sort_by!(table.col1, table.col2) }
