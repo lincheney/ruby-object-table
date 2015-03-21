@@ -3,7 +3,7 @@ require 'object_table'
 RSpec.shared_examples 'a table stacker' do
 
   describe '.stack' do
-    let(:others) do
+    let(:grids) do
       [
         ObjectTable.new(col1: [1, 2, 3], col2: 5),
         ObjectTable.new(col1: 10, col2: 50),
@@ -12,31 +12,39 @@ RSpec.shared_examples 'a table stacker' do
       ]
     end
 
-    subject{ described_class.stack *others }
+    subject{ described_class.stack *grids }
 
     it 'should join the tables and grids together' do
-      expect(subject).to be_a ObjectTable
-      expect(subject).to eql ObjectTable.new(
-        col1: others.flat_map{|x| x[:col1].to_a},
-        col2: others.flat_map{|x| x[:col2].to_a},
+      expect(subject).to be_a described_class
+      expect(subject).to eql described_class.new(
+        col1: grids.flat_map{|x| x[:col1].to_a},
+        col2: grids.flat_map{|x| x[:col2].to_a},
         )
     end
 
     it 'should duplicate the contents' do
-      others.each do |chunk|
+      grids.each do |chunk|
         expect(subject).to_not be chunk
       end
     end
 
+    context 'with no arguments' do
+      let(:grids){ [] }
+
+      it 'should return an empty table' do
+        expect(subject).to eql described_class.new
+      end
+    end
+
     context 'with non grids/tables' do
-      let(:others){ [ObjectTable.new(col1: 10, col2: 50), 'not a table'] }
+      let(:grids){ [ObjectTable.new(col1: 10, col2: 50), 'not a table'] }
 
       it 'should fail' do
         expect{subject}.to raise_error
       end
 
       context 'with only a non-grid/table' do
-        let(:others)  { ['not a table'] }
+        let(:grids)  { ['not a table'] }
 
         it 'should fail' do
           expect{subject}.to raise_error
@@ -45,7 +53,7 @@ RSpec.shared_examples 'a table stacker' do
     end
 
     context 'with extra column names' do
-      let(:others){ [ObjectTable.new(col1: 10, col2: 50), ObjectTable.new(col1: 10, col2: 30, col3: 50)] }
+      let(:grids){ [ObjectTable.new(col1: 10, col2: 50), ObjectTable.new(col1: 10, col2: 30, col3: 50)] }
 
       it 'should fail' do
         expect{subject}.to raise_error
@@ -53,7 +61,7 @@ RSpec.shared_examples 'a table stacker' do
     end
 
     context 'with missing column names' do
-      let(:others){ [ObjectTable.new(col1: 10, col2: 50), ObjectTable.new(col1: 10)] }
+      let(:grids){ [ObjectTable.new(col1: 10, col2: 50), ObjectTable.new(col1: 10)] }
 
       it 'should fail' do
         expect{subject}.to raise_error
@@ -61,26 +69,42 @@ RSpec.shared_examples 'a table stacker' do
     end
 
     context 'with empty tables' do
-      let(:others) { [ ObjectTable.new(col1: [1, 2, 3], col2: 5), ObjectTable.new ] }
+      let(:grids) { [ ObjectTable.new(col1: [1, 2, 3], col2: 5), ObjectTable.new ] }
 
       it 'should ignore empty tables' do
-        expect(subject).to eql others[0]
+        expect(subject).to eql grids[0]
+      end
+
+      context 'with only empty tables' do
+        let(:grids) { [ObjectTable.new] * 3 }
+
+        it 'should return an empty table' do
+          expect(subject).to eql described_class.new
+        end
       end
     end
 
     context 'with tables with empty rows' do
-      let(:others) { [ ObjectTable.new(col1: [1, 2, 3], col2: 5), ObjectTable.new(col1: [], col2: []) ] }
+      let(:grids) { [ ObjectTable.new(col1: [1, 2, 3], col2: 5), ObjectTable.new(col1: [], col2: []) ] }
 
       it 'should ignore empty tables' do
-        expect(subject).to eql others[0]
+        expect(subject).to eql grids[0]
       end
     end
 
     context 'with empty grids' do
-      let(:others) { [ ObjectTable.new(col1: [1, 2, 3], col2: 5), ObjectTable::BasicGrid.new ] }
+      let(:grids) { [ ObjectTable.new(col1: [1, 2, 3], col2: 5), ObjectTable::BasicGrid.new ] }
 
       it 'should ignore empty grids' do
-        expect(subject).to eql others[0]
+        expect(subject).to eql grids[0]
+      end
+
+      context 'with only empty grids' do
+        let(:grids) { [ObjectTable::BasicGrid.new] * 3 }
+
+        it 'should return an empty table' do
+          expect(subject).to eql described_class.new
+        end
       end
     end
 
