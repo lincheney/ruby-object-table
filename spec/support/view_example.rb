@@ -242,6 +242,31 @@ RSpec.shared_examples 'a table view' do |cls|
         expect(v).to_not be_a ObjectTable::MaskedColumn
       end
     end
+
+    context 'with an empty view' do
+      let(:block) { Proc.new{col1 > col1.max} }
+
+      it 'should clone the view' do
+        expect(clone).to eql subject
+        clone.columns.each do |k, v|
+          expect(v).to be_a NArray
+          expect(v).to_not be_a ObjectTable::MaskedColumn
+        end
+      end
+
+      context 'with an empty parent' do
+        let(:table) { ObjectTable.new(col1: [], col2: []) }
+
+        it 'should clone the view' do
+          expect(clone).to eql subject
+          clone.columns.each do |k, v|
+            expect(v).to be_a NArray
+            expect(v).to_not be_a ObjectTable::MaskedColumn
+          end
+        end
+      end
+    end
+
   end
 
 end

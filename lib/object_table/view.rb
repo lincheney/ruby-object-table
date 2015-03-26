@@ -19,7 +19,11 @@ class ObjectTable::View
   end
 
   def clone
-    cols = ObjectTable::BasicGrid[@parent.columns.map{|k, v| [k, v[false, indices]]}]
+    if nrows == 0
+      cols = @parent.columns.map{|k, v| [k, NArray.new(v.typecode, 0)]}
+    else
+      cols = @parent.columns.map{|k, v| [k, v[false, indices]]}
+    end
     __table_cls__.new(cols)
   end
 
