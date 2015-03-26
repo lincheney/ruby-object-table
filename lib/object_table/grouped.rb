@@ -14,9 +14,6 @@ class ObjectTable::Grouped
   def _groups
     names, keys = _keys()
     groups = keys.length.times.group_by{|i| keys[i]}
-    groups.each do |k, v|
-      groups[k] = v
-    end
     [names, groups]
   end
 
