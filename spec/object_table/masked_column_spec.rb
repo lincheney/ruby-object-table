@@ -169,6 +169,22 @@ describe ObjectTable::MaskedColumn do
     it 'should clone the data' do
       expect(clone.to_a).to eql subject.to_a
     end
+
+    context 'with an empty mask' do
+      let(:indices) { NArray[] }
+
+      it 'should clone the data' do
+        expect(clone.to_a).to eql subject.to_a
+      end
+
+      context 'with an empty parent' do
+        let(:parent) { NArray[] }
+
+        it 'should clone the data' do
+          expect(clone.to_a).to eql subject.to_a
+        end
+      end
+    end
   end
 
   describe 'operations' do

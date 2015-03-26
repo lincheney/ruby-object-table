@@ -40,6 +40,7 @@ class ObjectTable::MaskedColumn < NArray
   end
 
   def clone
+    return NArray.new(typecode, 0) if empty?
     NArray.cast(self).clone
   end
 
