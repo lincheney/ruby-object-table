@@ -61,8 +61,13 @@ class ObjectTable::Grouped
       value
     end
 
-    keys = groups.keys.transpose.map{|col| col.zip(nrows).flat_map{|key, rows| [key] * rows}}
-    keys = ObjectTable::BasicGrid[names.zip(keys)]
+    if groups.empty?
+      # empty table, so make all keys empty
+      keys = ObjectTable::BasicGrid[names.zip([[]] * names.length)]
+    else
+      keys = groups.keys.transpose.map{|col| col.zip(nrows).flat_map{|key, rows| [key] * rows}}
+      keys = ObjectTable::BasicGrid[names.zip(keys)]
+    end
 
     result = __table_cls__.stack(*data)
     __table_cls__.new(keys.merge!(result.columns))
