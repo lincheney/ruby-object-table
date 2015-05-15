@@ -19,7 +19,7 @@ module ObjectTable::TableMethods
   alias_method :eql?, :==
 
   def nrows
-    columns.empty? ? 0 : (columns.first[1].shape[-1] or 0)
+    columns.empty? ? 0 : ObjectTable::Column.length_of(columns.first[1])
   end
 
   def ncols
