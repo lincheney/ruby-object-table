@@ -21,26 +21,35 @@ class ObjectTable::Group < ObjectTable::StaticView
 
       @hash = {}
       @index = Hash[keys.each_with_index.to_a]
+      @keys = keys
+      @ids = @index.values_at(*keys)
       @length = keys.length
     end
 
     def [](k)
-      (@hash[k] ||= Array.new(@length, @defaults[k]))[@key]
+      (@hash[k] ||= Array.new(@length, @defaults[k]))[@id]
     end
 
     def []=(k, v)
-      @hash[k][@key] = v
+      @hash[k][@id] = v
     end
 
     def row_struct
       Class.new(Struct){ attr_accessor :K, :R }
     end
 
-    def eval_block(key, struct, row, block)
-      @key = @index[key]
-      row.K = struct
-      row.R = self
-      ObjectTable::Util.apply_block(row, block)
+    def apply_to_rows(rows, key_struct, block)
+      @ids.zip(@keys, rows) do |id, key, row|
+        @id = id
+        row.K = key_struct.new(*key)
+        row.R = self
+        ObjectTable::Util.apply_block(row, block)
+      end
+    end
+
+    def values
+      i = @index.values
+      @hash.map{|k, v| [k, v.values_at(*i)]}
     end
 
   end

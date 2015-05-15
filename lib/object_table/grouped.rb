@@ -73,15 +73,12 @@ class ObjectTable::Grouped
     keys = _keys()
     return empty_aggregation if keys.empty?
 
-    key_struct = key_struct()
-    data = ObjectTable::Group::Grid.new(keys, defaults)
-    keys.zip(@parent.each_row(row_struct: data.row_struct)) do |k, row|
-      data.eval_block(k, key_struct.new(*k), row, block)
-    end
+    grid = ObjectTable::Group::Grid.new(keys, defaults)
+    rows = @parent.each_row(row_struct: grid.row_struct)
+    grid.apply_to_rows(rows, key_struct, block)
 
-    keys = ObjectTable::BasicGrid[@names.zip(data.index.keys.transpose)]
-    index = data.index.values
-    __table_cls__.new(keys.merge!(Hash[data.hash.map{|k, v| [k, v.values_at(*index)]}]))
+    keys = ObjectTable::BasicGrid[@names.zip(grid.index.keys.transpose)]
+    __table_cls__.new(keys.merge!(Hash[grid.values]))
   end
 
   def _make_groups(groups)

@@ -16,7 +16,7 @@ class ObjectTable::StaticView
 
   def columns
     unless @fully_cached
-      @parent.columns.map{|k, v| get_column(k)}
+      @parent.columns.each_key{|k| get_column(k)}
       @fully_cached = true
     end
     @columns
