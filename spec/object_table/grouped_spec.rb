@@ -341,7 +341,7 @@ describe ObjectTable::Grouped do
 
   describe '#reduce' do
     let(:col2)  { (NArray.float(10, 200).random * 100).to_i }
-    subject{ grouped.reduce{|row| row.R[:col2] += col2.sum } }
+    subject{ grouped.reduce{|row| row.R[:col2] += row.col2.sum } }
 
     it 'should return a table with the group keys' do
       expect(subject).to be_a ObjectTable
@@ -354,7 +354,7 @@ describe ObjectTable::Grouped do
     end
 
     context 'with results that are narrays' do
-      subject{ grouped.reduce{|row| row.R[:col2] += col2 } }
+      subject{ grouped.reduce{|row| row.R[:col2] += row.col2 } }
 
       it 'should return a table with the group keys' do
         expect(subject).to be_a ObjectTable
@@ -367,7 +367,7 @@ describe ObjectTable::Grouped do
       end
     end
 
-    context 'when the block takes an argument', skip: true do
+    context 'when the block takes an argument' do
       it 'should not evaluate in the context of the group' do
         rspec_context = self
 
@@ -380,12 +380,12 @@ describe ObjectTable::Grouped do
       end
     end
 
-    context 'when the block takes no arguments', skip: true do
-      it 'should call the block in the context of the group' do
+    context 'when the block takes no arguments' do
+      it 'should call the block in the context of the row' do
         _ = self
         grouped.reduce do
           receiver = eval('self', binding)
-          _.expect(receiver).to _.be_a ObjectTable::Group
+          _.expect(receiver).to _.be_a Struct
           nil
         end
       end

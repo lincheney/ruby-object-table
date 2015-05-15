@@ -1,4 +1,5 @@
 require_relative 'static_view'
+require_relative 'util'
 
 class ObjectTable::Group < ObjectTable::StaticView
   attr_reader :K
@@ -34,7 +35,7 @@ class ObjectTable::Group < ObjectTable::StaticView
       @key = @index[key]
       row.K = @key_struct.new(*key)
       row.R = self
-      row.instance_eval(&block)
+      ObjectTable::Util.apply_block(row, block)
     end
 
   end
