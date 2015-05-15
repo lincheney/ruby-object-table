@@ -39,9 +39,9 @@ class ObjectTable::View
     @indices or NArray.int(@parent.nrows).indgen![Util.apply_block(@parent, @filter)]
   end
 
-  def cache_indices(&block)
+  def cache_indices
     @indices = indices
-    value = block.call()
+    value = yield
     @indices = nil
     value
   end
@@ -50,9 +50,9 @@ class ObjectTable::View
     @columns or super
   end
 
-  def cache_columns(&block)
+  def cache_columns
     @columns = columns
-    value = block.call()
+    value = yield
     @columns = nil
     value
   end

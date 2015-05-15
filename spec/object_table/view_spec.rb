@@ -96,13 +96,8 @@ describe ObjectTable::View do
     let(:table) { ObjectTable.new(col1: [1, 2, 3], col2: 5) }
     let(:view)  { ObjectTable::View.new(table){ col1 > 2 } }
 
-    let(:block) { Proc.new{'success!'} }
-
-    subject{ view.cache_indices(&block) }
-
-    it 'should call the block' do
-      expect(block).to receive(:call)
-      subject
+    it 'should yield to the block' do
+      expect{|b| view.cache_indices(&b)}.to yield_control
     end
   end
 
@@ -110,13 +105,8 @@ describe ObjectTable::View do
     let(:table) { ObjectTable.new(col1: [1, 2, 3], col2: 5) }
     let(:view)  { ObjectTable::View.new(table){ col1 > 2 } }
 
-    let(:block) { Proc.new{'success!'} }
-
-    subject{ view.cache_columns(&block) }
-
-    it 'should call the block' do
-      expect(block).to receive(:call)
-      subject
+    it 'should yield to the block' do
+      expect{|b| view.cache_columns(&b)}.to yield_control
     end
   end
 
