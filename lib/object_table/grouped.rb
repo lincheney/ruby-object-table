@@ -58,7 +58,7 @@ class ObjectTable::Grouped
       when ObjectTable::BasicGrid
         nrows = value._ensure_uniform_columns!
       else
-        nrows = (ObjectTable::Column.length_of(value) rescue 1)
+        nrows = (ObjectTable::Column.length_of(value) or 1)
       end
 
       keys.concat( [key] * nrows )

@@ -15,8 +15,8 @@ describe ObjectTable::Column do
       expect(described_class.length_of NArray.float(0)).to eql 0
     end
 
-    it 'should fail on other inputs' do
-      expect{described_class.length_of 123456}.to raise_error
+    it 'should return nil on other inputs' do
+      expect(described_class.length_of 123456).to be_nil
     end
   end
 

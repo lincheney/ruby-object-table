@@ -31,7 +31,6 @@ module ObjectTable::TableMethods
   def_delegator :columns, :delete, :pop_column
   def_delegator :columns, :[], :get_column
   alias_method :[], :get_column
-  alias_method :[]=, :set_column
 
   def set_column(name, value, *args)
     column = get_column(name)
@@ -62,6 +61,7 @@ module ObjectTable::TableMethods
       raise e
     end
   end
+  alias_method :[]=, :set_column
 
 
   def apply(&block)

@@ -4,12 +4,9 @@ module ObjectTable::Column
 
   def self.length_of(array)
     case array
-    when Array
-      array.length
-    when NArray
-      array.shape.last or 0
-    else
-      raise "Expected Array or NArray, got #{array}"
+    when Array then array.length
+    when NArray then (array.shape.last or 0)
+    else nil
     end
   end
 
