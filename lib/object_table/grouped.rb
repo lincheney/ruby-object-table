@@ -34,9 +34,8 @@ class ObjectTable::Grouped
 
   def each(&block)
     names, groups = _groups()
-    enumerator = _make_groups(names, groups)
-    return enumerator unless block
-    enumerator.each{|grp| grp._apply_block(&block)}
+    return to_enum(:_make_groups, names, groups) unless block
+    _make_groups(names, groups){|grp| grp._apply_block(&block)}
   end
 
   def apply(&block)
@@ -44,7 +43,7 @@ class ObjectTable::Grouped
     value_key = self.class._generate_name(DEFAULT_VALUE_PREFIX, names).to_sym
     nrows = []
 
-    data = _make_groups(names, groups).map do |group|
+    data = to_enum(:_make_groups, names, groups).map do |group|
       value = group._apply_block(&block)
 
       case value
@@ -73,15 +72,12 @@ class ObjectTable::Grouped
     __table_cls__.new(keys.merge!(result.columns))
   end
 
-
   def _make_groups(names, groups)
     key_struct = Struct.new(*names.map(&:to_sym))
-    enumerator = Enumerator.new do |y|
-      groups.each do |k, v|
-        y.yield __group_cls__.new(@parent, key_struct.new(*k), v)
-      end
-      @parent
+    groups.each do |k, v|
+      yield __group_cls__.new(@parent, key_struct.new(*k), v)
     end
+    @parent
   end
 
   def self._generate_name(prefix, existing_names)
