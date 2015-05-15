@@ -46,27 +46,27 @@ class ObjectTable::Grouped
     end
 
     value_key = self.class._generate_name(DEFAULT_VALUE_PREFIX, names).to_sym
-    nrows = []
+    keys = []
 
-    data = to_enum(:_make_groups, names, groups).map do |group|
+    data = groups.keys.zip(to_enum(:_make_groups, names, groups)).map do |key, group|
       value = Util.apply_block(group, block)
 
       case value
       when ObjectTable::TableMethods
-        nrows.push(value.nrows)
+        nrows = value.nrows
         value = value.columns
       when ObjectTable::BasicGrid
-        nrows.push(value._ensure_uniform_columns!)
+        nrows = value._ensure_uniform_columns!
       else
-        nrows.push( (ObjectTable::Column.length_of(value) rescue 1) )
+        nrows = (ObjectTable::Column.length_of(value) rescue 1)
       end
 
+      keys.concat( [key] * nrows )
       value = ObjectTable::BasicGrid[value_key, value] unless value.is_a?(ObjectTable::BasicGrid)
       value
     end
 
-    keys = groups.keys.transpose.map{|col| col.zip(nrows).flat_map{|key, rows| [key] * rows}}
-    keys = ObjectTable::BasicGrid[names.zip(keys)]
+    keys = ObjectTable::BasicGrid[names.zip(keys.transpose)]
     result = __table_cls__._stack(data)
     __table_cls__.new(keys.merge!(result.columns))
   end
