@@ -6,25 +6,11 @@ RSpec.shared_examples 'an object table' do |cls|
   end
 
   def _make_relevant_table(table)
-    if @cls == ObjectTable
-      table
-
-#       for views, basically add one row to the parent and mask the view
-#       so that it only includes the original rows
-    elsif @cls == ObjectTable::View
-      table.stack! ObjectTable::BasicGrid[table.columns.map{|k, v| [k, v.max]}]
-      column = table.colnames.first
-      table[column][-1] += 1
-      table.where{table[column] < table[column][-1]}
-
-    elsif @cls == ObjectTable::StaticView
-      table.stack! ObjectTable::BasicGrid[table.columns.map{|k, v| [k, v.max]}]
-      column = table.colnames.first
-      table[column][-1] += 1
-      table.where{table[column] < table[column][-1]}.apply{ self }
-
-    else
-      nil
+    case [@cls]
+    when [ObjectTable] then table
+    when [ObjectTable::View] then table.where{true}
+    when [ObjectTable::StaticView] then table.where{true}.apply{self}
+    else nil
     end
   end
 
@@ -404,6 +390,54 @@ EOS
         col3: [7, 8, 5, 6],
       )
     end
+  end
+
+  describe '#each_row' do
+    let(:col1)  { [1, 2, 3, 4] }
+    let(:col2)  { [NArray[1, -1], NArray[2, -2], NArray[3, -3], NArray[4, -4]] }
+    let(:col3)  { %w{ a b c d } }
+
+    let(:table) { ObjectTable.new(col1: col1, col2: col2, col3: col3) }
+
+    context 'with a block' do
+      it 'should yield successive rows' do
+        rows = []
+        subject.each_row{|row| rows.push row}
+        expect(rows.map(&:col1)).to eq col1
+        expect(rows.map(&:col2)).to eq col2
+        expect(rows.map(&:col3)).to eq col3
+      end
+    end
+
+    context 'without a block' do
+      it 'should return an enumerator' do
+        enum = subject.each_row
+        expect(enum).to be_a Enumerator
+      end
+
+      it 'should yield successive rows' do
+        rows = subject.each_row.to_a
+        expect(rows.map(&:col1)).to eq col1
+        expect(rows.map(&:col2)).to eq col2
+        expect(rows.map(&:col3)).to eq col3
+      end
+    end
+
+    context 'with specific columns' do
+      it 'should yield those columns' do
+        rows = subject.each_row(:col1, :col3).to_a
+        expect(rows.map(&:first)).to eq col1
+        expect(rows.map(&:last)).to eq col3
+      end
+    end
+
+    context 'with an empty table' do
+      let(:table) { ObjectTable.new }
+      it 'should do nothing' do
+        expect(subject.each_row.to_a).to be_empty
+      end
+    end
+
   end
 
 end
