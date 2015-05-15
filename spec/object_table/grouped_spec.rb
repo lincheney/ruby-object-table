@@ -76,40 +76,59 @@ describe ObjectTable::Grouped do
     subject{ grouped }
 
     it 'should mirror changes to the parent' do
-      expect(subject._groups[1]).to eql ({[1] => positive.to_a, [0] => negative.to_a})
+      expect(subject._groups).to eql ({[1] => positive.to_a, [0] => negative.to_a})
       table[:col1] = NArray.int(200).fill(2)
       table[:col1][0] = -100
-      expect(subject._groups[1]).to eql ({[1] => (1...200).to_a, [0] => [0]})
+      expect(subject._groups).to eql ({[1] => (1...200).to_a, [0] => [0]})
     end
   end
 
-  describe '#_groups' do
-    subject{ grouped._groups }
+  describe '#_keys' do
+    let(:grouped){ ObjectTable::Grouped.new(table){ {key1: col1 > 0, key2: col2 > 0.5} } }
 
-    it 'should return the names' do
-      expect(subject[0]).to eql [:pos]
+    it 'should return the keys' do
+      keys = grouped._keys.transpose
+      expect(keys).to eql [(table.col1 > 0).to_a, (table.col2 > 0.5).to_a]
     end
 
-    it 'should return the group key => row mapping' do
-      groups = subject[1]
-      expect(groups[[0]]).to eql negative.to_a
-      expect(groups[[1]]).to eql positive.to_a
+    it 'should set the names' do
+      grouped._keys
+      expect(grouped.instance_variable_get('@names')).to eql [:key1, :key2]
     end
 
     context 'when grouping by columns' do
       let(:table){ ObjectTable.new(key1: [0]*4 + [1]*4, key2: [0, 0, 1, 1]*2, data: 1..8 ) }
       let(:grouped){ ObjectTable::Grouped.new(table, :key1, :key2) }
 
-      it 'should use the columns as group names' do
-        expect(subject[0]).to eql [:key1, :key2]
+      it 'should use the columns as keys' do
+        keys = grouped._keys.transpose
+        expect(keys).to eql [table.key1.to_a, table.key2.to_a]
       end
 
+      it 'should set the names' do
+        grouped._keys
+        expect(grouped.instance_variable_get('@names')).to eql [:key1, :key2]
+      end
+    end
+  end
+
+  describe '#_groups' do
+    subject{ grouped._groups }
+
+    it 'should return the group key => row mapping' do
+      expect(subject[[0]]).to eql negative.to_a
+      expect(subject[[1]]).to eql positive.to_a
+    end
+
+    context 'when grouping by columns' do
+      let(:table){ ObjectTable.new(key1: [0]*4 + [1]*4, key2: [0, 0, 1, 1]*2, data: 1..8 ) }
+      let(:grouped){ ObjectTable::Grouped.new(table, :key1, :key2) }
+
       it 'should use the columns as groups' do
-        groups = subject[1]
-        expect(groups[[0, 0]]).to eql (table.key1.eq(0) & table.key2.eq(0)).where.to_a
-        expect(groups[[0, 1]]).to eql (table.key1.eq(0) & table.key2.eq(1)).where.to_a
-        expect(groups[[1, 0]]).to eql (table.key1.eq(1) & table.key2.eq(0)).where.to_a
-        expect(groups[[1, 1]]).to eql (table.key1.eq(1) & table.key2.eq(1)).where.to_a
+        expect(subject[[0, 0]]).to eql (table.key1.eq(0) & table.key2.eq(0)).where.to_a
+        expect(subject[[0, 1]]).to eql (table.key1.eq(0) & table.key2.eq(1)).where.to_a
+        expect(subject[[1, 0]]).to eql (table.key1.eq(1) & table.key2.eq(0)).where.to_a
+        expect(subject[[1, 1]]).to eql (table.key1.eq(1) & table.key2.eq(1)).where.to_a
       end
     end
   end

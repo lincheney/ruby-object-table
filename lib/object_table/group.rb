@@ -12,7 +12,7 @@ class ObjectTable::Group < ObjectTable::StaticView
   class Grid
     attr_reader :hash, :index
 
-    def initialize(names, keys, defaults)
+    def initialize(keys, defaults)
       unless defaults.is_a? Hash
         raise "Expected defaults to be a hash, got: #{defaults.inspect}"
       end
@@ -22,7 +22,6 @@ class ObjectTable::Group < ObjectTable::StaticView
       @hash = {}
       @index = Hash[keys.each_with_index.to_a]
       @length = keys.length
-      @key_struct = Struct.new(*names.map(&:to_sym))
     end
 
     def [](k)
@@ -37,9 +36,9 @@ class ObjectTable::Group < ObjectTable::StaticView
       Class.new(Struct){ attr_accessor :K, :R }
     end
 
-    def eval_block(key, row, block)
+    def eval_block(key, struct, row, block)
       @key = @index[key]
-      row.K = @key_struct.new(*key)
+      row.K = struct
       row.R = self
       ObjectTable::Util.apply_block(row, block)
     end
