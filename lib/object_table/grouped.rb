@@ -41,6 +41,10 @@ class ObjectTable::Grouped
 
   def apply(&block)
     names, groups = _groups()
+    if groups.empty?
+      return __table_cls__.new(names.zip([[]] * names.length))
+    end
+
     value_key = self.class._generate_name(DEFAULT_VALUE_PREFIX, names).to_sym
     nrows = []
 
@@ -61,14 +65,8 @@ class ObjectTable::Grouped
       value
     end
 
-    if groups.empty?
-      # empty table, so make all keys empty
-      keys = ObjectTable::BasicGrid[names.zip([[]] * names.length)]
-    else
-      keys = groups.keys.transpose.map{|col| col.zip(nrows).flat_map{|key, rows| [key] * rows}}
-      keys = ObjectTable::BasicGrid[names.zip(keys)]
-    end
-
+    keys = groups.keys.transpose.map{|col| col.zip(nrows).flat_map{|key, rows| [key] * rows}}
+    keys = ObjectTable::BasicGrid[names.zip(keys)]
     result = __table_cls__._stack(data)
     __table_cls__.new(keys.merge!(result.columns))
   end
