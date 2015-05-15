@@ -2,12 +2,17 @@ require 'object_table'
 require 'object_table/grouped'
 
 describe ObjectTable::Grouped do
-  let(:table){ ObjectTable.new(col1: [1, 2, 3, 4], col2: [5, 6, 7, 8] ) }
-#     group based on parity (even vs odd)
-  let(:grouped){ ObjectTable::Grouped.new(table){ {parity: col1 % 2} } }
+  let(:col1)  { ((1..100).to_a + (-100..-1).to_a).shuffle }
+  let(:col2)  { NArray.float(10, 200).random }
 
-  let(:even){ (table.col1 % 2).eq(0).where }
-  let(:odd) { (table.col1 % 2).eq(1).where }
+  let(:table){ ObjectTable.new(col1: col1, col2: col2 ) }
+  let(:grouped){ ObjectTable::Grouped.new(table){ {pos: col1 > 0} } }
+
+  let(:positive)  { (table.col1 > 0).where }
+  let(:negative)  { (table.col1 < 0).where }
+
+  let(:pos_group) { table.where{|t| positive} }
+  let(:neg_group) { table.where{|t| negative} }
 
   describe '._generate_name' do
     let(:prefix){ 'key_' }
@@ -71,9 +76,10 @@ describe ObjectTable::Grouped do
     subject{ grouped }
 
     it 'should mirror changes to the parent' do
-      expect(subject._groups[1]).to eql ({[0] => [1, 3], [1] => [0, 2]})
-      table[:col1] = [2, 3, 4, 5]
-      expect(subject._groups[1]).to eql ({[0] => [0, 2], [1] => [1, 3]})
+      expect(subject._groups[1]).to eql ({[1] => positive.to_a, [0] => negative.to_a})
+      table[:col1] = NArray.int(200).fill(2)
+      table[:col1][0] = -100
+      expect(subject._groups[1]).to eql ({[1] => (1...200).to_a, [0] => [0]})
     end
   end
 
@@ -81,13 +87,13 @@ describe ObjectTable::Grouped do
     subject{ grouped._groups }
 
     it 'should return the names' do
-      expect(subject[0]).to eql [:parity]
+      expect(subject[0]).to eql [:pos]
     end
 
     it 'should return the group key => row mapping' do
       groups = subject[1]
-      expect(groups[[0]]).to eql even.to_a
-      expect(groups[[1]]).to eql odd.to_a
+      expect(groups[[0]]).to eql negative.to_a
+      expect(groups[[1]]).to eql positive.to_a
     end
 
     context 'when grouping by columns' do
@@ -109,8 +115,6 @@ describe ObjectTable::Grouped do
   end
 
   describe '#each' do
-    let(:even_group){ table.where{ (col1 % 2).eq(0) } }
-    let(:odd_group) { table.where{ (col1 % 2).eq(1) } }
 
     context 'when the block takes an argument' do
       it 'should not evaluate in the context of the group' do
@@ -135,7 +139,7 @@ describe ObjectTable::Grouped do
     end
 
     it 'should yield the groups' do
-      groups = [even_group, odd_group]
+      groups = [pos_group, neg_group]
       grouped.each do |group|
         expect(groups).to include group
         groups -= [group]
@@ -145,26 +149,15 @@ describe ObjectTable::Grouped do
     it 'should give access to the keys' do
       keys = []
       grouped.each{ keys << Hash[@K.each_pair.to_a] }
-      expect(keys).to match_array [{parity: 0}, {parity: 1}]
+      expect(keys).to match_array [{pos: 0}, {pos: 1}]
     end
 
     it 'should give access to the correct key' do
       keys = []
       correct_keys = []
       grouped.each do
-        keys << [@K[:parity]]
-        correct_keys << (self.col1 % 2).to_a.uniq
-      end
-
-      expect(keys).to match_array(correct_keys)
-    end
-
-    it 'should give access to the correct key' do
-      keys = []
-      correct_keys = []
-      grouped.each do
-        keys << [@K.parity]
-        correct_keys << (self.col1 % 2).to_a.uniq
+        keys << [@K.pos]
+        correct_keys << (col1 > 0).to_a.uniq
       end
 
       expect(keys).to match_array(correct_keys)
@@ -176,7 +169,7 @@ describe ObjectTable::Grouped do
       end
 
       it 'should enumerate the groups' do
-        groups = [even_group, odd_group]
+        groups = [pos_group, neg_group]
         grouped.each.each do |group|
           expect(groups).to include group
           groups -= [group]
@@ -187,18 +180,16 @@ describe ObjectTable::Grouped do
   end
 
   describe '#apply' do
-    let(:even_group){ table.where{ (col1 % 2).eq(0) } }
-    let(:odd_group) { table.where{ (col1 % 2).eq(1) } }
-
-    subject{ grouped.apply{|group| group.col1.sum} }
+    subject{ grouped.apply{|group| group.col2.sum} }
 
     it 'should return a table with the group keys' do
       expect(subject).to be_a ObjectTable
-      expect(subject.colnames).to include :parity
+      expect(subject.colnames).to include :pos
     end
 
     it 'should concatenate the results of the block' do
-      expect(subject.sort_by(subject.parity)).to eql ObjectTable.new(parity: [0, 1], v_0: [6, 4])
+      value = [neg_group.col2.sum, pos_group.col2.sum]
+      expect(subject.sort_by(subject.pos)).to eql ObjectTable.new(pos: [0, 1], v_0: value)
     end
 
     describe 'value column auto naming' do
@@ -222,14 +213,14 @@ describe ObjectTable::Grouped do
 
       it 'should return a table with the group keys' do
         expect(subject).to be_a ObjectTable
-        expect(subject.colnames).to include :parity
+        expect(subject.colnames).to include :pos
       end
 
       it 'should stack the grids' do
-        expect(subject.sort_by(subject.parity)).to eql ObjectTable.new(
-          parity: [0, 1],
-          sum:    [even_group.col1.sum, odd_group.col1.sum],
-          mean:   [even_group.col2.mean, odd_group.col2.mean],
+        expect(subject.sort_by(subject.pos)).to eql ObjectTable.new(
+          pos:    [0, 1],
+          sum:    [neg_group.col1.sum, pos_group.col1.sum],
+          mean:   [neg_group.col2.mean, pos_group.col2.mean],
         )
       end
     end
@@ -239,14 +230,14 @@ describe ObjectTable::Grouped do
 
       it 'should return a table with the group keys' do
         expect(subject).to be_a ObjectTable
-        expect(subject.colnames).to include :parity
+        expect(subject.colnames).to include :pos
       end
 
       it 'should stack the grids' do
-        expect(subject.sort_by(subject.parity)).to eql ObjectTable.new(
-          parity: [0, 1],
-          sum:    [even_group.col1.sum, odd_group.col1.sum],
-          mean:   [even_group.col2.mean, odd_group.col2.mean],
+        expect(subject.sort_by(subject.pos)).to eql ObjectTable.new(
+          pos:    [0, 1],
+          sum:    [neg_group.col1.sum, pos_group.col1.sum],
+          mean:   [neg_group.col2.mean, pos_group.col2.mean],
         )
       end
     end
@@ -256,26 +247,26 @@ describe ObjectTable::Grouped do
 
       it 'should return a table with the group keys' do
         expect(subject).to be_a ObjectTable
-        expect(subject.colnames).to include :parity
+        expect(subject.colnames).to include :pos
       end
 
       it 'should stack the grids' do
-        expect(subject.where{parity.eq 0}.v_0).to eq even_group.col1[[0, -1]]
-        expect(subject.where{parity.eq 1}.v_0).to eq odd_group.col1[[0, -1]]
+        expect(subject.where{pos.eq 0}.v_0).to eq neg_group.col1[[0, -1]]
+        expect(subject.where{pos.eq 1}.v_0).to eq pos_group.col1[[0, -1]]
       end
     end
 
     context 'with results that are narrays' do
-      subject{ grouped.apply{ col1 < 2 } }
+      subject{ grouped.apply{ col2 < 0.5 } }
 
       it 'should return a table with the group keys' do
         expect(subject).to be_a ObjectTable
-        expect(subject.colnames).to include :parity
+        expect(subject.colnames).to include :pos
       end
 
       it 'should stack the grids' do
-        expect(subject.where{parity.eq 0}.v_0).to eq (even_group.col1 < 2)
-        expect(subject.where{parity.eq 1}.v_0).to eq (odd_group.col1 < 2)
+        expect(subject.where{pos.eq 0}.v_0).to eq (neg_group.col2 < 0.5)
+        expect(subject.where{pos.eq 1}.v_0).to eq (pos_group.col2 < 0.5)
       end
     end
 
@@ -341,7 +332,7 @@ describe ObjectTable::Grouped do
 
       it 'should return a table with no rows and only key columns' do
         expect(subject.nrows).to eql 0
-        expect(subject.columns.keys).to eql [:parity]
+        expect(subject.columns.keys).to eql [:pos]
       end
     end
 
