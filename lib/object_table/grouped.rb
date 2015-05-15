@@ -69,7 +69,7 @@ class ObjectTable::Grouped
       keys = ObjectTable::BasicGrid[names.zip(keys)]
     end
 
-    result = __table_cls__.stack(*data)
+    result = __table_cls__._stack(data)
     __table_cls__.new(keys.merge!(result.columns))
   end
 

@@ -7,6 +7,10 @@ module ObjectTable::Stacker
 
   module ClassMethods
     def stack(*grids)
+      _stack(grids)
+    end
+
+    def _stack(grids)
       keys = nil
 
       grids = grids.map do |grid|
