@@ -339,4 +339,101 @@ describe ObjectTable::Grouped do
   end
 
 
+  describe '#reduce' do
+    let(:col2)  { (NArray.float(10, 200).random * 100).to_i }
+    subject{ grouped.reduce{|row| row.R[:col2] += col2.sum } }
+
+    it 'should return a table with the group keys' do
+      expect(subject).to be_a ObjectTable
+      expect(subject.colnames).to include :pos
+    end
+
+    it 'should concatenate the results of the block' do
+      value = [neg_group.col2.sum, pos_group.col2.sum]
+      expect(subject.sort_by(subject.pos)).to eql ObjectTable.new(pos: [0, 1], col2: value)
+    end
+
+    context 'with results that are narrays' do
+      subject{ grouped.reduce{|row| row.R[:col2] += col2 } }
+
+      it 'should return a table with the group keys' do
+        expect(subject).to be_a ObjectTable
+        expect(subject.colnames).to include :pos
+      end
+
+      it 'should stack the grids' do
+        expect(subject.where{pos.eq 0}.col2.reshape(10)).to eq neg_group.col2.sum(1)
+        expect(subject.where{pos.eq 1}.col2.reshape(10)).to eq pos_group.col2.sum(1)
+      end
+    end
+
+    context 'when the block takes an argument', skip: true do
+      it 'should not evaluate in the context of the group' do
+        rspec_context = self
+
+        grouped.reduce do |group|
+          receiver = eval('self', binding)
+          expect(receiver).to_not be_a ObjectTable::Group
+          expect(receiver).to be rspec_context
+          nil
+        end
+      end
+    end
+
+    context 'when the block takes no arguments', skip: true do
+      it 'should call the block in the context of the group' do
+        _ = self
+        grouped.reduce do
+          receiver = eval('self', binding)
+          _.expect(receiver).to _.be_a ObjectTable::Group
+          nil
+        end
+      end
+    end
+
+    context 'with a matrix key', skip: true do
+      let(:ngroups) { 10 }
+      let(:table) do
+        ObjectTable.new(
+          key1: 10.times.map{[rand, 'abc']} * ngroups,
+          key2: 10.times.map{[rand, 'def', 'ghi']} * ngroups,
+          value: (ngroups*10).times.map{rand},
+        )
+      end
+
+      let(:grouped) { ObjectTable::Grouped.new(table, :key1, :key2) }
+      subject{ grouped.reduce{|row| row.R[:val] += value} }
+
+      it 'should return a table with the group keys' do
+        expect(subject).to be_a ObjectTable
+        expect(subject.colnames).to include :key1
+        expect(subject.colnames).to include :key2
+      end
+
+      it 'should preserve the dimensions of the keys' do
+        expect(subject.key1.shape[0...-1]).to eql table.key1.shape[0...-1]
+        expect(subject.key2.shape[0...-1]).to eql table.key2.shape[0...-1]
+      end
+
+      context 'with vector values' do
+        subject{ grouped.reduce{|row| row.R[:val] += value} }
+
+        it 'should work' do
+          expect{subject}.to_not raise_error
+        end
+      end
+    end
+
+    context 'on an empty table', skip: true do
+      let(:table) { ObjectTable.new(col1: [], col2: []) }
+
+      it 'should return a table with no rows and only key columns' do
+        expect(subject.nrows).to eql 0
+        expect(subject.columns.keys).to eql [:pos]
+      end
+    end
+
+  end
+
+
 end
