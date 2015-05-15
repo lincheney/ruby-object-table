@@ -1,11 +1,11 @@
 require 'forwardable'
 require_relative 'table_methods'
-require_relative 'table_child'
+require_relative 'factory'
 
 module ObjectTable::ViewMethods
   extend Forwardable
   include ObjectTable::TableMethods
-  include ObjectTable::TableChild
+  include ObjectTable::Factory::SubFactory
 
   def_delegators :@parent, :has_column?
 

@@ -17,11 +17,12 @@ describe 'Subclassing ObjectTable and friends' do
       end
     end
 
-    include Mixin
+#     include Mixin
 
-    class StaticView < StaticView; include Mixin; end
-    class View < View; include Mixin; end
-    class Group < Group; include Mixin; end
+#     class StaticView < StaticView; include Mixin; end
+#     class View < View; include Mixin; end
+#     class Group < Group; include Mixin; end
+    fully_include Mixin
   end
 
   let(:table){ MyTable.new(a: 0...100, b: 100.times.map{rand}) }
@@ -30,6 +31,22 @@ describe 'Subclassing ObjectTable and friends' do
 
   it 'should have the mixin method available' do
     expect(subject.a_plus_b).to eq (subject.a + subject.b)
+  end
+
+  it 'should include the mixin' do
+    expect(MyTable).to be < MyTable::Mixin
+  end
+
+  it 'should create new subclasses of views' do
+    expect(MyTable::View).to be < ObjectTable::View
+    expect(MyTable::StaticView).to be < ObjectTable::StaticView
+    expect(MyTable::Group).to be < ObjectTable::Group
+  end
+
+  it 'should include modules into view subclasses' do
+    expect(MyTable::View).to be < MyTable::Mixin
+    expect(MyTable::StaticView).to be < MyTable::Mixin
+    expect(MyTable::Group).to be < MyTable::Mixin
   end
 
   describe '#clone' do

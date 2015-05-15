@@ -6,10 +6,12 @@ require_relative "object_table/static_view"
 require_relative "object_table/column"
 require_relative "object_table/grouped"
 require_relative "object_table/stacker"
+require_relative "object_table/factory"
 
 class ObjectTable
   include TableMethods
   include Stacker
+  include Factory
 
   attr_reader :columns
 
@@ -39,22 +41,6 @@ class ObjectTable
       columns[k] = v[sort_index]
     end
     self
-  end
-
-  def __static_view_cls__
-    self.class::StaticView
-  end
-
-  def __view_cls__
-    self.class::View
-  end
-
-  def __group_cls__
-    self.class::Group
-  end
-
-  def __table_cls__
-    self.class
   end
 
 end

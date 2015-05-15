@@ -1,10 +1,10 @@
 require_relative 'group'
-require_relative 'table_child'
+require_relative 'factory'
 require_relative 'util'
 
 class ObjectTable::Grouped
-  DEFAULT_VALUE_PREFIX = 'v_'
-  include ObjectTable::TableChild
+  DEFAULT_VALUE_PREFIX = 'v_'.freeze
+  include ObjectTable::Factory::SubFactory
   Util = ObjectTable::Util
 
   def initialize(parent, *names, &grouper)
