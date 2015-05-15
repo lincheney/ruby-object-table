@@ -419,6 +419,10 @@ describe ObjectTable::Grouped do
           break
         end
       end
+
+      it 'should fail if defaults are badly specified' do
+        expect{ grouped.reduce(123){} }.to raise_error
+      end
     end
 
     context 'with a matrix key' do
