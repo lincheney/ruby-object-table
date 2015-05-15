@@ -458,7 +458,7 @@ describe ObjectTable::Grouped do
       end
     end
 
-    context 'on an empty table', skip: true do
+    context 'on an empty table' do
       let(:table) { ObjectTable.new(col1: [], col2: []) }
 
       it 'should return a table with no rows and only key columns' do

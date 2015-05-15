@@ -75,6 +75,10 @@ class ObjectTable::Grouped
 
   def reduce(defaults={}, &block)
     names, keys = _keys()
+    if keys.empty?
+      return __table_cls__.new(names.zip([[]] * names.length))
+    end
+
     data = ObjectTable::Group::Grid.new(names, keys, defaults)
 
     keys.zip(@parent.each_row(row_struct: data.row_struct)) do |k, row|
@@ -82,8 +86,8 @@ class ObjectTable::Grouped
     end
 
     keys = ObjectTable::BasicGrid[names.zip(data.index.keys.transpose)]
-    d = data.index.values
-    __table_cls__.new(keys.merge!(Hash[data.hash.map{|k, v| [k, v.values_at(*d)]}]))
+    index = data.index.values
+    __table_cls__.new(keys.merge!(Hash[data.hash.map{|k, v| [k, v.values_at(*index)]}]))
   end
 
   def _make_groups(names, groups)
