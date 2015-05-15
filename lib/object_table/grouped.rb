@@ -89,9 +89,9 @@ class ObjectTable::Grouped
     @parent
   end
 
-  def self._generate_name(prefix, existing_names)
+  def self._generate_name(prefix, names)
     regex = Regexp.new(Regexp.quote(prefix) + '(\d+)')
-    i = existing_names.map(&regex.method(:match)).compact.map{|match| match[-1].to_i}.max || -1
+    i = names.map{|n| n =~ regex and $1.to_i}.compact.max || -1
     "#{prefix}#{i + 1}"
   end
 

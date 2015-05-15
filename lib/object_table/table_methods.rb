@@ -102,7 +102,7 @@ module ObjectTable::TableMethods
   end
 
   def each_row(*cols, row_struct: Struct)
-    return to_enum(:each_row, *cols, row_struct: row_struct ) unless block_given?
+    return to_enum(:each_row, *cols, row_struct: row_struct) unless block_given?
     return if ncols == 0
 
     cls = nil
