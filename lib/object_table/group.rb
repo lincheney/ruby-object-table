@@ -12,7 +12,13 @@ class ObjectTable::Group < ObjectTable::StaticView
   class Grid
     attr_reader :hash, :index
 
-    def initialize(names, keys)
+    def initialize(names, keys, defaults)
+      unless defaults.is_a? Hash
+        raise "Expected defaults to be a hash, got: #{defaults.inspect}"
+      end
+      defaults.default = 0
+      @defaults = defaults
+
       @hash = {}
       @index = Hash[keys.each_with_index.to_a]
       @length = keys.length
@@ -20,7 +26,7 @@ class ObjectTable::Group < ObjectTable::StaticView
     end
 
     def [](k)
-      (@hash[k] ||= Array.new(@length, 0))[@key]
+      (@hash[k] ||= Array.new(@length, @defaults[k]))[@key]
     end
 
     def []=(k, v)

@@ -73,9 +73,9 @@ class ObjectTable::Grouped
     __table_cls__.new(keys.merge!(result.columns))
   end
 
-  def reduce(&block)
+  def reduce(defaults={}, &block)
     names, keys = _keys()
-    data = ObjectTable::Group::Grid.new(names, keys)
+    data = ObjectTable::Group::Grid.new(names, keys, defaults)
 
     keys.zip(@parent.each_row(row_struct: data.row_struct)) do |k, row|
       data.eval_block(k, row, block)

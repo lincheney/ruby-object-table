@@ -391,6 +391,22 @@ describe ObjectTable::Grouped do
       end
     end
 
+    describe 'defaults' do
+      it 'should default to 0' do
+        grouped.reduce do |row|
+          expect(row.R[:key]).to eql 0
+          break
+        end
+      end
+
+      it 'should enforce defaults' do
+        grouped.reduce(key: 1) do |row|
+          expect(row.R[:key]).to eql 1
+          break
+        end
+      end
+    end
+
     context 'with a matrix key', skip: true do
       let(:ngroups) { 10 }
       let(:table) do
