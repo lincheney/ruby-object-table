@@ -1,9 +1,11 @@
 require 'forwardable'
 require_relative 'printable'
+require_relative 'util'
 
 module ObjectTable::TableMethods
   include ObjectTable::Printable
   extend Forwardable
+  Util = ObjectTable::Util
 
   attr_reader :R
   def initialize
@@ -69,18 +71,10 @@ module ObjectTable::TableMethods
   end
 
   def apply(&block)
-    result = _apply_block(&block)
+    result = Util.apply_block(self, block)
 
     return result unless result.is_a? ObjectTable::BasicGrid
     __table_cls__.new(result)
-  end
-
-  def _apply_block(&block)
-    if block.arity == 0
-      result = instance_eval &block
-    else
-      result = block.call(self)
-    end
   end
 
   def where(&block)

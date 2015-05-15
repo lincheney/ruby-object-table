@@ -1,9 +1,11 @@
 require 'forwardable'
 require_relative 'view_methods'
 require_relative 'masked_column'
+require_relative 'util'
 
 class ObjectTable::View
   include ObjectTable::ViewMethods
+  Util = ObjectTable::Util
 
   extend Forwardable
   def_delegators :make_view, :apply
@@ -34,7 +36,7 @@ class ObjectTable::View
   end
 
   def indices
-    @indices or NArray.int(@parent.nrows).indgen![@parent._apply_block &@filter]
+    @indices or NArray.int(@parent.nrows).indgen![Util.apply_block(@parent, @filter)]
   end
 
   def cache_indices(&block)

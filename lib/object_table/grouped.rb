@@ -1,9 +1,11 @@
 require_relative 'group'
 require_relative 'table_child'
+require_relative 'util'
 
 class ObjectTable::Grouped
   DEFAULT_VALUE_PREFIX = 'v_'
   include ObjectTable::TableChild
+  Util = ObjectTable::Util
 
   def initialize(parent, *names, &grouper)
     @parent = parent
@@ -34,7 +36,7 @@ class ObjectTable::Grouped
   def each(&block)
     names, groups = _groups()
     return to_enum(:_make_groups, names, groups) unless block
-    _make_groups(names, groups){|grp| grp._apply_block(&block)}
+    _make_groups(names, groups){|grp| Util.apply_block(grp, block)}
   end
 
   def apply(&block)
@@ -43,7 +45,7 @@ class ObjectTable::Grouped
     nrows = []
 
     data = to_enum(:_make_groups, names, groups).map do |group|
-      value = group._apply_block(&block)
+      value = Util.apply_block(group, block)
 
       case value
       when ObjectTable::TableMethods
