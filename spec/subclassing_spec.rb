@@ -149,6 +149,12 @@ describe 'Subclassing ObjectTable and friends' do
 
     end
 
+    describe '#reduce' do
+      it 'should aggregate into a subclassed table' do
+        expect(subject.reduce{}).to be_a MyTable
+      end
+    end
+
   end
 
   describe '#sort_by' do
