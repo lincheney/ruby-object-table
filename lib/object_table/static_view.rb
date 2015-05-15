@@ -23,10 +23,7 @@ class ObjectTable::StaticView
   end
 
   def get_column(name)
-    @columns.fetch(name) do
-      col = super
-      @columns[name] = col if col
-    end
+    @columns[name] ||= super
   end
 
   def add_column(name, *args)
