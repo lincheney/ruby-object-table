@@ -362,8 +362,22 @@ describe ObjectTable::Grouped do
       end
 
       it 'should stack the grids' do
-        expect(subject.where{pos.eq 0}.col2.reshape(10)).to eq neg_group.col2.sum(1)
-        expect(subject.where{pos.eq 1}.col2.reshape(10)).to eq pos_group.col2.sum(1)
+        expect(subject.where{pos.eq 0}.col2).to eq neg_group.col2.sum(1).reshape(10, 1)
+        expect(subject.where{pos.eq 1}.col2).to eq pos_group.col2.sum(1).reshape(10, 1)
+      end
+    end
+
+    context 'with results that are arrays' do
+      subject{ grouped.reduce(col2: []){ @R[:col2] += col2.to_a } }
+
+      it 'should return a table with the group keys' do
+        expect(subject).to be_a ObjectTable
+        expect(subject.colnames).to include :pos
+      end
+
+      it 'should stack the grids' do
+        expect(subject.where{pos.eq 0}.col2).to eq neg_group.col2.reshape(1000, 1)
+        expect(subject.where{pos.eq 1}.col2).to eq pos_group.col2.reshape(1000, 1)
       end
     end
 
@@ -407,18 +421,20 @@ describe ObjectTable::Grouped do
       end
     end
 
-    context 'with a matrix key', skip: true do
-      let(:ngroups) { 10 }
+    context 'with a matrix key' do
+      let(:group_count) { 10 }
+      let(:group_size)  { 15 }
+
       let(:table) do
         ObjectTable.new(
-          key1: 10.times.map{[rand, 'abc']} * ngroups,
-          key2: 10.times.map{[rand, 'def', 'ghi']} * ngroups,
-          value: (ngroups*10).times.map{rand},
+          key1: group_count.times.map{[rand, 'abc']} * group_size,
+          key2: group_count.times.map{[rand, 'def', 'ghi']} * group_size,
+          value: (group_size * group_count).times.map{rand},
         )
       end
 
       let(:grouped) { ObjectTable::Grouped.new(table, :key1, :key2) }
-      subject{ grouped.reduce{|row| row.R[:val] += value} }
+      subject{ grouped.reduce{@R[:value] += value} }
 
       it 'should return a table with the group keys' do
         expect(subject).to be_a ObjectTable
@@ -432,10 +448,12 @@ describe ObjectTable::Grouped do
       end
 
       context 'with vector values' do
-        subject{ grouped.reduce{|row| row.R[:val] += value} }
+        subject{ grouped.reduce(value: []){ @R[:value] += [value] } }
 
         it 'should work' do
           expect{subject}.to_not raise_error
+          expect(subject.nrows).to eql group_count
+          expect(subject.value.shape).to eq [group_size, group_count]
         end
       end
     end
