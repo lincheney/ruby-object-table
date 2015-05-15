@@ -18,22 +18,20 @@ module ObjectTable::TableMethods
   end
   alias_method :eql?, :==
 
-  def colnames
-    columns.keys
-  end
-
   def nrows
-    columns.empty? ? 0 : (columns.values.first.shape[-1] or 0)
+    columns.empty? ? 0 : (columns.first[1].shape[-1] or 0)
   end
 
   def ncols
     columns.keys.length
   end
 
+  def_delegator :columns, :keys, :colnames
   def_delegator :columns, :include?, :has_column?
-
+  def_delegator :columns, :delete, :pop_column
   def_delegator :columns, :[], :get_column
   alias_method :[], :get_column
+  alias_method :[]=, :set_column
 
   def set_column(name, value, *args)
     column = get_column(name)
@@ -64,15 +62,10 @@ module ObjectTable::TableMethods
       raise e
     end
   end
-  alias_method :[]=, :set_column
 
-  def pop_column(name)
-    columns.delete name
-  end
 
   def apply(&block)
     result = Util.apply_block(self, block)
-
     return result unless result.is_a? ObjectTable::BasicGrid
     __table_cls__.new(result)
   end
@@ -123,7 +116,6 @@ module ObjectTable::TableMethods
       row = cls.new(*row) if cls
       yield row
     end
-
   end
 
 end
