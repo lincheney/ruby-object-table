@@ -18,18 +18,17 @@ class ObjectTable::Grouped
   end
 
   def _keys
-    if @names.empty?
-      keys = @parent.apply(&@grouper)
-      raise 'Group keys must be hashes' unless keys.is_a?(Hash)
-      keys = ObjectTable::BasicGrid.new.replace keys
-      keys._ensure_uniform_columns!(@parent.nrows)
-    else
-      keys = ObjectTable::BasicGrid[@names.map{|n| [n, @parent.get_column(n)]}]
+    unless @names.empty?
+      keys = @names.map{|n| @parent.get_column(n).to_a}.transpose
+      return [@names, keys]
     end
 
-    names = keys.keys
-    keys = keys.values.map(&:to_a).transpose
-    [names, keys]
+    keys = @parent.apply(&@grouper)
+    raise 'Group keys must be hashes' unless keys.is_a?(Hash)
+    keys = ObjectTable::BasicGrid.new.replace keys
+    keys._ensure_uniform_columns!(@parent.nrows)
+
+    [keys.keys, keys.values.map(&:to_a).transpose]
   end
 
   def each(&block)
