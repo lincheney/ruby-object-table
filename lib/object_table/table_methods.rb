@@ -114,13 +114,13 @@ module ObjectTable::TableMethods
     (0...nrows).zip(columns.map(&:to_a).transpose).sort_by(&:last).map(&:first)
   end
 
-  def each_row(*cols)
-    return to_enum(:each_row, *cols ) unless block_given?
+  def each_row(*cols, row_struct: Struct)
+    return to_enum(:each_row, *cols, row_struct: row_struct ) unless block_given?
     return if ncols == 0
 
     cls = nil
     if cols.empty?
-      cls = Struct.new(*colnames)
+      cls = row_struct.new(*colnames)
       cols = colnames
     end
 

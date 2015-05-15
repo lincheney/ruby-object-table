@@ -425,7 +425,7 @@ EOS
 
     context 'with specific columns' do
       it 'should yield those columns' do
-        rows = subject.each_row(:col1, :col3).to_a
+        rows = subject.each_row([:col1, :col3]).to_a
         expect(rows.map(&:first)).to eq col1
         expect(rows.map(&:last)).to eq col3
       end
@@ -435,6 +435,15 @@ EOS
       let(:table) { ObjectTable.new }
       it 'should do nothing' do
         expect(subject.each_row.to_a).to be_empty
+      end
+    end
+
+    context 'with a row struct' do
+      it 'should use the row struct' do
+        tmp_cls = Class.new(Struct)
+        subject.each_row(row_struct: tmp_cls) do |row|
+          expect(row).to be_a tmp_cls
+        end
       end
     end
 
