@@ -425,9 +425,8 @@ EOS
 
     context 'with specific columns' do
       it 'should yield those columns' do
-        rows = subject.each_row([:col1, :col3]).to_a
-        expect(rows.map(&:first)).to eq col1
-        expect(rows.map(&:last)).to eq col3
+        rows = subject.each_row(:col1, :col3).to_a.transpose
+        expect(rows).to eql [col1, col3]
       end
     end
 
