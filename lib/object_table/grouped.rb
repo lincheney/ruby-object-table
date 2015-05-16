@@ -100,7 +100,7 @@ class ObjectTable::Grouped
   end
 
   def empty_aggregation
-    __table_cls__.new(@names.zip(Array.new(@names.length, [])))
+    __table_cls__.new(@names.each_with_object([]).to_a)
   end
 
 end

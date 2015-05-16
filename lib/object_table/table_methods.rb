@@ -111,8 +111,9 @@ module ObjectTable::TableMethods
       cols = colnames
     end
 
+    columns = colnames.map{|c| get_column(c)}
     nrows.times do |i|
-      row = colnames.map{|c| get_column(c)[false, i]}
+      row = columns.map{|c| c[false, i]}
       row = cls.new(*row) if cls
       yield row
     end
