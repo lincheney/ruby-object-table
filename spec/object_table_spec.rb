@@ -253,4 +253,85 @@ describe ObjectTable do
     end
   end
 
+  describe '#join' do
+    let(:left) do
+      ObjectTable.new(
+        key1:   [ "a",  "b",  "a",  "b",  "c"],
+        lvalue: [   0,    1,    2,    3,    4],
+        )
+    end
+
+    let(:right) do
+      ObjectTable.new(
+        key1:   [ "d",  "c",  "b"],
+        rvalue: [   0,    1,    2],
+        )
+    end
+
+    context 'inner join' do
+      subject{ left.join(right, key=:key1, type: 'inner') }
+
+      let(:result) do
+        ObjectTable.new(
+          key1:   [ "b",  "b",  "c"],
+          lvalue: [   1,    3,    4],
+          rvalue: [   2,    2,    1],
+          )
+      end
+
+      it 'should return the joined result' do
+        expect(subject).to eql result
+      end
+    end
+
+    context 'left join' do
+      subject{ left.join(right, key=:key1, type: 'left') }
+
+      let(:result) do
+        ObjectTable.new(
+          key1:   [ "b",  "b",  "c",  "a",  "a"],
+          lvalue: [   1,    3,    4,    0,    2],
+          rvalue: [   2,    2,    1,    0,    0],
+          )
+      end
+
+      it 'should return the joined result' do
+        expect(subject).to eql result
+      end
+    end
+
+    context 'right join' do
+      subject{ left.join(right, key=:key1, type: 'right') }
+
+      let(:result) do
+        ObjectTable.new(
+          key1:   [ "b",  "b",  "c",  "d"],
+          lvalue: [   1,    3,    4,    0],
+          rvalue: [   2,    2,    1,    0],
+          )
+      end
+
+      it 'should return the joined result' do
+        expect(subject).to eql result
+      end
+    end
+
+    context 'outer join' do
+      subject{ left.join(right, key=:key1, type: 'outer') }
+
+      let(:result) do
+        ObjectTable.new(
+          key1:   [ "b",  "b",  "c",  "a",  "a",  "d"],
+          lvalue: [   1,    3,    4,    0,    2,    0],
+          rvalue: [   2,    2,    1,    0,    0,    0],
+          )
+      end
+
+      it 'should return the joined result' do
+        expect(subject).to eql result
+      end
+    end
+
+  end
+
 end
