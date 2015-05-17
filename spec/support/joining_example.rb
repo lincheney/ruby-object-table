@@ -2,34 +2,28 @@ require 'object_table'
 require_relative 'utils'
 
 RSpec.shared_examples 'a join operation' do |all_left, all_right|
-  let(:groups)  { 50 }
-  let(:lsize)   { 10 }
-  let(:rsize)   { 5 }
+  let(:total_groups)  { 50 }
+  let(:groups)        { 40 }
+  let(:lsize)         { 10 }
+  let(:rsize)         { 5 }
 
-  let(:lgroups) { 40 }
-  let(:rgroups) { 40 }
-
-  let(:key1)    { (0...groups).map{|i| "key1_#{i}"} }
-  let(:key2)    { (0...groups).map{|i| "key2_#{i}"} }
-
-  let(:lkeys)   { 0...lgroups }
-  let(:rkeys)   { (groups-rgroups)..-1 }
-  let(:common_keys) { (groups-rgroups)...lgroups }
+  let(:key1)    { (0...total_groups).map{|i| "key1_#{i}"} }
+  let(:key2)    { (0...total_groups).map{|i| "key2_#{i}"} * 2 }
 
   let(:__left__) do
     ObjectTable.new(
-      key1:   key1[lkeys] * lsize,
-      key2:   key2[lkeys] * lsize,
-      lval1:  NArray.object(lgroups * lsize).map!{rand},
-      lval2:  NArray.object(10, lgroups * lsize).map!{rand},
+      key1:   key1[0, groups] * lsize,
+      key2:   key2[0, groups/2] * 2 * lsize,
+      lval1:  NArray.object(groups * lsize).map!{rand},
+      lval2:  NArray.object(10, groups * lsize).map!{rand},
       )
   end
 
   let(:__right__) do
     ObjectTable.new(
-      key1:   key1[rkeys] * rsize,
-      key2:   key2[rkeys] * rsize,
-      rval1:  NArray.object(rgroups * rsize).map!{rand},
+      key1:   key1[-groups, groups] * rsize,
+      key2:   key2[-groups, groups/2] * 2 * rsize,
+      rval1:  NArray.object(groups * rsize).map!{rand},
       )
   end
 
@@ -40,17 +34,16 @@ RSpec.shared_examples 'a join operation' do |all_left, all_right|
   let(:left_only)   { subject.where{rval1.eq nil}.clone }
   let(:right_only)  { subject.where{lval1.eq nil}.clone }
 
+  let(:lkeys) { ObjectTable::Util.get_rows(left, [:key1, :key2]) }
+  let(:rkeys) { ObjectTable::Util.get_rows(right, [:key1, :key2]) }
+
   let(:expected_left_only) do
-    a = left.apply{[key1.to_a, key2.to_a]}.transpose
-    b = [key1[0...-rgroups], key2[0...-rgroups]].transpose
-    mask = a.map{|k| b.include?(k) ? 1 : 0}
+    mask = lkeys.map{|k| rkeys.include?(k) ? 0 : 1}
     left.where{NArray.to_na(mask).to_type('byte')}
   end
 
   let(:expected_right_only) do
-    a = right.apply{[key1.to_a, key2.to_a]}.transpose
-    b = [key1[lgroups..-1], key2[lgroups..-1]].transpose
-    mask = a.map{|k| b.include?(k) ? 1 : 0}
+    mask = rkeys.map{|k| lkeys.include?(k) ? 0 : 1}
     right.where{NArray.to_na(mask).to_type('byte')}
   end
 
@@ -59,20 +52,22 @@ RSpec.shared_examples 'a join operation' do |all_left, all_right|
   end
 
   it 'should have the correct keys' do
+    join_keys = ObjectTable::Util.get_rows(subject, [:key1, :key2])
+
     unless all_left
-      expect(subject.key1.to_a).to_not include(*key1[0...-rgroups])
-      expect(subject.key2.to_a).to_not include(*key2[0...-rgroups])
+      expect(join_keys & (lkeys - rkeys)).to be_empty
     end
 
     unless all_right
-      expect(subject.key1.to_a).to_not include(*key1[lgroups...-1])
-      expect(subject.key2.to_a).to_not include(*key2[lgroups...-1])
+      expect(join_keys & (rkeys - lkeys)).to be_empty
     end
   end
 
   it 'should duplicate keys correctly' do
+    keys = lkeys & rkeys
     counts = common.group_by(:key1, :key2).apply{ nrows }
-    expect(counts.v_0.to_a).to eq ([lsize * rsize] * common_keys.size)
+    expect(ObjectTable::Util.get_rows(counts, [:key1, :key2])).to match_array(keys)
+    expect(counts.v_0.to_a).to eq ([lsize * rsize] * keys.size)
   end
 
   it 'should cross product the values' do
@@ -93,8 +88,9 @@ RSpec.shared_examples 'a join operation' do |all_left, all_right|
   describe 'missing left keys' do
     if all_right
       it 'should have the right keys' do
-        counts = right_only.group_by(:key1, :key2).apply{ nrows }
-        expect(counts.v_0.to_a).to eq ([rsize] * (groups - lgroups))
+        keys = rkeys - lkeys
+        expect(right_only.key1.to_a).to eq keys.transpose[0]
+        expect(right_only.key2.to_a).to eq keys.transpose[1]
       end
 
       it 'should fill the right values with nil' do
@@ -118,8 +114,9 @@ RSpec.shared_examples 'a join operation' do |all_left, all_right|
   describe 'with missing right keys' do
     if all_left
       it 'should have the left keys' do
-        counts = left_only.group_by(:key1, :key2).apply{ nrows }
-        expect(counts.v_0.to_a).to eq ([lsize] * (groups - rgroups))
+        keys = lkeys - rkeys
+        expect(left_only.key1.to_a).to eq keys.transpose[0]
+        expect(left_only.key2.to_a).to eq keys.transpose[1]
       end
 
       it 'should fill the right values with nil' do

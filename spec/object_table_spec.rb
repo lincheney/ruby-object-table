@@ -290,8 +290,9 @@ describe ObjectTable do
   end
 
   describe '.join' do
-    subject{ ObjectTable.join(left, right, :key1, :key2, type: join_type) }
-    it_behaves_like 'a table joiner'
+    it_behaves_like 'a table joiner' do
+      subject{ ObjectTable.join(left, right, :key1, :key2, type: join_type) }
+    end
   end
 
 end
