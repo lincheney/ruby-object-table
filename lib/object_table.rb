@@ -60,8 +60,9 @@ class ObjectTable
 
     lmissing = (type == 'right' or type == 'outer')
     if lmissing
-      missing = NArray.int(other.nrows).fill!(1)
+      missing = NArray.int(other.nrows + 1).fill!(1)
       missing[rindex] = 0
+      missing[-1] = 0
       missing = missing.where.to_a
       rindex.concat( missing )
       lindex.concat( missing.fill(-1) )
