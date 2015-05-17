@@ -1,4 +1,5 @@
 require 'forwardable'
+
 require_relative 'table_methods'
 require_relative 'factory'
 

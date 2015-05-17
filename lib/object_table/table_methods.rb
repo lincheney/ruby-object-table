@@ -79,7 +79,7 @@ module ObjectTable::TableMethods
   end
 
   def group_by(*args, &block)
-    ObjectTable::Grouped.new(self, *args, &block)
+    ObjectTable::Grouping.new(self, *args, &block)
   end
 
   def sort_by(*keys)
@@ -124,3 +124,5 @@ module ObjectTable::TableMethods
   end
 
 end
+
+require_relative "grouping" # put here to avoid circular dependency

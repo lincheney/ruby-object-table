@@ -4,7 +4,6 @@ require_relative "object_table/table_methods"
 require_relative "object_table/view"
 require_relative "object_table/static_view"
 require_relative "object_table/column"
-require_relative "object_table/grouped"
 require_relative "object_table/stacking"
 require_relative "object_table/factory"
 

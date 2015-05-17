@@ -2,7 +2,7 @@ require_relative 'group'
 require_relative 'factory'
 require_relative 'util'
 
-class ObjectTable::Grouped
+class ObjectTable::Grouping
   DEFAULT_VALUE_PREFIX = 'v_'.freeze
   include ObjectTable::Factory::SubFactory
   Util = ObjectTable::Util

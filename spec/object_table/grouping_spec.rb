@@ -1,12 +1,12 @@
 require 'object_table'
-require 'object_table/grouped'
+require 'object_table/grouping'
 
-describe ObjectTable::Grouped do
+describe ObjectTable::Grouping do
   let(:col1)  { ((1..100).to_a + (-100..-1).to_a).shuffle }
   let(:col2)  { NArray.float(10, 200).random }
 
   let(:table){ ObjectTable.new(col1: col1, col2: col2 ) }
-  let(:grouped){ ObjectTable::Grouped.new(table){ {pos: col1 > 0} } }
+  let(:grouped){ described_class.new(table){ {pos: col1 > 0} } }
 
   let(:positive)  { (table.col1 > 0).where }
   let(:negative)  { (table.col1 < 0).where }
@@ -16,7 +16,7 @@ describe ObjectTable::Grouped do
 
   describe '._generate_name' do
     let(:prefix){ 'key_' }
-    subject{ ObjectTable::Grouped._generate_name(prefix, existing_keys) }
+    subject{ described_class._generate_name(prefix, existing_keys) }
 
     context 'with no matching keys' do
       let(:existing_keys){ ['a', 'b', 'c'] }
@@ -40,7 +40,7 @@ describe ObjectTable::Grouped do
       it 'should not evaluate in the context of the table' do
         rspec_context = self
 
-        grouped = ObjectTable::Grouped.new(table) do |tbl|
+        grouped = described_class.new(table) do |tbl|
           receiver = eval('self', binding)
           expect(receiver).to_not be table
           expect(receiver).to be rspec_context
@@ -50,7 +50,7 @@ describe ObjectTable::Grouped do
       end
 
       it 'should pass the table into the block' do
-        grouped = ObjectTable::Grouped.new(table) do |tbl|
+        grouped = described_class.new(table) do |tbl|
           expect(tbl).to be table
           {}
         end
@@ -61,7 +61,7 @@ describe ObjectTable::Grouped do
     context 'when the block takes no arguments' do
       it 'should call the block in the context of the table' do
         _ = self
-        grouped = ObjectTable::Grouped.new(table) do
+        grouped = described_class.new(table) do
           receiver = eval('self', binding)
           _.expect(receiver).to _.be _.table
           {}
@@ -84,7 +84,7 @@ describe ObjectTable::Grouped do
   end
 
   describe '#_keys' do
-    let(:grouped){ ObjectTable::Grouped.new(table){ {key1: col1 > 0, key2: col2 > 0.5} } }
+    let(:grouped){ described_class.new(table){ {key1: col1 > 0, key2: col2 > 0.5} } }
 
     it 'should return the keys' do
       keys = grouped._keys.transpose
@@ -98,7 +98,7 @@ describe ObjectTable::Grouped do
 
     context 'when grouping by columns' do
       let(:table){ ObjectTable.new(key1: [0]*4 + [1]*4, key2: [0, 0, 1, 1]*2, data: 1..8 ) }
-      let(:grouped){ ObjectTable::Grouped.new(table, :key1, :key2) }
+      let(:grouped){ described_class.new(table, :key1, :key2) }
 
       it 'should use the columns as keys' do
         keys = grouped._keys.transpose
@@ -122,7 +122,7 @@ describe ObjectTable::Grouped do
 
     context 'when grouping by columns' do
       let(:table){ ObjectTable.new(key1: [0]*4 + [1]*4, key2: [0, 0, 1, 1]*2, data: 1..8 ) }
-      let(:grouped){ ObjectTable::Grouped.new(table, :key1, :key2) }
+      let(:grouped){ described_class.new(table, :key1, :key2) }
 
       it 'should use the columns as groups' do
         expect(subject[[0, 0]]).to eql (table.key1.eq(0) & table.key2.eq(0)).where.to_a
@@ -213,14 +213,14 @@ describe ObjectTable::Grouped do
 
     describe 'value column auto naming' do
       it 'should auto name the value column' do
-        grouped = ObjectTable::Grouped.new(table){{parity: 1}}
+        grouped = described_class.new(table){{parity: 1}}
         result = grouped.apply{|group| group.col1.sum}
         expect(result).to have_column :v_0
         expect(result.v_0.to_a).to eql [table.col1.sum]
       end
 
       it 'should auto name the value column' do
-        grouped = ObjectTable::Grouped.new(table){{v_0: 1}}
+        grouped = described_class.new(table){{v_0: 1}}
         result = grouped.apply{|group| group.col1.sum}
         expect(result).to have_column :v_1
         expect(result.v_1.to_a).to eql [table.col1.sum]
@@ -323,7 +323,7 @@ describe ObjectTable::Grouped do
         )
       end
 
-      let(:grouped) { ObjectTable::Grouped.new(table, :key1, :key2) }
+      let(:grouped) { described_class.new(table, :key1, :key2) }
       subject{ grouped.apply{|group| group.value.sum} }
 
       it 'should return a table with the group keys' do
@@ -406,7 +406,7 @@ describe ObjectTable::Grouped do
 
         grouped.reduce do |group|
           receiver = eval('self', binding)
-          expect(receiver).to_not be_a ObjectTable::Group
+          expect(receiver).to_not be_a described_class
           expect(receiver).to be rspec_context
           nil
         end
@@ -456,7 +456,7 @@ describe ObjectTable::Grouped do
         )
       end
 
-      let(:grouped) { ObjectTable::Grouped.new(table, :key1, :key2) }
+      let(:grouped) { described_class.new(table, :key1, :key2) }
       subject{ grouped.reduce{@R[:value] += value} }
 
       it 'should return a table with the group keys' do
