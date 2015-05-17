@@ -5,8 +5,8 @@ require 'support/object_table_example'
 require 'support/view_example'
 
 describe ObjectTable::View do
-  it_behaves_like 'an object table', ObjectTable::View
-  it_behaves_like 'a table view', ObjectTable::View
+  it_behaves_like 'an object table'
+  it_behaves_like 'a table view'
 
   describe '#initialize' do
     let(:table) { ObjectTable.new(col1: [1, 2, 3], col2: 5) }

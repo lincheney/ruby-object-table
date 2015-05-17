@@ -4,8 +4,8 @@ require_relative 'utils'
 require 'support/joining_example'
 require 'support/stacking_example'
 
-RSpec.shared_examples 'an object table' do |cls|
-  subject{ make_table(table, cls) }
+RSpec.shared_examples 'an object table' do
+  subject{ make_table(table, described_class) }
 
   describe '#inspect' do
     let(:table){ ObjectTable.new(col1: 1..10, col2: 5) }
@@ -466,7 +466,7 @@ EOS
   end
 
   describe '#join' do
-    it_behaves_like 'a table joiner', cls do
+    it_behaves_like 'a table joiner' do
       subject{ left.join(right, :key1, :key2, type: join_type) }
     end
   end

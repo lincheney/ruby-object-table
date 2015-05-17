@@ -1,7 +1,7 @@
 require 'object_table'
 require_relative 'utils'
 
-RSpec.shared_examples 'a join operation' do |cls, all_left, all_right|
+RSpec.shared_examples 'a join operation' do |all_left, all_right|
   let(:groups)  { 50 }
   let(:lsize)   { 10 }
   let(:rsize)   { 5 }
@@ -33,8 +33,8 @@ RSpec.shared_examples 'a join operation' do |cls, all_left, all_right|
       )
   end
 
-  let(:left)  { make_table(__left__, cls) }
-  let(:right) { make_table(__right__, cls) }
+  let(:left)  { make_table(__left__, described_class) }
+  let(:right) { make_table(__right__, described_class) }
 
   let(:common)      { subject.where{lval1.ne(nil).and(rval1.ne(nil))}.clone }
   let(:left_only)   { subject.where{rval1.eq nil}.clone }
@@ -140,24 +140,24 @@ RSpec.shared_examples 'a join operation' do |cls, all_left, all_right|
 end
 
 
-RSpec.shared_examples 'a table joiner' do |cls|
+RSpec.shared_examples 'a table joiner' do
   context 'inner join' do
     let(:join_type) { 'inner' }
-    it_behaves_like 'a join operation', cls, false, false
+    it_behaves_like 'a join operation', false, false
   end
 
   context 'left join' do
     let(:join_type) { 'left' }
-    it_behaves_like 'a join operation', cls, true, false
+    it_behaves_like 'a join operation', true, false
   end
 
   context 'right join' do
     let(:join_type) { 'right' }
-    it_behaves_like 'a join operation', cls, false, true
+    it_behaves_like 'a join operation', false, true
   end
 
   context 'outer join' do
     let(:join_type) { 'outer' }
-    it_behaves_like 'a join operation', cls, true, true
+    it_behaves_like 'a join operation', true, true
   end
 end

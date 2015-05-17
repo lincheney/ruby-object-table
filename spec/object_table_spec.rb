@@ -5,7 +5,7 @@ require 'support/stacking_example'
 require 'support/joining_example'
 
 describe ObjectTable do
-  it_behaves_like 'an object table', ObjectTable
+  it_behaves_like 'an object table'
 
   describe '#initialize' do
     let(:columns){ {col1: [1, 2, 3], col2: NArray[4, 5, 6], col3: 7..9, col4: 10} }
@@ -291,7 +291,7 @@ describe ObjectTable do
 
   describe '.join' do
     subject{ ObjectTable.join(left, right, :key1, :key2, type: join_type) }
-    it_behaves_like 'a table joiner', ObjectTable
+    it_behaves_like 'a table joiner'
   end
 
 end

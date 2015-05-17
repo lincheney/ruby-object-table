@@ -1,24 +1,21 @@
 require 'object_table'
 
-RSpec.shared_examples 'a table view' do |cls|
-  before do
-    @cls = cls
-  end
+RSpec.shared_examples 'a table view' do
 
-  def _make_relevant_view(table, block)
-    if @cls == ObjectTable::View
-      @cls.new(table, &block)
+  def _make_relevant_view(table, block, cls)
+    if cls == ObjectTable::View
+      cls.new(table, &block)
 
-    elsif @cls == ObjectTable::StaticView
+    elsif cls == ObjectTable::StaticView
       indices = table.apply(&block).where
-      @cls.new(table, indices)
+      cls.new(table, indices)
 
     else
-      nil
+      raise "Could not make a a #{cls.inspect} view"
     end
   end
 
-  subject{ _make_relevant_view(table, block) }
+  subject{ _make_relevant_view(table, block, described_class) }
 
   describe '#columns' do
     let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: 5) }
@@ -52,7 +49,7 @@ RSpec.shared_examples 'a table view' do |cls|
   describe '#set_column' do
     let(:table) { ObjectTable.new(col1: [0, 1, 2, 3], col2: 5) }
     let(:block) { Proc.new{col1 > 0} }
-    let(:view)  { _make_relevant_view(table, block) }
+    let(:view)  { _make_relevant_view(table, block, described_class) }
 
     let(:value) { [10, 20, 30] }
     let(:args)  { [] }
@@ -189,7 +186,7 @@ RSpec.shared_examples 'a table view' do |cls|
   describe '#pop_column' do
     let(:table){ ObjectTable.new(col1: [1, 2, 3], col2: 5) }
     let(:block){ Proc.new{col1 > 2} }
-    let(:view) { _make_relevant_view(table, block) }
+    let(:view) { _make_relevant_view(table, block, described_class) }
     let(:name) { :col2 }
 
     subject{ view.pop_column(name) }
