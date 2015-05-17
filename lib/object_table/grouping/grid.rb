@@ -27,8 +27,10 @@ class ObjectTable::Grouping
       @hash[k][@id] = v
     end
 
-    def row_struct
-      Class.new(Struct){ attr_accessor :K, :R }
+    module RowFactory
+      def self.new(*args)
+        Struct.new(*args){ attr_accessor :K, :R }
+      end
     end
 
     def apply_to_rows(rows, key_struct, block)

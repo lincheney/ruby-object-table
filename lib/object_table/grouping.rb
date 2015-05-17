@@ -83,7 +83,7 @@ class ObjectTable
       return empty_aggregation if keys.empty?
 
       grid = Grid.new(keys, defaults)
-      rows = @parent.each_row(row_struct: grid.row_struct)
+      rows = @parent.each_row(row_factory: Grid::RowFactory)
       grid.apply_to_rows(rows, key_struct, block)
 
       keys = BasicGrid[@names.zip(grid.index.keys.transpose)]

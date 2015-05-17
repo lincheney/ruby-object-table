@@ -427,10 +427,10 @@ EOS
       end
     end
 
-    context 'with a row struct' do
-      it 'should use the row struct' do
+    context 'with a row factory' do
+      it 'should use the row factory' do
         tmp_cls = Class.new(Struct)
-        subject.each_row(row_struct: tmp_cls) do |row|
+        subject.each_row(row_factory: tmp_cls) do |row|
           expect(row).to be_a tmp_cls
         end
       end
