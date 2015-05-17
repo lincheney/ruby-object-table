@@ -27,19 +27,19 @@ module ObjectTable::Printable
       format = widths.to_a.map{|w| "%#{w}s"}.join
       rows.map{|row| format % row }
     end
-  end
 
+    def self.format_section(columns, row_slice)
+      numbers = split_column_lines('', row_slice.map{|i| "#{i}: "})
 
-  def _format_section(row_slice, slice)
-    numbers = Helper.split_column_lines('', row_slice.map{|i| "#{i}: "})
+      section = columns.map do |name, c|
+        c = c.slice(false, row_slice)
+        c = format_column(c)
+        c = split_column_lines(name.to_s, c)
+      end
 
-    section = columns.map do |name, c|
-      c = c.slice(false, row_slice)
-      c = Helper.format_column(c)
-      c = Helper.split_column_lines(name.to_s, c)
+      [numbers] + section
     end
 
-    ([numbers] + section).map{|col| col.slice(slice)}
   end
 
 
@@ -52,8 +52,8 @@ module ObjectTable::Printable
     separated = (nrows > max_section * 2)
     max_section = (nrows / 2) unless separated
 
-    head = _format_section(0...max_section, 0...-1).transpose
-    tail = _format_section((nrows - max_section)...nrows, 1..-1).transpose
+    head = Helper.format_section(columns, 0...max_section).transpose[0...-1]
+    tail = Helper.format_section(columns, (nrows - max_section)...nrows).transpose[1..-1]
     widths = Helper.calc_column_widths(head + tail, col_padding)
 
     rows = Helper.format_rows(head, widths)
