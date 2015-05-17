@@ -157,4 +157,15 @@ RSpec.shared_examples 'a table joiner' do
     let(:join_type) { 'outer' }
     it_behaves_like 'a join operation', true, true
   end
+
+  context 'with invalid join' do
+    let(:left)      { ObjectTable.new(key1: 1, key2: 2, value: 3) }
+    let(:right)     { ObjectTable.new(key1: 1, key2: 2, value: 4) }
+    let(:join_type) { 'asklj' }
+
+    it 'should fail' do
+      expect{subject}.to raise_error
+    end
+  end
+
 end

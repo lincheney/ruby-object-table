@@ -8,25 +8,35 @@ class ObjectTable
     end
 
     module ClassMethods
+      VALID_JOIN_TYPES = %w{ inner left outer right }.freeze
+
+      # -1 in an index indicates a missing value
       def join(left, right, *keys, type: 'inner')
+        incl_left = incl_right = false
+        case type
+        when 'left' then incl_left = true
+        when 'right' then incl_right = true
+        when 'outer' then incl_left = incl_right = true
+        when 'inner'
+        else raise "Expected one of (inner, left, outer, right), got #{type.inspect}"
+        end
+
         lkeys = Util.get_rows(left, keys)
         rkeys = Util.get_rows(right, keys)
 
         rgroups = Util.group_indices(rkeys)
-        if type == 'left' or type == 'outer'
-          rgroups.default = [-1]
-        else
-          rgroups.default = []
-        end
+        rgroups.default = (incl_left ? [-1] : []) # keep left missing values if incl_left
 
         lindex = rgroups.values_at(*lkeys)
         rindex = lindex.flatten
         lindex = lindex.each_with_index.flat_map{|r, i| r.fill(i)}
 
-        if type == 'right' or type == 'outer'
+        if incl_right
+          # rindex may have missing values
+          # so add a dud value at the end ...
           missing = NArray.int(right.nrows + 1).fill!(1)
           missing[rindex] = 0
-          missing[-1] = 0
+          missing[-1] = 0 # ... that we always exclude
           missing = missing.where
           rindex.concat( missing.to_a )
           lindex.fill(-1, lindex.length ... (lindex.length + missing.length))
@@ -41,7 +51,7 @@ class ObjectTable
         end
 
         table = __table_cls__.new(data)
-        unless blanks[0].empty?
+        if incl_right
           keys.each do |k|
             table[k][false, blanks[0]] = right[k][false, missing]
           end
