@@ -2,6 +2,7 @@ require 'object_table'
 require_relative 'utils'
 
 require 'support/joining_example'
+require 'support/stacking_example'
 
 RSpec.shared_examples 'an object table' do |cls|
   subject{ make_table(table, cls) }
@@ -438,9 +439,36 @@ EOS
 
   end
 
+  describe '#stack' do
+    it_behaves_like 'a stacking operation' do
+      subject{ grids[0].stack *grids[1..-1] }
+
+      it 'should make a new table' do
+        expect(subject).to_not be grids[0]
+      end
+
+      it 'should duplicate the contents' do
+        grids.each do |chunk|
+          expect(subject).to_not be chunk
+        end
+      end
+
+      context 'with no arguments' do
+        let(:table){ ObjectTable.new(col1: 1..100, col2: 5) }
+        let(:grids){ [table] }
+
+        it 'should make a copy' do
+          expect(subject).to eql table
+          expect(subject).to_not be table
+        end
+      end
+    end
+  end
+
   describe '#join' do
-    subject{ left.join(right, :key1, :key2, type: join_type) }
-    it_behaves_like 'a table joiner', cls
+    it_behaves_like 'a table joiner', cls do
+      subject{ left.join(right, :key1, :key2, type: join_type) }
+    end
   end
 
 end

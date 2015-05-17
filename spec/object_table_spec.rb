@@ -6,7 +6,6 @@ require 'support/joining_example'
 
 describe ObjectTable do
   it_behaves_like 'an object table', ObjectTable
-  it_behaves_like 'a table stacker'
 
   describe '#initialize' do
     let(:columns){ {col1: [1, 2, 3], col2: NArray[4, 5, 6], col3: 7..9, col4: 10} }
@@ -254,7 +253,43 @@ describe ObjectTable do
     end
   end
 
-  context do
+  describe '.stack' do
+    it_behaves_like 'a stacking operation' do
+      subject{ ObjectTable.stack(*grids) }
+
+      it 'should duplicate the contents' do
+        grids.each do |chunk|
+          expect(subject).to_not be chunk
+        end
+      end
+
+      context 'with no arguments' do
+        let(:grids){ [] }
+        it 'should return an empty table' do
+          expect(subject).to eql described_class.new
+        end
+      end
+
+      context 'with only a non-grid/table' do
+        let(:grids)  { ['not a table'] }
+        it 'should fail' do
+          expect{subject}.to raise_error
+        end
+      end
+    end
+  end
+
+  describe '#stack!' do
+    it_behaves_like 'a stacking operation' do
+      subject{ grids[0].stack! *grids[1..-1] }
+
+      it 'should modify the table' do
+        expect(subject).to be grids[0]
+      end
+    end
+  end
+
+  describe '.join' do
     subject{ ObjectTable.join(left, right, :key1, :key2, type: join_type) }
     it_behaves_like 'a table joiner', ObjectTable
   end

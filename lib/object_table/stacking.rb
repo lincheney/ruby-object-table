@@ -1,8 +1,12 @@
 module ObjectTable::Stacking
 
   def stack!(*others)
-    @columns.replace( self.class.stack(self, *others).columns )
+    @columns.replace( __table_cls__.stack(self, *others).columns )
     self
+  end
+
+  def stack(*others)
+    __table_cls__.stack(self, *others)
   end
 
   module ClassMethods
