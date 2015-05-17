@@ -17,6 +17,27 @@ describe ObjectTable::Util do
         expect(row).to eql [col1, col2]
       end
     end
-
   end
+
+  describe '.group_indices' do
+    let(:_key)  { %w{ a a b b a b c a } }
+    let(:key)   { NArray.to_na(_key) }
+
+    subject{ described_class.group_indices(key) }
+
+    it 'should return a hash' do
+      expect(subject).to be_a Hash
+    end
+
+    it 'should have all the keys' do
+      expect(subject.keys).to match_array(_key.uniq)
+    end
+
+    it 'should group indices by key' do
+      subject.each do |k, indices|
+        expect(indices).to eq key.eq(k).where.to_a
+      end
+    end
+  end
+
 end

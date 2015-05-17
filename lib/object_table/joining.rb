@@ -1,14 +1,13 @@
 require_relative 'util'
 
 module ObjectTable::Joining
-
   Util = ObjectTable::Util
 
   def join(other, *keys, type: 'inner')
     lkeys = Util.get_rows(self, keys)
     rkeys = Util.get_rows(other, keys)
 
-    rgroups = rkeys.length.times.group_by{|i| rkeys[i]}
+    rgroups = Util.group_indices(rkeys)
     if type == 'left' or type == 'outer'
       rgroups.default = [-1]
     else

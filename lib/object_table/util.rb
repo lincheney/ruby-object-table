@@ -12,4 +12,8 @@ module ObjectTable::Util
     columns.map{|n| table[n].to_a}.transpose
   end
 
+  def self.group_indices(keys)
+    keys.length.times.group_by{|i| keys[i]}
+  end
+
 end

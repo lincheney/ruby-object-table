@@ -43,13 +43,13 @@ class ObjectTable
     end
 
     def each(&block)
-      groups = _groups()
+      groups = Util.group_indices(_keys)
       return to_enum(:_make_groups, groups) unless block
       _make_groups(groups){|grp| Util.apply_block(grp, block)}
     end
 
     def apply(&block)
-      groups = _groups()
+      groups = Util.group_indices(_keys)
       return empty_aggregation if groups.empty?
 
       value_key = self.class._generate_name(DEFAULT_VALUE_PREFIX, @names).to_sym
