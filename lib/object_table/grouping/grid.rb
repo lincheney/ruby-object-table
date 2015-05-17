@@ -1,13 +1,6 @@
-require_relative 'static_view'
-require_relative 'util'
+require_relative '../util'
 
-class ObjectTable::Group < ObjectTable::StaticView
-  attr_reader :K
-
-  def initialize(parent, keys, value)
-    super(parent, value)
-    @K = keys
-  end
+class ObjectTable::Grouping
 
   class Grid
     attr_reader :hash, :index
