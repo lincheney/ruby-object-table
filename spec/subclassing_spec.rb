@@ -182,4 +182,20 @@ describe 'Subclassing ObjectTable and friends' do
     end
   end
 
+  describe '#stack' do
+    let(:stacked){ table.stack(table) }
+
+    it 'should return an instance of the table subclass' do
+      expect(stacked).to be_a MyTable
+    end
+  end
+
+  describe '#join' do
+    let(:joined){ table.join(table, :a) }
+
+    it 'should return an instance of the table subclass' do
+      expect(joined).to be_a MyTable
+    end
+  end
+
 end
