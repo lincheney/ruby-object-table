@@ -1,7 +1,7 @@
 require 'object_table'
 
 require 'support/object_table_example'
-require 'support/stacker_example'
+require 'support/stacking_example'
 
 describe ObjectTable do
   it_behaves_like 'an object table', ObjectTable
@@ -353,7 +353,7 @@ describe ObjectTable do
             expect(right_only.lval2.to_a).to eq [[nil] * 10] * right_only.nrows
           end
 
-          it 'should keep the right values' do
+          it 'should keep the right columns' do
             right_only.pop_column(:lval1)
             right_only.pop_column(:lval2)
             expect(right_only).to eq expected_right_only
@@ -377,7 +377,7 @@ describe ObjectTable do
             expect(left_only.rval1.to_a).to eq [nil] * left_only.nrows
           end
 
-          it 'should keep the left values' do
+          it 'should keep the left columns' do
             left_only.pop_column(:rval1)
             expect(left_only).to eq expected_left_only
           end
