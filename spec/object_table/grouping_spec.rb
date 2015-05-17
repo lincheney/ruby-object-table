@@ -46,7 +46,7 @@ describe ObjectTable::Grouping do
           expect(receiver).to be rspec_context
           {}
         end
-        grouped._groups # call _groups to make it call the block
+        grouped._keys # call _keys to make it call the block
       end
 
       it 'should pass the table into the block' do
@@ -54,7 +54,7 @@ describe ObjectTable::Grouping do
           expect(tbl).to be table
           {}
         end
-        grouped._groups # call _groups to make it call the block
+        grouped._keys # call _keys to make it call the block
       end
     end
 
@@ -66,7 +66,7 @@ describe ObjectTable::Grouping do
           _.expect(receiver).to _.be _.table
           {}
         end
-        grouped._groups # call _groups to make it call the block
+        grouped._keys # call _keys to make it call the block
       end
     end
 
@@ -76,10 +76,10 @@ describe ObjectTable::Grouping do
     subject{ grouped }
 
     it 'should mirror changes to the parent' do
-      expect(subject._groups).to eql ({[1] => positive.to_a, [0] => negative.to_a})
+      expect(subject._keys).to eq (table.col1 > 0).to_a.zip
       table[:col1] = NArray.int(200).fill(2)
       table[:col1][0] = -100
-      expect(subject._groups).to eql ({[1] => (1...200).to_a, [0] => [0]})
+      expect(subject._keys).to eql ([0] + [1] * 199).zip
     end
   end
 
@@ -108,27 +108,6 @@ describe ObjectTable::Grouping do
       it 'should set the names' do
         grouped._keys
         expect(grouped.instance_variable_get('@names')).to eql [:key1, :key2]
-      end
-    end
-  end
-
-  describe '#_groups' do
-    subject{ grouped._groups }
-
-    it 'should return the group key => row mapping' do
-      expect(subject[[0]]).to eql negative.to_a
-      expect(subject[[1]]).to eql positive.to_a
-    end
-
-    context 'when grouping by columns' do
-      let(:table){ ObjectTable.new(key1: [0]*4 + [1]*4, key2: [0, 0, 1, 1]*2, data: 1..8 ) }
-      let(:grouped){ described_class.new(table, :key1, :key2) }
-
-      it 'should use the columns as groups' do
-        expect(subject[[0, 0]]).to eql (table.key1.eq(0) & table.key2.eq(0)).where.to_a
-        expect(subject[[0, 1]]).to eql (table.key1.eq(0) & table.key2.eq(1)).where.to_a
-        expect(subject[[1, 0]]).to eql (table.key1.eq(1) & table.key2.eq(0)).where.to_a
-        expect(subject[[1, 1]]).to eql (table.key1.eq(1) & table.key2.eq(1)).where.to_a
       end
     end
   end

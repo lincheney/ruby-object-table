@@ -8,7 +8,6 @@ class ObjectTable
     end
 
     module ClassMethods
-      VALID_JOIN_TYPES = %w{ inner left outer right }.freeze
 
       # -1 in an index indicates a missing value
       def join(left, right, *keys, type: 'inner')

@@ -23,11 +23,6 @@ class ObjectTable
       @names = columns
     end
 
-    def _groups
-      keys = _keys()
-      keys.length.times.group_by{|i| keys[i]}
-    end
-
     def _keys
       unless @columns.empty?
         return Util.get_rows(@parent, @columns)
