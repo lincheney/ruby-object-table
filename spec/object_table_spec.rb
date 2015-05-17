@@ -390,35 +390,55 @@ describe ObjectTable do
     end
 
     context 'right join' do
-      subject{ left.join(right, key=:key1, type: 'right') }
+      let(:join_type) { 'right' }
 
-      let(:result) do
-        ObjectTable.new(
-          key1:   [ "b",  "b",  "c",  "d"],
-          lvalue: [   1,    3,    4,    0],
-          rvalue: [   2,    2,    1,    0],
-          )
+      it 'shold have all columns' do
+        expect(subject.colnames).to eql [:key1, :key2, :lval1, :lval2, :rval1]
       end
 
-      it 'should return the joined result' do
-        expect(subject).to eql result
-      end
-    end
-
-    context 'outer join' do
-      subject{ left.join(right, key=:key1, type: 'outer') }
-
-      let(:result) do
-        ObjectTable.new(
-          key1:   [ "b",  "b",  "c",  "a",  "a",  "d"],
-          lvalue: [   1,    3,    4,    0,    2,    0],
-          rvalue: [   2,    2,    1,    0,    0,    0],
-          )
+      it 'should only have common and right keys' do
+        expect(subject.key1.to_a).to_not include(*key1[0...-rgroups])
+        expect(subject.key2.to_a).to_not include(*key2[0...-rgroups])
       end
 
-      it 'should return the joined result' do
-        expect(subject).to eql result
+      it 'should duplicate keys correctly' do
+        counts = common.group_by(:key1, :key2).apply{ nrows }
+        expect(counts.v_0.to_a).to eq ([lsize * rsize] * common_keys.size)
       end
+
+      it 'should cross product the values' do
+        common.group_by(:key1, :key2).each do |grp|
+          filter = Proc.new{|t| t.key1.eq(grp.K.key1).and(t.key2.eq(grp.K.key2)) }
+          lgroup = left.where(&filter)
+          rgroup = right.where(&filter)
+
+          lvalues = lgroup.apply{[lval1.to_a, lval2.to_a]}.transpose
+          rvalues = rgroup.apply{[rval1.to_a]}.transpose
+          joined_values = grp.apply{[lval1, lval2, rval1]}.map(&:to_a).transpose
+
+          expected = lvalues.product(rvalues).map{|row| row.flatten(1)}
+          expect(joined_values).to eq expected
+        end
+      end
+
+      describe 'with missing left keys' do
+        it 'should have the right keys' do
+          counts = right_only.group_by(:key1, :key2).apply{ nrows }
+          expect(counts.v_0.to_a).to eq ([rsize] * (groups - lgroups))
+        end
+
+        it 'should fill the right values with nil' do
+          expect(right_only.lval1.to_a).to eq [nil] * right_only.nrows
+          expect(right_only.lval2.to_a).to eq [[nil] * 10] * right_only.nrows
+        end
+
+        it 'should keep the right values' do
+          right_only.pop_column(:lval1)
+          right_only.pop_column(:lval2)
+          expect(right_only).to eq expected_right_only
+        end
+      end
+
     end
 
   end
