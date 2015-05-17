@@ -1,22 +1,22 @@
-module ObjectTable::Stacking
+class ObjectTable
+  module Stacking
 
-  def stack(*others)
-    __table_cls__.stack(self, *others)
-  end
-
-  module InPlace
-    def stack!(*others)
-      @columns.replace( __table_cls__.stack(self, *others).columns )
-      self
+    def stack(*others)
+      __table_cls__.stack(self, *others)
     end
-  end
 
-  module ClassMethods
-    def stack(*grids); Helper.stack(grids, __table_cls__); end
-    def _stack(grids); Helper.stack(grids, __table_cls__); end
-  end
+    module InPlace
+      def stack!(*others)
+        @columns.replace( __table_cls__.stack(self, *others).columns )
+        self
+      end
+    end
 
-  module Helper
+    module ClassMethods
+      def stack(*grids); Stacking.stack(grids, __table_cls__); end
+      def _stack(grids); Stacking.stack(grids, __table_cls__); end
+    end
+
     def self.stack(grids, cls)
       keys = nil
 
@@ -32,7 +32,7 @@ module ObjectTable::Stacking
         [k, stack_segments(segments)]
       end
 
-      cls.new(ObjectTable::BasicGrid[result])
+      cls.new(BasicGrid[result])
     end
 
     def self.stack_segments(segments)
@@ -41,20 +41,20 @@ module ObjectTable::Stacking
 
       else
         segments.map!{|seg| NArray.to_na seg}
-        column = ObjectTable::Column.stack(*segments)
+        column = Column.stack(*segments)
 
       end
     end
 
     def self.process_stackable_grid(grid, keys)
       case grid
-      when ObjectTable::TableMethods
+      when TableMethods
         grid = grid.columns
-      when ObjectTable::BasicGrid
+      when BasicGrid
         grid._ensure_uniform_columns!
       end
 
-      raise "Don't know how to join a #{grid.class}" unless grid.is_a?(ObjectTable::BasicGrid)
+      raise "Don't know how to join a #{grid.class}" unless grid.is_a?(BasicGrid)
       return if grid.empty?
       raise 'Mismatch in column names' unless !keys or ( (keys - grid.keys).empty? and (grid.keys - keys).empty? )
       return grid

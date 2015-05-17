@@ -10,7 +10,6 @@ module ObjectTable::Factory
   FACTORIES = (CLASS_MAP.keys + ['__table_cls__']).freeze
 
   module ClassMethods
-
     CLASS_MAP.each do |name, const|
       eval "def #{name}; self::#{const}; end"
     end
