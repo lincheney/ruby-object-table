@@ -1,23 +1,20 @@
 module ObjectTable::Stacking
 
-  def stack!(*others)
-    @columns.replace( __table_cls__.stack(self, *others).columns )
-    self
-  end
-
   def stack(*others)
     __table_cls__.stack(self, *others)
+  end
+
+  module InPlace
+    def stack!(*others)
+      @columns.replace( __table_cls__.stack(self, *others).columns )
+      self
+    end
   end
 
   module ClassMethods
     def stack(*grids); Helper.stack(grids, __table_cls__); end
     def _stack(grids); Helper.stack(grids, __table_cls__); end
   end
-
-  def self.included(base)
-    base.extend(ClassMethods)
-  end
-
 
   module Helper
     def self.stack(grids, cls)

@@ -10,8 +10,10 @@ require_relative "object_table/joining"
 
 class ObjectTable
   include TableMethods
-  include Stacking
+  include Stacking::InPlace
   include Factory
+
+  extend Stacking::ClassMethods
   extend Joining::ClassMethods
 
   attr_reader :columns
