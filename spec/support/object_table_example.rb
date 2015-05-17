@@ -1,20 +1,10 @@
 require 'object_table'
+require_relative 'utils'
+
+require 'support/joining_example'
 
 RSpec.shared_examples 'an object table' do |cls|
-  before do
-    @cls = cls
-  end
-
-  def _make_relevant_table(table)
-    case [@cls]
-    when [ObjectTable] then table
-    when [ObjectTable::View] then table.where{true}
-    when [ObjectTable::StaticView] then table.where{true}.apply{self}
-    else nil
-    end
-  end
-
-  subject{ _make_relevant_table(table) }
+  subject{ make_table(table, cls) }
 
   describe '#inspect' do
     let(:table){ ObjectTable.new(col1: 1..10, col2: 5) }
@@ -447,5 +437,7 @@ EOS
     end
 
   end
+
+  it_behaves_like 'a table joiner', cls
 
 end

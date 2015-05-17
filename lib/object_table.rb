@@ -7,13 +7,11 @@ require_relative "object_table/column"
 require_relative "object_table/grouped"
 require_relative "object_table/stacking"
 require_relative "object_table/factory"
-require_relative "object_table/joining"
 
 class ObjectTable
   include TableMethods
   include Stacking
   include Factory
-  include Joining
 
   attr_reader :columns
 

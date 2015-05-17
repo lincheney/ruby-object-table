@@ -1,9 +1,12 @@
 require 'forwardable'
+
 require_relative 'printable'
 require_relative 'util'
+require_relative "joining"
 
 module ObjectTable::TableMethods
   include ObjectTable::Printable
+  include ObjectTable::Joining
   extend Forwardable
   Util = ObjectTable::Util
 
