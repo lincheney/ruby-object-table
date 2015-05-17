@@ -6,29 +6,35 @@ module ObjectTable::Stacking
   end
 
   module ClassMethods
-    def stack(*grids)
-      _stack(grids)
-    end
+    def stack(*grids); Helper.stack(grids, __table_cls__); end
+    def _stack(grids); Helper.stack(grids, __table_cls__); end
+  end
 
-    def _stack(grids)
+  def self.included(base)
+    base.extend(ClassMethods)
+  end
+
+
+  module Helper
+    def self.stack(grids, cls)
       keys = nil
 
       grids = grids.map do |grid|
-        grid = _process_stackable_grid(grid, keys)
+        grid = process_stackable_grid(grid, keys)
         keys ||= grid.keys if grid
         grid
       end.compact
-      return self.new if grids.empty?
+      return cls.new if grids.empty?
 
       result = keys.map do |k|
         segments = grids.map{|grid| grid[k]}
-        [k, _stack_segments(segments)]
+        [k, stack_segments(segments)]
       end
 
-      self.new(ObjectTable::BasicGrid[result])
+      cls.new(ObjectTable::BasicGrid[result])
     end
 
-    def _stack_segments(segments)
+    def self.stack_segments(segments)
       if segments.all?{|seg| seg.is_a? Array}
         column = NArray.to_na(segments.flatten(1))
 
@@ -39,7 +45,7 @@ module ObjectTable::Stacking
       end
     end
 
-    def _process_stackable_grid(grid, keys)
+    def self.process_stackable_grid(grid, keys)
       case grid
       when ObjectTable::TableMethods
         grid = grid.columns
@@ -53,11 +59,6 @@ module ObjectTable::Stacking
       return grid
     end
 
-  end
-
-
-  def self.included(base)
-    base.extend(ClassMethods)
   end
 
 end
