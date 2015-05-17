@@ -438,6 +438,9 @@ EOS
 
   end
 
-  it_behaves_like 'a table joiner', cls
+  describe '#join' do
+    subject{ left.join(right, :key1, :key2, type: join_type) }
+    it_behaves_like 'a table joiner', cls
+  end
 
 end

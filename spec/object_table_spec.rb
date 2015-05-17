@@ -2,6 +2,7 @@ require 'object_table'
 
 require 'support/object_table_example'
 require 'support/stacking_example'
+require 'support/joining_example'
 
 describe ObjectTable do
   it_behaves_like 'an object table', ObjectTable
@@ -251,6 +252,11 @@ describe ObjectTable do
     it 'should sort by the given columns' do
       expect(subject).to eql table.sort_by(table.col1, table.col2)
     end
+  end
+
+  context do
+    subject{ ObjectTable.join(left, right, :key1, :key2, type: join_type) }
+    it_behaves_like 'a table joiner', ObjectTable
   end
 
 end

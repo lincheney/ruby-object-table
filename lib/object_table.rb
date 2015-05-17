@@ -6,11 +6,13 @@ require_relative "object_table/static_view"
 require_relative "object_table/column"
 require_relative "object_table/stacking"
 require_relative "object_table/factory"
+require_relative "object_table/joining"
 
 class ObjectTable
   include TableMethods
   include Stacking
   include Factory
+  extend Joining::ClassMethods
 
   attr_reader :columns
 

@@ -3,6 +3,6 @@ def make_table(table, cls)
   when [ObjectTable] then table
   when [ObjectTable::View] then table.where{true}
   when [ObjectTable::StaticView] then table.where{true}.apply{self}
-  else nil
+  else raise "Could not make a a #{cls.inspect} table"
   end
 end
