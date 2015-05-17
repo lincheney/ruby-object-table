@@ -1,4 +1,4 @@
-module ObjectTable::Printable
+module ObjectTable::Printing
 
   module Helper
     def self.format_column(column)
