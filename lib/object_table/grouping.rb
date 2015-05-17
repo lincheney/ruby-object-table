@@ -63,7 +63,7 @@ class ObjectTable
           nrows = (Column.length_of(value) or 1)
         end
 
-        keys.concat( [key] * nrows )
+        keys.concat( Array.new(nrows, key) )
         value = BasicGrid[value_key, value] unless value.is_a?(BasicGrid)
         value
       end

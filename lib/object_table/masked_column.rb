@@ -13,9 +13,9 @@ class ObjectTable::MaskedColumn < NArray
     end
 
     if masked.rank <= 0
-      column = self.new(masked.typecode, 0)
+      column = new(masked.typecode, 0)
     else
-      column = self.cast(masked)
+      column = cast(masked)
     end
 
     column.parent = parent

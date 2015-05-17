@@ -11,7 +11,9 @@ module ObjectTable::Column
   end
 
 
-  def self.stack(*columns)
+  def self.stack(*columns); _stack(columns); end
+
+  def self._stack(columns)
     columns = columns.reject(&:empty?)
     return NArray[] if columns.empty?
     return columns[0].clone if columns.length == 1

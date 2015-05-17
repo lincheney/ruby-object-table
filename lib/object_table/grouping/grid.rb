@@ -6,7 +6,7 @@ class ObjectTable::Grouping
     attr_reader :hash, :index
 
     def initialize(keys, defaults)
-      unless defaults.is_a? Hash
+      unless defaults.is_a?(Hash)
         raise "Expected defaults to be a hash, got: #{defaults.inspect}"
       end
       defaults.default = 0

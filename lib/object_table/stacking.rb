@@ -41,7 +41,7 @@ class ObjectTable
 
       else
         segments.map!{|seg| NArray.to_na seg}
-        column = Column.stack(*segments)
+        column = Column._stack(segments)
 
       end
     end

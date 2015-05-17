@@ -38,7 +38,7 @@ class ObjectTable
           missing[-1] = 0 # ... that we always exclude
           missing = missing.where
           rindex.concat( missing.to_a )
-          lindex.fill(-1, lindex.length ... (lindex.length + missing.length))
+          lindex.concat( Array.new(missing.length, -1) )
         end
 
         index = [lindex, rindex].map{|ix| NArray.to_na(ix)}
