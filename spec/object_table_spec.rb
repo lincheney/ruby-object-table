@@ -254,33 +254,69 @@ describe ObjectTable do
   end
 
   describe '#join' do
+    let(:groups)  { 100 }
+    let(:lsize)   { 10 }
+    let(:rsize)   { 5 }
+
+    let(:lgroups) { 80 }
+    let(:rgroups) { 80 }
+
+    let(:key1)    { (0...groups).map{|i| "key1_#{i}"} }
+    let(:key2)    { (0...groups).map{|i| "key2_#{i}"} }
+
+    let(:lkeys)   { 0...lgroups }
+    let(:rkeys)   { (groups-rgroups)..-1 }
+    let(:common_keys) { (groups-rgroups)...lgroups }
+
     let(:left) do
       ObjectTable.new(
-        key1:   [ "a",  "b",  "a",  "b",  "c"],
-        lvalue: [   0,    1,    2,    3,    4],
+        key1:   key1[0...lgroups] * lsize,
+        key2:   key2[0...lgroups] * lsize,
+        lval1:  NArray.float(lgroups * lsize).random,
+        lval2:  NArray.float(10, lgroups * lsize).random,
         )
     end
 
     let(:right) do
       ObjectTable.new(
-        key1:   [ "d",  "c",  "b"],
-        rvalue: [   0,    1,    2],
+        key1:   key1[-rgroups..-1] * rsize,
+        key2:   key2[-rgroups..-1] * rsize,
+        rval1:  NArray.float(rgroups * rsize).random,
         )
     end
 
     context 'inner join' do
-      subject{ left.join(right, key=:key1, type: 'inner') }
+      subject{ left.join(right, :key1, type: 'inner') }
 
-      let(:result) do
-        ObjectTable.new(
-          key1:   [ "b",  "b",  "c"],
-          lvalue: [   1,    3,    4],
-          rvalue: [   2,    2,    1],
-          )
+      it 'shold have all columns' do
+        expect(subject.colnames).to eql [:key1, :key2, :lval1, :lval2, :rval1]
       end
 
-      it 'should return the joined result' do
-        expect(subject).to eql result
+      it 'should only have common keys' do
+        expect(subject.key1.to_a).to_not include(*key1[0...-rgroups])
+        expect(subject.key1.to_a).to_not include(*key1[lgroups...-1])
+        expect(subject.key2.to_a).to_not include(*key2[0...-rgroups])
+        expect(subject.key2.to_a).to_not include(*key2[lgroups...-1])
+      end
+
+      it 'should duplicate keys correctly' do
+        counts = subject.group_by(:key1, :key2).apply{ nrows }
+        expect(counts.v_0.to_a).to eq ([lsize * rsize] * common_keys.size)
+      end
+
+      it 'should cross product the values' do
+        subject.group_by(:key1, :key2).each do |grp|
+          filter = Proc.new{|t| t.key1.eq(grp.K.key1).and(t.key2.eq(grp.K.key2)) }
+          lgroup = left.where(&filter)
+          rgroup = right.where(&filter)
+
+          lvalues = lgroup.apply{[lval1.to_a, lval2.to_a]}.transpose
+          rvalues = rgroup.apply{[rval1.to_a]}.transpose
+          joined_values = grp.apply{[lval1, lval2, rval1]}.map(&:to_a).transpose
+
+          expected = lvalues.product(rvalues).map{|row| row.flatten(1)}
+          expect(joined_values).to eq expected
+        end
       end
     end
 
