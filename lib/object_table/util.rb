@@ -8,4 +8,8 @@ module ObjectTable::Util
     end
   end
 
+  def self.get_rows(table, columns)
+    columns.map{|n| table[n].to_a}.transpose
+  end
+
 end

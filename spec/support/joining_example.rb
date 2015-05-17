@@ -3,12 +3,12 @@ require_relative 'utils'
 
 RSpec.shared_examples 'a table joiner' do |cls|
   describe '#join' do
-    let(:groups)  { 100 }
+    let(:groups)  { 50 }
     let(:lsize)   { 10 }
     let(:rsize)   { 5 }
 
-    let(:lgroups) { 80 }
-    let(:rgroups) { 80 }
+    let(:lgroups) { 40 }
+    let(:rgroups) { 40 }
 
     let(:key1)    { (0...groups).map{|i| "key1_#{i}"} }
     let(:key2)    { (0...groups).map{|i| "key2_#{i}"} }

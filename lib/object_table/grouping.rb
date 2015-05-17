@@ -30,7 +30,7 @@ class ObjectTable
 
     def _keys
       unless @columns.empty?
-        return @columns.map{|n| @parent.get_column(n).to_a}.transpose
+        return Util.get_rows(@parent, @columns)
       end
 
       keys = @parent.apply(&@grouper)
