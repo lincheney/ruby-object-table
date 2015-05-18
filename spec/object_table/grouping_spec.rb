@@ -14,9 +14,9 @@ describe ObjectTable::Grouping do
   let(:pos_group) { table.where{|t| positive} }
   let(:neg_group) { table.where{|t| negative} }
 
-  describe '._generate_name' do
+  describe '.generate_name' do
     let(:prefix){ 'key_' }
-    subject{ described_class._generate_name(prefix, existing_keys) }
+    subject{ described_class.generate_name(prefix, existing_keys) }
 
     context 'with no matching keys' do
       let(:existing_keys){ ['a', 'b', 'c'] }

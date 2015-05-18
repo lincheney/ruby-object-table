@@ -24,9 +24,7 @@ class ObjectTable
     end
 
     def _keys
-      unless @columns.empty?
-        return Util.get_rows(@parent, @columns)
-      end
+      return Util.get_rows(@parent, @columns) unless @columns.empty?
 
       keys = @parent.apply(&@grouper)
       raise 'Group keys must be hashes' unless keys.is_a?(Hash)
@@ -47,7 +45,7 @@ class ObjectTable
       groups = Util.group_indices(_keys)
       return empty_aggregation if groups.empty?
 
-      value_key = self.class._generate_name(DEFAULT_VALUE_PREFIX, @names).to_sym
+      value_key = self.class.generate_name(DEFAULT_VALUE_PREFIX, @names).to_sym
       keys = []
 
       data = groups.keys.zip(to_enum(:_make_groups, groups)).map do |key, group|
@@ -56,15 +54,14 @@ class ObjectTable
         case value
         when TableMethods
           nrows = value.nrows
-          value = value.columns
         when BasicGrid
           nrows = value._ensure_uniform_columns!
         else
           nrows = (Column.length_of(value) or 1)
+          value = BasicGrid[value_key, value]
         end
 
         keys.concat( Array.new(nrows, key) )
-        value = BasicGrid[value_key, value] unless value.is_a?(BasicGrid)
         value
       end
 
@@ -79,32 +76,32 @@ class ObjectTable
 
       grid = Grid.new(keys, defaults)
       rows = @parent.each_row(row_factory: Grid::RowFactory)
-      grid.apply_to_rows(rows, key_struct, block)
+      grid.apply_to_rows(rows, self.class.key_struct(@names), block)
 
       keys = BasicGrid[@names.zip(grid.index.keys.transpose)]
       __table_cls__.new(keys.merge!(Hash[grid.values]))
     end
 
     def _make_groups(groups)
-      key_struct = key_struct()
+      key_struct = self.class.key_struct(@names)
       groups.each do |k, v|
         yield __group_cls__.new(@parent, key_struct.new(*k), v)
       end
       @parent
     end
 
-    def self._generate_name(prefix, names)
+    def self.generate_name(prefix, names)
       regex = Regexp.new(Regexp.quote(prefix) + '(\d+)')
       i = names.map{|n| n =~ regex and $1.to_i}.compact.max || -1
       "#{prefix}#{i + 1}"
     end
 
-    def key_struct
-      Struct.new(*@names.map(&:to_sym))
+    def self.key_struct(names)
+      Struct.new(*names.map(&:to_sym))
     end
 
     def empty_aggregation
-      __table_cls__.new(@names.each_with_object([]).to_a)
+      __table_cls__.new(@names.map{|n| [n, []]})
     end
 
   end

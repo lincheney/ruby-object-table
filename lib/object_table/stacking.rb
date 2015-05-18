@@ -13,27 +13,28 @@ class ObjectTable
     end
 
     module ClassMethods
-      def stack(*grids); Stacking.stack(grids, __table_cls__); end
-      def _stack(grids); Stacking.stack(grids, __table_cls__); end
-    end
+      def stack(*grids); _stack(grids); end
 
-    def self.stack(grids, cls)
-      keys = nil
+      def _stack(grids)
+        keys = nil
 
-      grids = grids.map do |grid|
-        grid = process_stackable_grid(grid, keys)
-        keys ||= grid.keys if grid
-        grid
-      end.compact
-      return cls.new if grids.empty?
+        grids = grids.map do |grid|
+          grid = Stacking.process_stackable_grid(grid, keys)
+          keys ||= grid.keys if grid
+          grid
+        end.compact
+        return __table_cls__.new if grids.empty?
 
-      result = keys.map do |k|
-        segments = grids.map{|grid| grid[k]}
-        [k, stack_segments(segments)]
+        result = keys.map do |k|
+          segments = grids.map{|grid| grid[k]}
+          [k, Stacking.stack_segments(segments)]
+        end
+
+        __table_cls__.new(BasicGrid[result])
       end
 
-      cls.new(BasicGrid[result])
     end
+
 
     def self.stack_segments(segments)
       if segments.all?{|seg| seg.is_a? Array}
