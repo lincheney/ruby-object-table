@@ -3,7 +3,7 @@ require_relative '../util'
 class ObjectTable::Grouping
 
   class Grid
-    attr_reader :hash, :index
+    attr_reader :values, :index
 
     def initialize(keys, defaults)
       unless defaults.is_a?(Hash)
@@ -12,19 +12,19 @@ class ObjectTable::Grouping
       defaults.default = 0
       @defaults = defaults
 
-      @hash = {}
-      @index = Hash[keys.each_with_index.to_a]
+      @values = {}
+      @index = {}
+      @ids = keys.map{|k| @index[k] ||= @index.length}
       @keys = keys
-      @ids = @index.values_at(*keys)
-      @length = keys.length
+      @length = @index.length
     end
 
     def [](k)
-      (@hash[k] ||= Array.new(@length, @defaults[k]))[@id]
+      (@values[k] ||= Array.new(@length, @defaults[k]))[@id]
     end
 
     def []=(k, v)
-      @hash[k][@id] = v
+      @values[k][@id] = v
     end
 
     module RowFactory
@@ -40,11 +40,6 @@ class ObjectTable::Grouping
         row.R = self
         ObjectTable::Util.apply_block(row, block)
       end
-    end
-
-    def values
-      i = @index.values
-      @hash.map{|k, v| [k, v.values_at(*i)]}
     end
 
   end

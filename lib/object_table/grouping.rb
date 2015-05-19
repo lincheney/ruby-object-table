@@ -79,13 +79,13 @@ class ObjectTable
       grid.apply_to_rows(rows, self.class.key_struct(@names), block)
 
       keys = BasicGrid[@names.zip(grid.index.keys.transpose)]
-      __table_cls__.new(keys.merge!(Hash[grid.values]))
+      __table_cls__.new(keys.merge!(grid.values))
     end
 
     def _make_groups(groups)
       key_struct = self.class.key_struct(@names)
       groups.each do |k, v|
-        yield __group_cls__.new(@parent, key_struct.new(*k), v)
+        yield __group_cls__.new(@parent, key_struct.new(*k), NArray.to_na(v))
       end
       @parent
     end
