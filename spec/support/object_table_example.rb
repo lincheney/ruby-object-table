@@ -44,6 +44,23 @@ EOS
       end
     end
 
+    context 'with an odd number of rows' do
+      let(:table){ ObjectTable.new(col1: 1..5, col2: 5) }
+
+      it 'should include all the rows' do
+        table = subject.inspect.lines.to_a[1..-1].join + "\n"
+        expect(table).to eql <<EOS
+       col1  col2
+  0:      1     5
+  1:      2     5
+  2:      3     5
+  3:      4     5
+  4:      5     5
+       col1  col2
+EOS
+      end
+    end
+
     context 'with many rows' do
       let(:table){ ObjectTable.new(col1: 1..100, col2: 5) }
 

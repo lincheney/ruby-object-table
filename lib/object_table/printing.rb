@@ -8,10 +8,10 @@ class ObjectTable
       return "#{header}(empty table with columns: #{colnames.join(", ")})" if nrows == 0
 
       separated = (nrows > max_section * 2)
-      max_section = (nrows / 2) unless separated
+      max_section = (nrows / 2.0) unless separated
 
-      head = Printing.format_section(columns, 0...max_section).transpose[0...-1]
-      tail = Printing.format_section(columns, (nrows - max_section)...nrows).transpose[1..-1]
+      head = Printing.format_section(columns, 0...max_section.to_i).transpose[0...-1]
+      tail = Printing.format_section(columns, (nrows - max_section).to_i...nrows).transpose[1..-1]
       widths = Printing.calc_column_widths(head + tail, col_padding)
 
       rows = Printing.format_rows(head, widths)
