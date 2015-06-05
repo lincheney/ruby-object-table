@@ -53,10 +53,11 @@ class ObjectTable
     end
 
     def self.format_section(columns, row_slice)
+      row_slice = row_slice.to_a
       numbers = split_column_lines('', row_slice.map{|i| "#{i}: "})
 
       section = columns.map do |name, c|
-        c = c.slice(false, row_slice)
+        c = (row_slice.empty? ? NArray[] : c.slice(false, row_slice))
         c = format_column(c)
         c = split_column_lines(name.to_s, c)
       end
