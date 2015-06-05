@@ -6,9 +6,11 @@ ruby-object-table
 [![Code Climate](https://codeclimate.com/github/lincheney/ruby-object-table/badges/gpa.svg)](https://codeclimate.com/github/lincheney/ruby-object-table)
 [![Coverage Status](https://coveralls.io/repos/lincheney/ruby-object-table/badge.svg?branch=master)](https://coveralls.io/r/lincheney/ruby-object-table?branch=master)
 
-Simple data table/frame implementation in ruby
+Simple data table/frame implementation in ruby.
 Probably slow and extremely inefficient, but it works and that's all that matters.
 Uses NArrays (https://github.com/masa16/narray) for storing data.
+
+Be sure to check out the [release notes](https://github.com/lincheney/ruby-object-table/releases).
 
 ## Creating a table
 
@@ -59,7 +61,7 @@ Otherwise the scalars are extended to match the length of the vector columns
 - `#nrows` returns the number of rows
 - `#colnames` returns an array of the column names
 - `#clone` make a copy of the table
-- `#stack(table1, table2, ...)` appends then supplied tables
+- `#stack(table1, table2, ...)` appends the supplied tables
 - `#apply(&block)` evaluates `block` in the context of the table
 - `#where(&block)` filters the table
 - `#group_by(&block)` splits the table into groups
@@ -359,104 +361,223 @@ If you want to filter a table and keep that data (i.e. without it syncing with t
 ## Grouping (and aggregating)
 
 Use the `#group_by` method and pass column names or a block that returns grouping keys.
-Then call `#each` to iterate through the groups or `#apply` to aggregate the results.
-
-The argument to `#group_by` should be a hash mapping key name => key. See the below example.
 
 ```ruby
->>> data = ObjectTable.new(name: ['John', 'Tom', 'John', 'Tom', 'Jim'], value: 1..5)
- => ObjectTable(5, 2)
-         name  value
-  0:   "John"      1
-  1:    "Tom"      2
-  2:   "John"      3
-  3:    "Tom"      4
-  4:    "Jim"      5
-         name  value
-
-# group by the name and get the no. of rows in each group
->>> num_rows = []
->>> data.group_by(:name).each{ num_rows.push(nrows) }
->>> num_rows
- => [2, 2, 1]
- 
-# or group with a block
->>> num_rows = []
-# let's group by initial letter of the name
->>> data.group_by{ {initial: name.map{|n| n[0]}} }.each{ num_rows.push(nrows) }
->>> num_rows
- => [3, 2]
+# group by column_1
+>>> data.group_by(:column_1)
+# or group by a dynamically calculated value
+# note the double braces is actually a hash inside a block 
+>>> data.group_by{{ key: column_1.round }}
 ```
 
-The group keys are accessible through the `@K` shortcut
+This gives you a `ObjectTable::Grouping`.
+There are two ways to perform aggregation with a grouping: using `apply`/`each` or using `reduce`.
+
+Using `apply`/`each` is the most flexible and powerful.
+It iterates through each group and calls a supplied block for each group.
+
+`reduce` instead iterates through each *row* and keeps track of which group the row belongs to.
+It can only be used with (online algorithms)[http://en.wikipedia.org/wiki/Online_algorithm]
+but can be much faster if there is a large number of groups (relative to the number of rows).
+
+### Using `apply`/`each`
+
+`each` enumerates through the groups.
+`apply` is similar to doing `grouping.each.map` but instead of collecting results in an `Array`
+the results are stacked into a new table.
 
 ```ruby
->>> data = ObjectTable.new(name: ['John', 'Tom', 'John', 'Tom', 'Jim'], value: 1..5)
->>> data.group_by(:name).each{ p @K }
-{:name=>"John"}
-{:name=>"Tom"}
-{:name=>"Jim"}
+# let's create some data
+>>> data = ObjectTable.new(col1: 1..10, col2: (1..20).step(2).to_a)
+  => ObjectTable(10, 2)
+       col1  col2
+  0:      1     1
+  1:      2     3
+  2:      3     5
+  3:      4     7
+  4:      5     9
+  5:      6    11
+  6:      7    13
+  7:      8    15
+  8:      9    17
+  9:     10    19
+       col1  col2 
 
-# or if you are using a block with args
->>> data.group_by(:name).each{|grp| p grp.K }
-{:name=>"John"}
-{:name=>"Tom"}
-{:name=>"Jim"}
-```
+# print sum of col2 for col1 remainder 3
+>>> data.group_by{{ rem: col1 % 3 }}.each{ p col2.sum }; nil
+40
+27
+33
 
+# which sum is which group?
+# we can access the group keys through @K
+>>> data.group_by{{ rem: col1 > 0 }}.each{ p [@K.rem, col2.sum] }; nil
+[1, 40]
+[2, 27]
+[0, 33]
 
-### Aggregation
+# collect results into an array
+# note that we need an argument to the map block
+>>> data.group_by{{ rem: col1 % 3 }}.each.map{|grp| [grp.K.rem, grp.col2.sum] }
+ => [[1, 40], [2, 27], [0, 33]]
 
-Call `#apply` and the results are stored into a table.
-
-```ruby
->>> data = ObjectTable.new(name: ['John', 'Tom', 'John', 'Tom', 'Jim'], value: 1..5)
->>> data.group_by(:name).apply{ value.mean }
+# collect the results into a new table using apply()
+>>> data.group_by{{ rem: col1 % 3 }}.apply{ col2.sum }
  => ObjectTable(3, 2)
-         name  v_0
-  0:   "John"  2.0
-  1:    "Tom"  3.0
-  2:    "Jim"  5.0
-         name  v_0 
+       rem  v_0
+  0:     1   40
+  1:     2   27
+  2:     0   33
+       rem  v_0 
+
+# aggregated columns are given default names of v_0, v_1, etc.
+# let's set the names ourselves
+>>> data.group_by{{ rem: col1 % 3 }}.apply{ @R[sum: col2.sum] }
+ => ObjectTable(3, 2)
+       rem  sum
+  0:     1   40
+  1:     2   27
+  2:     0   33
+       rem  sum 
 ```
 
-Normally you can only have one aggregated column with a default name of v_0.
-You can have more columns and set column names by making a `ObjectTable` or using the @R shortcut.
+We can also assign new columns based on the group (you cannot do this with `reduce`).
 
 ```ruby
->>> data.group_by(:name).apply{ @R[ mean: value.mean, sum: value.sum] }
- => ObjectTable(3, 3)
-         name  mean  sum
-  0:   "John"   2.0    4
-  1:    "Tom"   3.0    6
-  2:    "Jim"   5.0    5
-         name  mean  sum 
-
-# or if you are using a block with args
->>> data.group_by(:name).apply{|grp| grp.R[ mean: grp.value.mean, sum: grp.value.sum] }
- => ObjectTable(3, 3)
-         name  mean  sum
-  0:   "John"   2.0    4
-  1:    "Tom"   3.0    6
-  2:    "Jim"   5.0    5
-         name  mean  sum 
+>>> data.group_by{{ rem: col1 % 3 }}.each{ self[:sum] = col2.sum }
+>>> data
+ => ObjectTable(10, 3)
+       col1  col2  sum
+  0:      1     1   40
+  1:      2     3   27
+  2:      3     5   33
+  3:      4     7   40
+  4:      5     9   27
+  5:      6    11   33
+  6:      7    13   40
+  7:      8    15   27
+  8:      9    17   33
+  9:     10    19   40
+       col1  col2  sum 
 ```
 
-### Assigning to columns
+### Using `reduce`
 
-Assigning to columns will assign by group.
+`reduce` returns a new table like `apply`
+(and there is no equivalent for `each`, i.e. iterating through groups).
+
+Pass a block to `reduce`; you will have access to the `@R` variable
+which is a group-specific hash where you can accumulate results.
+See the examples below.
 
 ```ruby
-# every row with the same name will get the same group_values
->>> data.group_by(:name).each{|grp| grp[:group_values] = grp.value.to_a.join(',') }
+# sum of column 2
+>>> data.group_by{{ rem: col1 % 3 }}.reduce{ @R[:sum] += col2 }
+ => ObjectTable(3, 2)
+       rem  sum
+  0:     1   40
+  1:     2   27
+  2:     0   33
+       rem  sum
+
+# we can supply initial values, e.g. if we wish to calculate product
+>>> data.group_by{{ rem: col1 % 3 }}.reduce(prod: 1){ @R[:prod] *= col2 }
+ => ObjectTable(3, 2)
+       rem  prod
+  0:     1  1729
+  1:     2   405
+  2:     0   935
+       rem  prod 
+```
+
+You should avoid reduce unless your aggregating operation is simply
+and you have a relatively large number of groups
+(`reduce` is slower than `apply` with few groups).
+
+### Comparison of `apply` and `reduce`
+
+The `reduce` version is more complicated because we must implement the
+online algorithm ourselves.
+
+#### Sum 
+
+```ruby
+>>> data.group_by{{ rem: col1 % 3 }}.apply{ @R[sum: col2.sum] }
+>>> data.group_by{{ rem: col1 % 3 }}.reduce{ @R[:sum] += col2 }
+```
+
+#### Product
+
+```ruby
+>>> data.group_by{{ rem: col1 % 3 }}.apply{ @R[prod: col2.prod] }
+>>> data.group_by{{ rem: col1 % 3 }}.reduce(prod: 1){ @R[:prod] *= col2 }
+```
+
+#### Variance
+
+Online algorithm for variance taken from: 
+http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm
+
+```ruby
+>>> data.group_by{{ rem: col1 % 3 }}.apply{ @R[var: col2.stddev**2] }
+>>> data.group_by{{ rem: col1 % 3 }}.reduce(n: 0, mean: 0.0, m2: 0) do
+      @R[:n] += 1
+      delta = col2 - @R[:mean]
+      @R[:mean] += delta / @R[:n]
+      @R[:m2] += delta * (col2 - @R[:mean])
+    end.apply{ @R[rem: rem, variance: m2 / (n - 1)] }
+```
+
+## Joining
+
+Note the current joining algorithm is quite slow.
+
+```ruby
+# let's create some data
+>>> left = ObjectTable.new( key: [1, 2, 3, 5, 7], val_1: 1..5 )
+>>> right = ObjectTable.new( key: [2, 3, 4, 5], val_2: 'a'..'d')
+
+# inner join
+>>> left.join(right, :key)
+  => ObjectTable(3, 3)
+       key  val_1  val_2
+  0:     2      2    "a"
+  1:     3      3    "b"
+  2:     5      4    "d"
+       key  val_1  val_2 
+
+# left join
+>>> left.join(right, :key, type: 'left')
  => ObjectTable(5, 3)
-         name  value  group_values
-  0:   "John"      1         "1,3"
-  1:    "Tom"      2         "2,4"
-  2:   "John"      3         "1,3"
-  3:    "Tom"      4         "2,4"
-  4:    "Jim"      5           "5"
-         name  value  group_values 
+       key  val_1  val_2
+  0:     1      1    nil
+  1:     2      2    "a"
+  2:     3      3    "b"
+  3:     5      4    "d"
+  4:     7      5    nil
+       key  val_1  val_2 
+
+# right join
+>>> left.join(right, :key, type: 'right')
+ => ObjectTable(4, 3)
+       key  val_1  val_2
+  0:     2      2    "a"
+  1:     3      3    "b"
+  2:     5      4    "d"
+  3:     4      0    "c"
+       key  val_1  val_2 
+
+# outer join
+>>> left.join(right, :key, type: 'outer')
+ => ObjectTable(6, 3)
+       key  val_1  val_2
+  0:     1      1    nil
+  1:     2      2    "a"
+  2:     3      3    "b"
+  3:     5      4    "d"
+  4:     7      5    nil
+  5:     4      0    "c"
+       key  val_1  val_2 
 ```
 
 ## Subclassing ObjectTable
@@ -481,8 +602,8 @@ The act of subclassing itself is easy, but any methods you add won't be availabl
 NoMethodError: undefined method `a_plus_b' for #<ObjectTable::View:0x000000011d4dd0>
 ```
 
-To make it work, you'll need to subclass `View`, `StaticView` and `Group` too and assign those subclasses under your ObjectTable subclass.
-The easiest way is just to include a module with your common methods.
+The easiest way to make it work is to put your methods into a mixin
+and use the `fully_include` class method.
 
 ```ruby
 >>> class WorkingTable < ObjectTable
@@ -492,12 +613,7 @@ The easiest way is just to include a module with your common methods.
         end
       end
 
-      include Mixin
-
-      # subclass each of these and include the Mixin too
-      class StaticView < StaticView; include Mixin; end
-      class View < View; include Mixin; end
-      class Group < Group; include Mixin; end
+      fully_include Mixin
     end
 ...
 
@@ -508,15 +624,7 @@ The easiest way is just to include a module with your common methods.
 
 # hurrah!
 >>> data.where{ a > 1 }.a_plus_b
- => NArray.int(2): 
+ => ObjectTable::MaskedColumn.int(2): 
 [ 7, 9 ] 
 
-# also works in groups!
->>> data.group_by{{odd: a % 2}}.each do
-      p "when a % 2 == #{@K[:odd]}, a + b == #{a_plus_b.to_a}"
-    end
-...
-
-"when a % 2 == 1, a + b == [5, 9]"
-"when a % 2 == 0, a + b == [7]"
 ```
