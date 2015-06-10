@@ -23,18 +23,11 @@ class ObjectTable::MaskedColumn < NArray
     column
   end
 
-  def []=(*keys, value)
-    unless parent.nil? or ((value.is_a?(Array) or value.is_a?(NArray)) and value.empty?)
-      parent[false, indices[*keys]] = value
-    end
-    super
-  end
-
 #   make destructive methods affect parent
-  %w{ fill! indgen! indgen random! map! collect! conj! imag= mod! add! div! sbt! mul! }.each do |op|
+  %w{ []= fill! indgen! indgen random! map! collect! conj! imag= mod! add! div! sbt! mul! }.each do |op|
     define_method(op) do |*args, &block|
       result = super(*args, &block)
-      parent[false, indices] = result if parent
+      parent[false, indices] = self if parent
       result
     end
   end
